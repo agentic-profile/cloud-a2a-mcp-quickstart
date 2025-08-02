@@ -1,0 +1,39 @@
+{
+  "httpMethod": "POST",
+  "path": "/",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {},
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "test",
+    "apiId": "test",
+    "resourcePath": "/",
+    "httpMethod": "POST",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": null,
+      "sourceIp": "127.0.0.1",
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "test",
+      "user": null
+    },
+    "extendedRequestId": null,
+    "path": "/"
+  },
+  "resource": "/",
+  "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}",
+  "isBase64Encoded": false
+} 

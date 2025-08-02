@@ -1,0 +1,29 @@
+{
+  "name": "agentic-profile-mcp",
+  "version": "1.0.0",
+  "description": "Agentic Profile MCP Lambda Function",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "package": "npm run build && zip -r function.zip dist node_modules",
+    "deploy": "npm run package && aws cloudformation deploy --template-file template.yaml --stack-name agentic-profile-mcp --capabilities CAPABILITY_IAM"
+  },
+  "keywords": ["lambda", "typescript", "mcp"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.0.0",
+    "@aws-sdk/client-cloudformation": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/aws-lambda": "^8.10.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+} 
