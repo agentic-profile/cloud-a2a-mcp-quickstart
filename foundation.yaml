@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Foundation Infrastructure for Agentic Profile Lambda Functions'
+Description: 'Foundation Infrastructure for Agentic Lambda Functions'
 
 Parameters:
   Environment:
@@ -13,7 +13,7 @@ Resources:
   DeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'agentic-profile-deployment--${AWS::AccountId}-${Environment}'
+      BucketName: !Sub 'agentic-foundation-deployment-${AWS::AccountId}-${Environment}'
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -25,13 +25,13 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
         - Key: Service
-          Value: agentic-profile-foundation
+          Value: agentic-foundation
 
   # Valkey Cache Serverless (Redis-compatible)
   ValkeyCacheServerless:
     Type: AWS::ElastiCache::ServerlessCache
     Properties:
-      ServerlessCacheName: !Sub 'agentic-profile-mcp-valkey-${Environment}'
+      ServerlessCacheName: !Sub 'agentic-foundation-valkey-${Environment}'
       Engine: redis
       UserGroupId: !Ref ValkeyUserGroup
       SubnetIds:
@@ -39,20 +39,20 @@ Resources:
         - !Ref DefaultSubnet2
       SecurityGroupIds:
         - !Ref ValkeySecurityGroup
-      Description: Serverless Redis cache for agentic profile MCP
+      Description: Serverless Redis cache for agentic foundation
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-valkey-${Environment}'
+          Value: !Sub 'agentic-foundation-valkey-${Environment}'
         - Key: Environment
           Value: !Ref Environment
         - Key: Service
-          Value: agentic-profile-foundation
+          Value: agentic-foundation
 
   # User Group for Serverless Cache
   ValkeyUserGroup:
     Type: AWS::ElastiCache::UserGroup
     Properties:
-      UserGroupId: !Sub 'agentic-profile-mcp-users-${Environment}'
+      UserGroupId: !Sub 'agentic-foundation-users-${Environment}'
       Engine: redis
       UserIds:
         - !Ref ValkeyUser
@@ -61,7 +61,7 @@ Resources:
   ValkeyUser:
     Type: AWS::ElastiCache::User
     Properties:
-      UserId: !Sub 'agentic-profile-mcp-user-${Environment}'
+      UserId: !Sub 'agentic-foundation-user-${Environment}'
       Engine: redis
       UserName: default
       Passwords:
@@ -72,10 +72,10 @@ Resources:
   ValkeyPassword:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub 'agentic-profile-mcp-valkey-password-${Environment}'
+      Name: !Sub 'agentic-foundation-valkey-password-${Environment}'
       Description: Password for Valkey serverless cache
       GenerateSecretString:
-        SecretStringTemplate: '{"username": "agentic-profile-mcp"}'
+        SecretStringTemplate: '{"username": "agentic-foundation"}'
         GenerateStringKey: password
         PasswordLength: 32
         ExcludeCharacters: '"@/\'
@@ -83,7 +83,7 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
         - Key: Service
-          Value: agentic-profile-foundation
+          Value: agentic-foundation
 
   # Security Group for Valkey Cache
   ValkeySecurityGroup:
@@ -103,8 +103,6 @@ Resources:
           CidrIpv6: ::/0
           Description: Allow Redis access from anywhere (IPv6)
 
-
-
   # Default VPC
   DefaultVpc:
     Type: AWS::EC2::VPC
@@ -114,7 +112,7 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-vpc-${Environment}'
+          Value: !Sub 'agentic-foundation-vpc-${Environment}'
         - Key: Environment
           Value: !Ref Environment
 
@@ -124,7 +122,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-igw-${Environment}'
+          Value: !Sub 'agentic-foundation-igw-${Environment}'
 
   # Attach Internet Gateway to VPC
   AttachGateway:
@@ -140,7 +138,7 @@ Resources:
       VpcId: !Ref DefaultVpc
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-rt-${Environment}'
+          Value: !Sub 'agentic-foundation-rt-${Environment}'
 
   # Default Route
   DefaultRoute:
@@ -161,7 +159,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-subnet-1-${Environment}'
+          Value: !Sub 'agentic-foundation-subnet-1-${Environment}'
 
   # Subnet 2
   DefaultSubnet2:
@@ -173,7 +171,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-subnet-2-${Environment}'
+          Value: !Sub 'agentic-foundation-subnet-2-${Environment}'
 
   # Associate Subnet 1 with Route Table
   Subnet1RouteTableAssociation:

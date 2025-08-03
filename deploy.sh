@@ -47,19 +47,17 @@ fi
 
 echo -e "${GREEN}✅ Build completed successfully${NC}"
 
-# Package the function
-echo -e "${YELLOW}📦 Packaging function...${NC}"
-npm run package
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Packaging failed${NC}"
+# Check if function.zip exists
+echo -e "${YELLOW}📦 Checking for function.zip...${NC}"
+if [ ! -f "function.zip" ]; then
+    echo -e "${RED}❌ function.zip not found. Please run 'npm run package' first.${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Function packaged successfully${NC}"
+echo -e "${GREEN}✅ Function package found${NC}"
 
 # Check if foundation stack exists
-FOUNDATION_STACK_NAME="agentic-profile-foundation-${ENVIRONMENT}"
+FOUNDATION_STACK_NAME="agentic-foundation-${ENVIRONMENT}"
 echo -e "${YELLOW}🔍 Checking for foundation stack: ${FOUNDATION_STACK_NAME}${NC}"
 
 if ! aws cloudformation describe-stacks --stack-name ${FOUNDATION_STACK_NAME} --region ${REGION} &> /dev/null; then

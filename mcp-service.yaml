@@ -30,7 +30,9 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: !ImportValue 
-          Fn::Sub: 'agentic-profile-foundation-${Environment}-DeploymentBucketName'
+          Fn::Sub: 
+            - 'agentic-foundation-${Environment}-DeploymentBucketName'
+            - Environment: !Ref Environment
         S3Key: function.zip
         S3ObjectVersion: !If [HasVersion, !Ref FunctionZipVersion, !Ref AWS::NoValue]
       Environment:
@@ -38,9 +40,13 @@ Resources:
           ENVIRONMENT: !Ref Environment
           NODE_ENV: !Ref Environment
           VALKEY_ENDPOINT: !ImportValue 
-            Fn::Sub: 'agentic-profile-foundation-${Environment}-ValkeyCacheEndpoint'
+            Fn::Sub: 
+              - 'agentic-foundation-${Environment}-ValkeyCacheEndpoint'
+              - Environment: !Ref Environment
           VALKEY_PORT: !ImportValue 
-            Fn::Sub: 'agentic-profile-foundation-${Environment}-ValkeyCachePort'
+            Fn::Sub: 
+              - 'agentic-foundation-${Environment}-ValkeyCachePort'
+              - Environment: !Ref Environment
       Timeout: 30
       MemorySize: 256
       Tags:
@@ -82,7 +88,12 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:GetObjectVersion
-                Resource: !Sub 'arn:aws:s3:::${FoundationDeploymentBucket}/*'
+                Resource: !Sub 
+                  - 'arn:aws:s3:::${BucketName}/*'
+                  - BucketName: !ImportValue 
+                    Fn::Sub: 
+                      - 'agentic-foundation-${Environment}-DeploymentBucketName'
+                      - Environment: !Ref Environment
         - PolicyName: OutboundHttpAccess
           PolicyDocument:
             Version: '2012-10-17'
