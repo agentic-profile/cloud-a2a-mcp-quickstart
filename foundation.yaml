@@ -1,0 +1,233 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Foundation Infrastructure for Agentic Profile Lambda Functions'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment name (dev, staging, prod)
+    AllowedValues: [dev, staging, prod]
+
+Resources:
+  # S3 Bucket for Lambda Deployment
+  DeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'agentic-profile-deployment--${AWS::AccountId}-${Environment}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-profile-foundation
+
+  # Valkey Cache Serverless (Redis-compatible)
+  ValkeyCacheServerless:
+    Type: AWS::ElastiCache::ServerlessCache
+    Properties:
+      ServerlessCacheName: !Sub 'agentic-profile-mcp-valkey-${Environment}'
+      Engine: redis
+      UserGroupId: !Ref ValkeyUserGroup
+      SubnetIds:
+        - !Ref DefaultSubnet1
+        - !Ref DefaultSubnet2
+      SecurityGroupIds:
+        - !Ref ValkeySecurityGroup
+      Description: Serverless Redis cache for agentic profile MCP
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-valkey-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-profile-foundation
+
+  # User Group for Serverless Cache
+  ValkeyUserGroup:
+    Type: AWS::ElastiCache::UserGroup
+    Properties:
+      UserGroupId: !Sub 'agentic-profile-mcp-users-${Environment}'
+      Engine: redis
+      UserIds:
+        - !Ref ValkeyUser
+
+  # User for Serverless Cache
+  ValkeyUser:
+    Type: AWS::ElastiCache::User
+    Properties:
+      UserId: !Sub 'agentic-profile-mcp-user-${Environment}'
+      Engine: redis
+      UserName: default
+      Passwords:
+        - !Ref ValkeyPassword
+      AccessString: on ~* +@all
+
+  # Password for Serverless Cache
+  ValkeyPassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub 'agentic-profile-mcp-valkey-password-${Environment}'
+      Description: Password for Valkey serverless cache
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "agentic-profile-mcp"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-profile-foundation
+
+  # Security Group for Valkey Cache
+  ValkeySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Valkey serverless cache
+      VpcId: !Ref DefaultVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIp: 0.0.0.0/0
+          Description: Allow Redis access from anywhere (IPv4)
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIpv6: ::/0
+          Description: Allow Redis access from anywhere (IPv6)
+
+
+
+  # Default VPC
+  DefaultVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-vpc-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-igw-${Environment}'
+
+  # Attach Internet Gateway to VPC
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref DefaultVpc
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Table
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref DefaultVpc
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-rt-${Environment}'
+
+  # Default Route
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # Subnet 1
+  DefaultSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVpc
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-subnet-1-${Environment}'
+
+  # Subnet 2
+  DefaultSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVpc
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-subnet-2-${Environment}'
+
+  # Associate Subnet 1 with Route Table
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DefaultSubnet1
+      RouteTableId: !Ref RouteTable
+
+  # Associate Subnet 2 with Route Table
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DefaultSubnet2
+      RouteTableId: !Ref RouteTable
+
+Outputs:
+  DeploymentBucketName:
+    Description: 'S3 Bucket for Lambda Deployment'
+    Value: !Ref DeploymentBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DeploymentBucketName'
+
+  DeploymentBucketArn:
+    Description: 'S3 Bucket ARN for Lambda Deployment'
+    Value: !GetAtt DeploymentBucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DeploymentBucketArn'
+
+  ValkeyCacheEndpoint:
+    Description: 'Valkey Serverless Cache Endpoint'
+    Value: !GetAtt ValkeyCacheServerless.Endpoint.Address
+    Export:
+      Name: !Sub '${AWS::StackName}-ValkeyCacheEndpoint'
+
+  ValkeyCachePort:
+    Description: 'Valkey Serverless Cache Port'
+    Value: !GetAtt ValkeyCacheServerless.Endpoint.Port
+    Export:
+      Name: !Sub '${AWS::StackName}-ValkeyCachePort'
+
+  ValkeySecurityGroupId:
+    Description: 'Valkey Security Group ID'
+    Value: !Ref ValkeySecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-ValkeySecurityGroupId'
+
+  ValkeyPasswordSecretArn:
+    Description: 'Valkey Password Secret ARN'
+    Value: !Ref ValkeyPassword
+    Export:
+      Name: !Sub '${AWS::StackName}-ValkeyPasswordSecretArn'
+
+  ValkeyUserGroupId:
+    Description: 'Valkey User Group ID'
+    Value: !Ref ValkeyUserGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-ValkeyUserGroupId' 

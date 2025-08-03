@@ -13,7 +13,8 @@ NC='\033[0m' # No Color
 # Configuration
 STACK_NAME="agentic-profile-mcp"
 ENVIRONMENT=${1:-dev}
-REGION=${AWS_REGION:-us-east-1}
+# Get region from AWS CLI configuration, fallback to environment variable, then default
+REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
 
 echo -e "${GREEN}🚀 Deploying Agentic Profile MCP Lambda Function${NC}"
 echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
@@ -57,14 +58,63 @@ fi
 
 echo -e "${GREEN}✅ Function packaged successfully${NC}"
 
-# Deploy using CloudFormation
+# Check if foundation stack exists
+FOUNDATION_STACK_NAME="agentic-profile-foundation-${ENVIRONMENT}"
+echo -e "${YELLOW}🔍 Checking for foundation stack: ${FOUNDATION_STACK_NAME}${NC}"
+
+if ! aws cloudformation describe-stacks --stack-name ${FOUNDATION_STACK_NAME} --region ${REGION} &> /dev/null; then
+    echo -e "${RED}❌ Foundation stack not found. Please run 'npm run foundation:up' first.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Foundation stack found${NC}"
+
+# Get the S3 bucket name from foundation stack
+BUCKET_NAME=$(aws cloudformation describe-stacks \
+    --stack-name ${FOUNDATION_STACK_NAME} \
+    --region ${REGION} \
+    --query 'Stacks[0].Outputs[?OutputKey==`DeploymentBucketName`].OutputValue' \
+    --output text)
+
+if [ -z "${BUCKET_NAME}" ]; then
+    echo -e "${RED}❌ Could not get S3 bucket name from foundation stack${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}📦 Using S3 bucket from foundation: ${BUCKET_NAME}${NC}"
+
+# Upload function.zip to S3 first
+echo -e "${YELLOW}📦 Uploading function.zip to S3 bucket: ${BUCKET_NAME}${NC}"
+
+# Upload the zip file to S3
+aws s3 cp function.zip s3://${BUCKET_NAME}/function.zip
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to upload function.zip to S3${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Function uploaded to S3 successfully${NC}"
+
+# Get the version ID of the uploaded file
+echo -e "${YELLOW}📋 Getting S3 object version...${NC}"
+VERSION_ID=$(aws s3api head-object \
+    --bucket ${BUCKET_NAME} \
+    --key function.zip \
+    --query 'VersionId' \
+    --output text)
+
+echo -e "${YELLOW}📦 S3 object version: ${VERSION_ID}${NC}"
+
+# Deploy using CloudFormation with the uploaded function.zip
 echo -e "${YELLOW}🚀 Deploying to AWS CloudFormation...${NC}"
 
+# Deploy the stack with foundation bucket parameter and function version
 aws cloudformation deploy \
-    --template-file template.yaml \
+    --template-file mcp-service.yaml \
     --stack-name ${STACK_NAME} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-    --parameter-overrides Environment=${ENVIRONMENT} \
+    --parameter-overrides Environment=${ENVIRONMENT} FoundationDeploymentBucket=${BUCKET_NAME} FunctionZipVersion=${VERSION_ID} \
     --region ${REGION}
 
 if [ $? -ne 0 ]; then

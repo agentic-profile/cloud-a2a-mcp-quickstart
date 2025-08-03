@@ -1,12 +1,23 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Agentic Profile MCP Lambda Function'
 
+Conditions:
+  HasVersion: !Not [!Equals [!Ref FunctionZipVersion, ""]]
+
 Parameters:
   Environment:
     Type: String
     Default: dev
     Description: Environment name (dev, staging, prod)
     AllowedValues: [dev, staging, prod]
+  FunctionZipVersion:
+    Type: String
+    Description: S3 object version for the function zip file
+    Default: ""
+  FoundationDeploymentBucket:
+    Type: String
+    Description: S3 bucket name from foundation stack
+    Default: ""
 
 Resources:
   # Lambda Function
@@ -18,11 +29,18 @@ Resources:
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        ZipFile: function.zip
+        S3Bucket: !ImportValue 
+          Fn::Sub: 'agentic-profile-foundation-${Environment}-DeploymentBucketName'
+        S3Key: function.zip
+        S3ObjectVersion: !If [HasVersion, !Ref FunctionZipVersion, !Ref AWS::NoValue]
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
           NODE_ENV: !Ref Environment
+          VALKEY_ENDPOINT: !ImportValue 
+            Fn::Sub: 'agentic-profile-foundation-${Environment}-ValkeyCacheEndpoint'
+          VALKEY_PORT: !ImportValue 
+            Fn::Sub: 'agentic-profile-foundation-${Environment}-ValkeyCachePort'
       Timeout: 30
       MemorySize: 256
       Tags:
@@ -55,6 +73,34 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: !Sub 'arn:aws:s3:::${FoundationDeploymentBucket}/*'
+        - PolicyName: OutboundHttpAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: ElastiCacheAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticache:DescribeCacheClusters
+                  - elasticache:DescribeCacheSubnetGroups
                 Resource: '*'
 
   # API Gateway
@@ -146,4 +192,8 @@ Outputs:
     Description: 'Lambda Function Name'
     Value: !Ref AgenticProfileMCPFunction
     Export:
-      Name: !Sub '${AWS::StackName}-LambdaFunctionName' 
+      Name: !Sub '${AWS::StackName}-LambdaFunctionName'
+
+
+
+ 
