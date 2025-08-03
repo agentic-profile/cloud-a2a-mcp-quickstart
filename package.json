@@ -9,7 +9,7 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "package": "npm run build && zip -r function.zip dist node_modules",
-    "deploy": "npm run package && aws cloudformation deploy --template-file template.yaml --stack-name agentic-profile-mcp --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM",
+    "deploy": "npm run package && aws cloudformation deploy --template-file template.yaml --stack-name agentic-profile-mcp --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --parameter-overrides Environment=dev && echo '\\n🚀 Deployment completed! Server endpoint:' && aws cloudformation describe-stacks --stack-name agentic-profile-mcp --query 'Stacks[0].Outputs[?OutputKey==`ApiGatewayUrl`].OutputValue' --output text",
     "undeploy": "aws cloudformation delete-stack --stack-name agentic-profile-mcp",
     "status": "aws cloudformation describe-stacks --stack-name agentic-profile-mcp --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
     "events": "aws cloudformation describe-stack-events --stack-name agentic-profile-mcp --query 'StackEvents[0:5]' --output table",

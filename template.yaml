@@ -18,13 +18,7 @@ Resources:
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        ZipFile: |
-          exports.handler = async (event, context) => {
-            return {
-              statusCode: 200,
-              body: JSON.stringify({ message: 'Function deployed successfully' })
-            };
-          };
+        ZipFile: function.zip
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
