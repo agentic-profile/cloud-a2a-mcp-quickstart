@@ -63,7 +63,7 @@ echo -e "${YELLOW}🚀 Deploying to AWS CloudFormation...${NC}"
 aws cloudformation deploy \
     --template-file template.yaml \
     --stack-name ${STACK_NAME} \
-    --capabilities CAPABILITY_IAM \
+    --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --parameter-overrides Environment=${ENVIRONMENT} \
     --region ${REGION}
 
