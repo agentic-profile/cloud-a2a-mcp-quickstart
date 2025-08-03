@@ -1,113 +1,78 @@
 # Agentic Profile MCP Lambda Function
 
-A TypeScript Lambda function that implements the Model Context Protocol (MCP) for agentic profiles. This function can be deployed to AWS Lambda using CloudFormation.
-
-Created by Cursor:
-```
-Create a new typescript project in the folder agentic-profile-mcp that has a Lambda handler function in index.ts and can be deployed to Lambda using cloudformation
-```
+A Lambda function that implements the Model Context Protocol (MCP) for agentic profiles.
 
 ## Features
 
-- **MCP Protocol Support**: Implements the Model Context Protocol for agentic profile management
-- **TypeScript**: Written in TypeScript with proper type definitions
-- **AWS Lambda**: Designed to run on AWS Lambda with API Gateway integration
-- **CloudFormation**: Includes CloudFormation template for infrastructure as code
-- **CORS Support**: Configured with CORS headers for web client access
-- **Error Handling**: Comprehensive error handling and logging
+- MCP-compliant API endpoints
+- Support for profile retrieval and updates
+- Local testing with SAM
+- CloudFormation deployment
 
-## Project Structure
+## Development
 
-```
-agentic-profile-mcp/
-├── src/
-│   └── index.ts          # Main Lambda handler
-├── template.yaml         # CloudFormation template
-├── package.json          # Node.js dependencies
-├── tsconfig.json         # TypeScript configuration
-└── README.md            # This file
-```
+### Prerequisites
 
-## Prerequisites
+- Node.js 18+
+- AWS CLI configured with `agentic` profile
+- AWS SAM CLI
 
-- Node.js 18 or later
-- AWS CLI configured with appropriate credentials
-- AWS SAM CLI (optional, for local testing)
+### Installation
 
-## Installation
-
-1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Build the TypeScript code:
-```bash
-npm run build
-```
-
-## Local Development
-
-### Running Tests
-```bash
-npm test
-```
-
 ### Building
+
 ```bash
 npm run build
 ```
 
-### Clean Build
+### Local Testing
+
+The project includes several test events for different MCP methods:
+
 ```bash
-npm run clean && npm run build
+# Test initialize method
+npm run test:local
+
+# Test tools/list method
+npm run test:tools-list
+
+# Test get_profile tool
+npm run test:get-profile
+
+# Test all methods
+npm run test:all
 ```
 
-## Deployment
+### Deployment
 
-### Using CloudFormation
+Deploy to AWS using CloudFormation:
 
-1. Build the project:
-```bash
-npm run build
-```
-
-2. Package the function:
-```bash
-npm run package
-```
-
-3. Deploy using CloudFormation:
 ```bash
 npm run deploy
 ```
 
-Or manually:
-```bash
-aws cloudformation deploy \
-  --template-file template.yaml \
-  --stack-name agentic-profile-mcp \
-  --capabilities CAPABILITY_IAM \
-  --parameter-overrides Environment=dev
-```
-
-### Environment Variables
-
-The CloudFormation template supports the following environment parameter:
-- `Environment`: Set to `dev`, `staging`, or `prod` (default: `dev`)
+This will:
+1. Build the TypeScript code
+2. Package the function
+3. Deploy using CloudFormation with the `agentic` profile
 
 ## API Endpoints
 
-### Health Check
-- **GET** `/` - Health check endpoint
-- Returns service status and timestamp
+### Initialize
+- **Method**: POST
+- **Body**: `{"jsonrpc":"2.0","id":1,"method":"initialize"}`
 
-### MCP Protocol Endpoints
-- **POST** `/` - MCP protocol requests
-- Supports the following MCP methods:
-  - `initialize` - Initialize the MCP connection
-  - `tools/list` - List available tools
-  - `tools/call` - Execute a tool
+### Tools List
+- **Method**: POST
+- **Body**: `{"jsonrpc":"2.0","id":2,"method":"tools/list"}`
+
+### Get Profile
+- **Method**: POST
+- **Body**: `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_profile","arguments":{"did":"did:example:123"}}}`
 
 ## Available Tools
 
@@ -117,21 +82,6 @@ Retrieves an agentic profile by DID.
 **Parameters:**
 - `did` (string, required): The DID of the profile to retrieve
 
-**Example:**
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "get_profile",
-    "arguments": {
-      "did": "did:example:123"
-    }
-  }
-}
-```
-
 ### update_profile
 Updates an agentic profile.
 
@@ -139,75 +89,34 @@ Updates an agentic profile.
 - `did` (string, required): The DID of the profile to update
 - `profile` (object, required): The profile data to update
 
-**Example:**
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "update_profile",
-    "arguments": {
-      "did": "did:example:123",
-      "profile": {
-        "name": "Updated Profile",
-        "description": "Updated description"
-      }
-    }
-  }
-}
+## Project Structure
+
 ```
-
-## Infrastructure
-
-The CloudFormation template creates:
-
-- **Lambda Function**: The main function with Node.js 18 runtime
-- **IAM Role**: Execution role with CloudWatch Logs permissions
-- **API Gateway**: REST API with proxy integration
-- **CloudWatch Log Group**: For function logs with 14-day retention
-
-## Monitoring
-
-- **CloudWatch Logs**: Function logs are automatically sent to CloudWatch
-- **API Gateway**: Request/response metrics available in CloudWatch
-- **Lambda Metrics**: Invocation count, duration, and error rates
-
-## Development
-
-### Adding New Tools
-
-1. Add the tool definition to `handleToolsList()` in `src/index.ts`
-2. Add the tool handler to `handleToolsCall()` in `src/index.ts`
-3. Implement the tool handler function
-4. Update tests if applicable
-
-### Local Testing
-
-You can test the function locally using AWS SAM:
-
-```bash
-# Install AWS SAM CLI if not already installed
-# Then run:
-sam local invoke AgenticProfileMCPFunction --event events/test-event.json
+├── src/
+│   └── index.ts          # Main Lambda function
+├── events/               # Test events for SAM local
+│   ├── test-event.json
+│   ├── test-tools-list.json
+│   └── test-get-profile.json
+├── template.yaml         # CloudFormation template
+├── sam-template.yaml     # SAM template for local testing
+└── package.json
 ```
 
 ## Troubleshooting
 
-### Common Issues
+### SAM Local Issues
 
-1. **Deployment Fails**: Check AWS credentials and permissions
-2. **Function Timeout**: Increase timeout in CloudFormation template
-3. **Memory Issues**: Increase memory allocation in CloudFormation template
-4. **CORS Errors**: Verify CORS headers in the function response
+If you encounter issues with SAM local:
 
-### Logs
+1. Make sure you're using the `sam-template.yaml` file
+2. Ensure the `dist/` folder exists (run `npm run build` first)
+3. Check that Docker is running
 
-Check CloudWatch Logs for the function:
-```bash
-aws logs tail /aws/lambda/agentic-profile-mcp-dev --follow
-```
+### Deployment Issues
 
-## License
+If deployment fails:
 
-MIT License - see LICENSE file for details. 
+1. Verify AWS credentials are configured: `aws configure list-profiles`
+2. Ensure you have the correct permissions for the `agentic` profile
+3. Check that the stack name doesn't conflict with existing stacks 

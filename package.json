@@ -9,7 +9,11 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "package": "npm run build && zip -r function.zip dist node_modules",
-    "deploy": "npm run package && aws cloudformation deploy --template-file template.yaml --stack-name agentic-profile-mcp --capabilities CAPABILITY_IAM"
+    "deploy": "npm run package && aws cloudformation deploy --template-file template.yaml --stack-name agentic-profile-mcp --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --profile agentic",
+    "test:local": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-event.json --template sam-template.yaml",
+    "test:tools-list": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-tools-list.json --template sam-template.yaml",
+    "test:get-profile": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-get-profile.json --template sam-template.yaml",
+    "test:all": "npm run test:local && npm run test:tools-list && npm run test:get-profile"
   },
   "keywords": ["lambda", "typescript", "mcp"],
   "author": "",
