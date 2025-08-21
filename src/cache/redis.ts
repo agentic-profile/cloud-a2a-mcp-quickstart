@@ -1,8 +1,8 @@
 import { Redis, RedisOptions } from "ioredis";
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-// Redis client configuration from CloudFormation
-const REDIS_ENDPOINT = process.env.VALKEY_ENDPOINT;
+// Redis client configuration
+const REDIS_ENDPOINT = process.env.VALKEY_ENDPOINT || 'localhost';
 const REDIS_PORT = parseInt(process.env.VALKEY_PORT || '6379');
 const REDIS_PASSWORD_SECRET_ARN = process.env.VALKEY_PASSWORD_SECRET_ARN;
 const REDIS_DB = parseInt(process.env.VALKEY_DB || '0');
@@ -80,15 +80,39 @@ async function getRedis() {
         port: REDIS_PORT,
         username,
         password,
+        db: REDIS_DB,
         connectTimeout: 10000,
         maxRetriesPerRequest: 3
     };
 
-    //if( scheme === "rediss" )
-        options.tls = {};   // assume TLS
+    // Only use TLS for cloud Redis (not localhost)
+    if (REDIS_ENDPOINT !== 'localhost' && REDIS_ENDPOINT !== '127.0.0.1') {
+        options.tls = {};   // assume TLS for cloud Redis
+    }
 
     console.log( "Redis options", options );
     redis = new Redis(options);
+
+    // Add connection event handlers for better debugging
+    redis.on('connect', () => {
+        console.log('✅ Redis client connected');
+    });
+
+    redis.on('ready', () => {
+        console.log('✅ Redis client ready');
+    });
+
+    redis.on('error', (err) => {
+        console.error('❌ Redis client error:', err);
+    });
+
+    redis.on('close', () => {
+        console.log('🔌 Redis client connection closed');
+    });
+
+    redis.on('reconnecting', () => {
+        console.log('🔄 Redis client reconnecting...');
+    });
 
     return redis;
 }

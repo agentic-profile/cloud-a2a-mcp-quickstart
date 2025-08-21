@@ -1,12 +1,12 @@
-# Agentic Profile MCP Lambda Function
+# Agentic Profile A2A/MCP service running on AWS
 
-A Lambda function that implements the Model Context Protocol (MCP) for agentic profiles.
+Leverages CloudFormation to create a scalable A2A/MCP service with Lambda, Redis, DynamoDB, and S3.  Uses
+NAT to fetch external Agentic Profiles for authentication.
 
 ## Features
 
-- MCP-compliant API endpoints
+- A2A and MCP compliant API endpoints
 - Support for profile retrieval and updates
-- Local testing with SAM
 - CloudFormation deployment
 
 ## Development
@@ -46,6 +46,21 @@ npm run test:get-profile
 # Test all methods
 npm run test:all
 ```
+
+### Local Development with Redis
+
+1. Install Redis
+2. Start Redis locally
+
+  ```bash
+  redis-server
+  ```
+
+3. Start MCP server
+
+  ```bash
+  npm run start:local
+  ```
 
 ### Deployment
 

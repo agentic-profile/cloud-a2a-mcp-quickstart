@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Script to provide instructions for uninstalling local Redis server
+
+echo "🗑️  Instructions for uninstalling local Redis server..."
+
+echo "📋 To uninstall your manually installed Redis server:"
+echo ""
+echo "   On macOS (using Homebrew):"
+echo "     brew services stop redis"
+echo "     brew uninstall redis"
+echo ""
+echo "   On Ubuntu/Debian:"
+echo "     sudo systemctl stop redis-server"
+echo "     sudo systemctl disable redis-server"
+echo "     sudo apt remove redis-server"
+echo "     sudo apt autoremove"
+echo ""
+echo "   On CentOS/RHEL:"
+echo "     sudo systemctl stop redis"
+echo "     sudo systemctl disable redis"
+echo "     sudo yum remove redis"
+echo ""
+echo "   On Windows:"
+echo "     Stop the Redis service from Services"
+echo "     Uninstall from Control Panel > Programs > Uninstall a program"
+echo ""
+echo "🔍 To verify Redis is uninstalled:"
+echo "   redis-cli -h localhost -p 6379 ping"
+echo "   # Should return 'Could not connect to Redis' or similar error"
+echo ""
+echo "🚀 To reinstall Redis later, follow the installation instructions in:"
+echo "   ./scripts/start-local-redis.sh"
