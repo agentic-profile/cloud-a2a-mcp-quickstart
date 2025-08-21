@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { JsonRPCRequest, JsonRPCResponse } from './types';
 import { handleInitialize, handleToolsList, handleToolsCall, handleLocationUpdate, handleLocationQuery } from './mcp/location/methods';
+import { handleVentureJsonRPC } from './a2a/venture/handler';
+import { handleVCJsonRPC } from './a2a/vc/handler';
 
 // Create Express app
 import express from 'express';
@@ -38,6 +40,52 @@ app.post('/', async (req: Request, res: Response) => {
         res.json(response);
     } catch (error) {
         console.error('Error processing request:', error);
+        res.status(500).json({
+            jsonrpc: '2.0',
+            id: 'error',
+            error: {
+                code: -32603,
+                message: 'Internal error',
+                data: error instanceof Error ? error.message : 'Unknown error'
+            }
+        });
+    }
+});
+
+// A2A Venture endpoint
+app.post('/venture', async (req: Request, res: Response) => {
+    try {
+        console.log('🚀 Handling A2A venture JSON-RPC request...');
+        const body = req.body;
+        console.log('🚀 Request body:', JSON.stringify(body, null, 2));
+        
+        const response = await handleVentureJsonRPC(body);
+        res.json(response);
+    } catch (error) {
+        console.error('Error processing venture request:', error);
+        res.status(500).json({
+            jsonrpc: '2.0',
+            id: 'error',
+            error: {
+                code: -32603,
+                message: 'Internal error',
+                data: error instanceof Error ? error.message : 'Unknown error'
+            }
+        });
+    }
+});
+
+// A2A VC (Venture Capital) endpoint
+app.post('/vc', async (req: Request, res: Response) => {
+    try {
+        console.log('💰 Handling A2A VC JSON-RPC request...');
+        const body = req.body;
+        console.log('💰 Request body:', JSON.stringify(body, null, 2));
+        
+        const response = await handleVCJsonRPC(body);
+        res.json(response);
+    } catch (error) {
+        console.error('Error processing VC request:', error);
         res.status(500).json({
             jsonrpc: '2.0',
             id: 'error',
