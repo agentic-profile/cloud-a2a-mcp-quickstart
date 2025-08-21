@@ -65,7 +65,7 @@ Resources:
       Engine: redis
       UserName: default
       Passwords:
-        - !Ref ValkeyPassword
+        - !Sub '{{resolve:secretsmanager:${ValkeyPassword}:SecretString:password}}'
       AccessString: on ~* +@all
 
   # Password for Serverless Cache
@@ -75,7 +75,7 @@ Resources:
       Name: !Sub 'agentic-foundation-valkey-password-${Environment}'
       Description: Password for Valkey serverless cache
       GenerateSecretString:
-        SecretStringTemplate: '{"username": "agentic-foundation"}'
+        SecretStringTemplate: '{"username": "default"}'
         GenerateStringKey: password
         PasswordLength: 32
         ExcludeCharacters: '"@/\'
@@ -187,6 +187,37 @@ Resources:
       SubnetId: !Ref DefaultSubnet2
       RouteTableId: !Ref RouteTable
 
+  # Security Group for VPC Endpoints
+  VpcEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for VPC endpoints
+      VpcId: !Ref DefaultVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+          Description: Allow HTTPS access from VPC
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic
+
+  # VPC Endpoint for Secrets Manager
+  SecretsManagerVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref DefaultVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.secretsmanager'
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref DefaultSubnet1
+        - !Ref DefaultSubnet2
+      SecurityGroupIds:
+        - !Ref VpcEndpointSecurityGroup
+      PrivateDnsEnabled: true
+
 Outputs:
   DeploymentBucketName:
     Description: 'S3 Bucket for Lambda Deployment'
@@ -228,4 +259,22 @@ Outputs:
     Description: 'Valkey User Group ID'
     Value: !Ref ValkeyUserGroup
     Export:
-      Name: !Sub '${AWS::StackName}-ValkeyUserGroupId' 
+      Name: !Sub '${AWS::StackName}-ValkeyUserGroupId'
+
+  DefaultVpc:
+    Description: 'Default VPC ID'
+    Value: !Ref DefaultVpc
+    Export:
+      Name: !Sub '${AWS::StackName}-DefaultVpc'
+
+  DefaultSubnet1:
+    Description: 'Default Subnet 1 ID'
+    Value: !Ref DefaultSubnet1
+    Export:
+      Name: !Sub '${AWS::StackName}-DefaultSubnet1'
+
+  DefaultSubnet2:
+    Description: 'Default Subnet 2 ID'
+    Value: !Ref DefaultSubnet2
+    Export:
+      Name: !Sub '${AWS::StackName}-DefaultSubnet2' 

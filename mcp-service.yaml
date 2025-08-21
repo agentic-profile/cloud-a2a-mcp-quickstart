@@ -40,8 +40,18 @@ Resources:
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyCacheEndpoint'
           VALKEY_PORT: !ImportValue 
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyCachePort'
+          VALKEY_PASSWORD_SECRET_ARN: !ImportValue 
+            Fn::Sub: 'agentic-foundation-${Environment}-ValkeyPasswordSecretArn'
       Timeout: 30
       MemorySize: 256
+      VpcConfig:
+        SubnetIds:
+          - !ImportValue 
+            Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet1'
+          - !ImportValue 
+            Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet2'
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -103,6 +113,27 @@ Resources:
                   - elasticache:DescribeCacheClusters
                   - elasticache:DescribeCacheSubnetGroups
                 Resource: '*'
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !ImportValue 
+                  Fn::Sub: 'agentic-foundation-${Environment}-ValkeyPasswordSecretArn'
+        - PolicyName: VPCAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:UnassignPrivateIpAddresses
+                Resource: '*'
 
   # API Gateway
   ApiGateway:
@@ -159,6 +190,41 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGateway
       StageName: !Ref Environment
+
+  # Lambda Security Group
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Lambda function to access Valkey cache and VPC endpoints
+      VpcId: !ImportValue 
+        Fn::Sub: 'agentic-foundation-${Environment}-DefaultVpc'
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          DestinationSecurityGroupId: !ImportValue 
+            Fn::Sub: 'agentic-foundation-${Environment}-ValkeySecurityGroupId'
+          Description: Allow Lambda to access Valkey cache
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+          Description: Allow Lambda to access VPC endpoints
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Allow Lambda to access AWS services (HTTPS)
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Allow Lambda to access AWS services (HTTP)
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-profile-mcp-lambda-sg-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
 
   # Lambda Permission for API Gateway
   LambdaPermission:

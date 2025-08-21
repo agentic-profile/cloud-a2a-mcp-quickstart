@@ -28,21 +28,31 @@
     "foundation:status": "aws cloudformation describe-stacks --stack-name agentic-foundation-dev --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
     "foundation:status:prod": "aws cloudformation describe-stacks --stack-name agentic-foundation-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
     "foundation:events": "aws cloudformation describe-stack-events --stack-name agentic-foundation-dev --query 'StackEvents[0:5]' --output table",
-    "foundation:events:prod": "aws cloudformation describe-stack-events --stack-name agentic-foundation-prod --query 'StackEvents[0:5]' --output table"
+    "foundation:events:prod": "aws cloudformation describe-stack-events --stack-name agentic-foundation-prod --query 'StackEvents[0:5]' --output table",
+    "test:redis": "node scripts/test-redis-connection.js",
+    "start:local": "tsx src/index.local.ts"
   },
-  "keywords": ["lambda", "typescript", "mcp"],
+  "keywords": [
+    "lambda",
+    "typescript",
+    "mcp"
+  ],
   "author": "",
-  "license": "MIT",
+  "license": "Apache 2.0",
   "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.0.0",
     "@aws-sdk/client-lambda": "^3.0.0",
-    "@aws-sdk/client-cloudformation": "^3.0.0"
+    "@aws-sdk/client-secrets-manager": "^3.859.0",
+    "ioredis": "^5.6.1",
+    "redis": "^5.7.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/jest": "^29.0.0",
     "@types/aws-lambda": "^8.10.0",
-    "typescript": "^5.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
     "jest": "^29.0.0",
-    "ts-jest": "^29.0.0"
+    "ts-jest": "^29.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.0.0"
   }
-} 
+}

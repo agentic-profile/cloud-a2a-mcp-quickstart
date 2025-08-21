@@ -13,7 +13,7 @@ A Lambda function that implements the Model Context Protocol (MCP) for agentic p
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - AWS CLI configured with `agentic` profile
 - AWS SAM CLI
 
@@ -120,3 +120,29 @@ If deployment fails:
 1. Verify AWS credentials are configured: `aws configure list-profiles`
 2. Ensure you have the correct permissions for the `agentic` profile
 3. Check that the stack name doesn't conflict with existing stacks 
+
+## Example queries:
+
+Ensure Lambda endpoint is known:
+
+```bash
+export AGENTIC_HOST=https://ierurztomh.execute-api.us-west-2.amazonaws.com/dev
+```
+
+Store user location:
+
+```bash
+curl -X POST $AGENTIC_HOST \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"locationUpdate","params":{"coords":{"latitude":35.6762,"longitude":139.6503}}}'
+```
+
+Fetch user location:
+
+```bash
+curl -X POST $AGENTIC_HOST \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"locationQuery"}'
+```
+
+
