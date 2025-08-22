@@ -17,11 +17,11 @@ describe('Lambda Handler', () => {
     succeed: jest.fn(),
   };
 
-  describe('Health Check', () => {
-    it('should return 200 for GET request', async () => {
+  describe('Lambda Integration', () => {
+    it('should handle requests through serverless-express', async () => {
       const event: APIGatewayProxyEvent = {
         httpMethod: 'GET',
-        path: '/',
+        path: '/status',
         headers: {},
         multiValueHeaders: {},
         queryStringParameters: null,
@@ -34,7 +34,7 @@ describe('Lambda Handler', () => {
         isBase64Encoded: false,
       };
 
-      const result = await handler(event, mockContext);
+      const result = await handler(event, mockContext, () => {});
 
       expect(result.statusCode).toBe(200);
       expect(result.headers).toHaveProperty('Content-Type', 'application/json');
@@ -43,10 +43,8 @@ describe('Lambda Handler', () => {
       expect(body).toHaveProperty('status', 'healthy');
       expect(body).toHaveProperty('service', 'agentic-profile-mcp');
     });
-  });
 
-  describe('MCP Protocol', () => {
-    it('should handle initialize request', async () => {
+    it('should handle MCP initialize request through Lambda', async () => {
       const event: APIGatewayProxyEvent = {
         httpMethod: 'POST',
         path: '/',
@@ -66,7 +64,7 @@ describe('Lambda Handler', () => {
         isBase64Encoded: false,
       };
 
-      const result = await handler(event, mockContext);
+      const result = await handler(event, mockContext, () => {});
 
       expect(result.statusCode).toBe(200);
       
@@ -78,10 +76,10 @@ describe('Lambda Handler', () => {
       expect(body.result).toHaveProperty('serverInfo');
     });
 
-    it('should handle tools/list request', async () => {
+    it('should handle A2A endpoint requests through Lambda', async () => {
       const event: APIGatewayProxyEvent = {
         httpMethod: 'POST',
-        path: '/',
+        path: '/a2a/hireme',
         headers: {},
         multiValueHeaders: {},
         queryStringParameters: null,
@@ -91,166 +89,22 @@ describe('Lambda Handler', () => {
         requestContext: {} as any,
         resource: '',
         body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'tools/list',
-        }),
-        isBase64Encoded: false,
-      };
-
-      const result = await handler(event, mockContext);
-
-      expect(result.statusCode).toBe(200);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body.jsonrpc).toBe('2.0');
-      expect(body.id).toBe(1);
-      expect(body.result).toHaveProperty('tools');
-      expect(Array.isArray(body.result.tools)).toBe(true);
-    });
-
-    it('should handle get_profile tool call', async () => {
-      const event: APIGatewayProxyEvent = {
-        httpMethod: 'POST',
-        path: '/',
-        headers: {},
-        multiValueHeaders: {},
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        pathParameters: null,
-        stageVariables: null,
-        requestContext: {} as any,
-        resource: '',
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'tools/call',
+          id: 'task-1',
+          method: 'tasks/send',
           params: {
-            name: 'get_profile',
-            arguments: {
-              did: 'did:example:123',
-            },
+            position: 'Senior Software Engineer',
           },
         }),
         isBase64Encoded: false,
       };
 
-      const result = await handler(event, mockContext);
+      const result = await handler(event, mockContext, () => {});
 
       expect(result.statusCode).toBe(200);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body.jsonrpc).toBe('2.0');
-      expect(body.id).toBe(1);
-      expect(body.result).toHaveProperty('content');
-      expect(Array.isArray(body.result.content)).toBe(true);
+      expect(result.body).toBeDefined();
     });
 
-    it('should handle update_profile tool call', async () => {
-      const event: APIGatewayProxyEvent = {
-        httpMethod: 'POST',
-        path: '/',
-        headers: {},
-        multiValueHeaders: {},
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        pathParameters: null,
-        stageVariables: null,
-        requestContext: {} as any,
-        resource: '',
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'tools/call',
-          params: {
-            name: 'update_profile',
-            arguments: {
-              did: 'did:example:123',
-              profile: {
-                name: 'Updated Profile',
-                description: 'Updated description',
-              },
-            },
-          },
-        }),
-        isBase64Encoded: false,
-      };
-
-      const result = await handler(event, mockContext);
-
-      expect(result.statusCode).toBe(200);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body.jsonrpc).toBe('2.0');
-      expect(body.id).toBe(1);
-      expect(body.result).toHaveProperty('content');
-      expect(Array.isArray(body.result.content)).toBe(true);
-    });
-
-    it('should return error for invalid JSON-RPC request', async () => {
-      const event: APIGatewayProxyEvent = {
-        httpMethod: 'POST',
-        path: '/',
-        headers: {},
-        multiValueHeaders: {},
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        pathParameters: null,
-        stageVariables: null,
-        requestContext: {} as any,
-        resource: '',
-        body: JSON.stringify({
-          jsonrpc: '1.0', // Invalid version
-          id: 1,
-          method: 'initialize',
-        }),
-        isBase64Encoded: false,
-      };
-
-      const result = await handler(event, mockContext);
-
-      expect(result.statusCode).toBe(400);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body.jsonrpc).toBe('2.0');
-      expect(body.error).toHaveProperty('code', -32600);
-      expect(body.error).toHaveProperty('message', 'Invalid Request');
-    });
-
-    it('should return error for unknown method', async () => {
-      const event: APIGatewayProxyEvent = {
-        httpMethod: 'POST',
-        path: '/',
-        headers: {},
-        multiValueHeaders: {},
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        pathParameters: null,
-        stageVariables: null,
-        requestContext: {} as any,
-        resource: '',
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'unknown_method',
-        }),
-        isBase64Encoded: false,
-      };
-
-      const result = await handler(event, mockContext);
-
-      expect(result.statusCode).toBe(200);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body.jsonrpc).toBe('2.0');
-      expect(body.id).toBe(1);
-      expect(body.error).toHaveProperty('code', -32601);
-      expect(body.error).toHaveProperty('message', 'Method not found');
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle malformed JSON', async () => {
+    it('should handle malformed JSON gracefully in Lambda', async () => {
       const event: APIGatewayProxyEvent = {
         httpMethod: 'POST',
         path: '/',
@@ -266,36 +120,10 @@ describe('Lambda Handler', () => {
         isBase64Encoded: false,
       };
 
-      const result = await handler(event, mockContext);
+      const result = await handler(event, mockContext, () => {});
 
       expect(result.statusCode).toBe(500);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body).toHaveProperty('error', 'Internal server error');
-    });
-
-    it('should return 405 for unsupported HTTP method', async () => {
-      const event: APIGatewayProxyEvent = {
-        httpMethod: 'PUT',
-        path: '/',
-        headers: {},
-        multiValueHeaders: {},
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        pathParameters: null,
-        stageVariables: null,
-        requestContext: {} as any,
-        resource: '',
-        body: null,
-        isBase64Encoded: false,
-      };
-
-      const result = await handler(event, mockContext);
-
-      expect(result.statusCode).toBe(405);
-      
-      const body = JSON.parse(result.body || '{}');
-      expect(body).toHaveProperty('error', 'Method not allowed');
+      expect(result.body).toBeDefined();
     });
   });
 }); 

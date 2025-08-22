@@ -1,4 +1,5 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { JsonRPCRequest, JsonRPCResponse } from './types';
 import { handleInitialize, handleToolsList, handleToolsCall, handleLocationUpdate, handleLocationQuery } from './mcp/location/methods';
 import { handleVentureTasks } from './a2a/venture/handler';
@@ -37,18 +38,17 @@ app.get('/status', (_req: Request, res: Response) => {
     });
 });
 
-
-// A2A HireMe TaskHandler endpoint (new)
+// A2A HireMe TaskHandler endpoint
 app.post('/a2a/hireme', async (req: Request, res: Response) => {
     await handleA2ARequest( req, res, handleHireMeTasksWithMiddleware );
 });
 
-// A2A Venture TaskHandler endpoint (new)
+// A2A Venture TaskHandler endpoint
 app.post('/a2a/venture', async (req: Request, res: Response) => {
     await handleA2ARequest(req, res, handleVentureTasksWithMiddleware);
 });
 
-// A2A VC TaskHandler endpoint (new)
+// A2A VC TaskHandler endpoint
 app.post('/a2a/vc', async (req: Request, res: Response) => {
     await handleA2ARequest(req, res, handleVCTasksWithMiddleware);
 });
@@ -58,17 +58,15 @@ app.options('*', (_req: Request, res: Response) => {
     res.sendStatus(200);
 });
 
-// 404 handler
-app.use('*', (_req: Request, res: Response) => {
-    res.status(404).json({
-        jsonrpc: '2.0',
-        id: 'not-found',
-        error: {
-            code: -32601,
-            message: 'Method not found'
-        }
-    });
+// Serve static files from www directory
+app.use(express.static('www'));
+
+// Serve the web interface for non-API routes
+app.get('/', (_req: Request, res: Response) => {
+    res.sendFile('index.html', { root: 'www' });
 });
+
+
 
 // Error handling middleware
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
@@ -80,6 +78,18 @@ app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
             code: -32603,
             message: 'Internal error',
             data: error.message
+        }
+    });
+});
+
+// 404 handler
+app.use('*', (_req: Request, res: Response) => {
+    res.status(404).json({
+        jsonrpc: '2.0',
+        id: 'not-found',
+        error: {
+            code: -32601,
+            message: 'Method not found'
         }
     });
 });

@@ -1,6 +1,6 @@
 # Agentic Profile A2A/MCP service running on AWS
 
-Leverages CloudFormation to create a scalable A2A/MCP service with Lambda, Redis, DynamoDB, and S3.  Uses
+Leverages CloudFormation to create a scalable A2A/MCP service with Lambda, Redis, DynamoDB, and S3. Uses
 NAT to fetch external Agentic Profiles for authentication.
 
 ## Features
@@ -8,6 +8,7 @@ NAT to fetch external Agentic Profiles for authentication.
 - A2A and MCP compliant API endpoints
 - Support for profile retrieval and updates
 - CloudFormation deployment
+- A2A TaskHandler endpoints for HireMe, Venture, and VC operations
 
 ## Development
 
@@ -31,7 +32,7 @@ npm run build
 
 ### Local Testing
 
-The project includes several test events for different MCP methods:
+The project includes several test events for different MCP methods and A2A endpoints:
 
 ```bash
 # Test initialize method
@@ -42,6 +43,14 @@ npm run test:tools-list
 
 # Test get_profile tool
 npm run test:get-profile
+
+# Test A2A endpoints
+npm run test:venture
+npm run test:venture-create
+npm run test:vc
+npm run test:vc-task-send
+npm run test:hireme
+npm run test:hireme-taskhandler
 
 # Test all methods
 npm run test:all
@@ -75,19 +84,60 @@ This will:
 2. Package the function
 3. Deploy using CloudFormation with the `agentic` profile
 
+## Web Interface
+
+The service now includes a web interface for easy testing and exploration of the API endpoints.
+
+- **URL**: `http://localhost:3000/` (local development)
+- **Features**: Interactive API testing, endpoint documentation, and visual feedback
+- **Files**: Served from the `/www` directory
+
 ## API Endpoints
 
-### Initialize
+### Health Check
+- **Endpoint**: `GET /status`
+- **Response**: Service health status and metadata
+
+### MCP Protocol Endpoints
+- **Base Path**: `/` (root)
+- **Protocol**: JSON-RPC 2.0
+
+#### Initialize
 - **Method**: POST
 - **Body**: `{"jsonrpc":"2.0","id":1,"method":"initialize"}`
 
-### Tools List
+#### Tools List
 - **Method**: POST
 - **Body**: `{"jsonrpc":"2.0","id":2,"method":"tools/list"}`
 
-### Get Profile
+#### Tools Call
 - **Method**: POST
 - **Body**: `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_profile","arguments":{"did":"did:example:123"}}}`
+
+#### Location Update
+- **Method**: POST
+- **Body**: `{"jsonrpc":"2.0","id":4,"method":"locationUpdate","params":{"coords":{"latitude":35.6762,"longitude":139.6503}}}`
+
+#### Location Query
+- **Method**: POST
+- **Body**: `{"jsonrpc":"2.0","id":5,"method":"locationQuery"}`
+
+### A2A TaskHandler Endpoints
+
+#### `/a2a/hireme` - HireMe TaskHandler
+- **Method**: POST
+- **Purpose**: Handle HireMe related tasks and operations
+- **Protocol**: A2A TaskHandler pattern
+
+#### `/a2a/venture` - Venture TaskHandler
+- **Method**: POST
+- **Purpose**: Handle Venture creation and management tasks
+- **Protocol**: A2A TaskHandler pattern
+
+#### `/a2a/vc` - VC TaskHandler
+- **Method**: POST
+- **Purpose**: Handle VC (Venture Capital) related tasks
+- **Protocol**: A2A TaskHandler pattern
 
 ## Available Tools
 
@@ -152,11 +202,9 @@ async function* handleHireMeTask(context: TaskContext): AsyncGenerator<TaskYield
 export const handleHireMeTaskWithMiddleware = withDefaultMiddleware(handleHireMeTask);
 ```
 
-### TaskHandler Endpoints
+### TaskHandler Request/Response Format
 
-#### `/hireme/task` - HireMe TaskHandler
-
-**Request:**
+#### Request Format
 ```json
 {
   "id": "task-1",
@@ -170,7 +218,7 @@ export const handleHireMeTaskWithMiddleware = withDefaultMiddleware(handleHireMe
 }
 ```
 
-**Response:**
+#### Response Format
 ```json
 {
   "jsonrpc": "2.0",
@@ -198,29 +246,80 @@ export const handleHireMeTaskWithMiddleware = withDefaultMiddleware(handleHireMe
 }
 ```
 
-### Testing TaskHandler
-
-```bash
-# Test the new TaskHandler endpoint
-npm run test:hireme-taskhandler
-
-# Test all endpoints including TaskHandler
-npm run test:all
-```
-
 ## Project Structure
 
 ```
 ├── src/
-│   └── index.ts          # Main Lambda function
-├── events/               # Test events for SAM local
+│   ├── index.ts              # Main Lambda function
+│   ├── index.local.ts        # Local development server
+│   ├── router.ts             # Express router with all endpoints
+│   ├── a2a/                  # A2A TaskHandler implementations
+│   │   ├── hireme/           # HireMe task handlers
+│   │   ├── venture/          # Venture task handlers
+│   │   ├── vc/               # VC task handlers
+│   │   └── utils.ts          # A2A utilities and middleware
+│   ├── mcp/                  # MCP protocol implementations
+│   │   └── location/         # Location-related MCP methods
+│   └── cache/                # Redis caching layer
+├── www/                      # Static web files
+│   ├── index.html            # Web interface HTML
+│   ├── styles.css            # Web interface styles
+│   └── script.js             # Web interface JavaScript
+├── events/                   # Test events for SAM local
 │   ├── test-event.json
 │   ├── test-tools-list.json
-│   └── test-get-profile.json
-├── template.yaml         # CloudFormation template
-├── sam-template.yaml     # SAM template for local testing
+│   ├── test-get-profile.json
+│   ├── test-venture.json
+│   ├── test-venture-create.json
+│   ├── test-vc-initialize.json
+│   ├── test-vc-task-send.json
+│   ├── test-hireme-task-send.json
+│   └── test-hireme-taskhandler.json
+├── foundation.yaml           # CloudFormation foundation template
+├── mcp-service.yaml         # SAM template for local testing
 └── package.json
 ```
+
+## Testing
+
+### Unit Tests
+```bash
+npm test
+```
+
+### Local Testing with SAM
+```bash
+# Test individual endpoints
+npm run test:local
+npm run test:tools-list
+npm run test:get-profile
+npm run test:venture
+npm run test:venture-create
+npm run test:vc
+npm run test:vc-task-send
+npm run test:hireme
+npm run test:hireme-taskhandler
+
+# Test all endpoints
+npm run test:all
+```
+
+### Local Development Server
+```bash
+npm run start:local
+```
+
+This starts a local HTTP server on port 3000 with all endpoints available for testing.
+
+### Web Interface Testing
+The web interface at `http://localhost:3000/` provides an interactive way to test all API endpoints:
+
+- **Health Check**: Test the service status endpoint
+- **MCP Protocol**: Test JSON-RPC methods like initialize and tools/list
+- **A2A Endpoints**: Test HireMe, Venture, and VC TaskHandler endpoints
+- **Visual Feedback**: See real-time API responses and error handling
+
+The interface includes keyboard shortcuts (Ctrl+1, Ctrl+2, Ctrl+3) for quick testing.
 
 ## Troubleshooting
 
@@ -228,7 +327,7 @@ npm run test:all
 
 If you encounter issues with SAM local:
 
-1. Make sure you're using the `sam-template.yaml` file
+1. Make sure you're using the `mcp-service.yaml` file
 2. Ensure the `dist/` folder exists (run `npm run build` first)
 3. Check that Docker is running
 
@@ -238,30 +337,76 @@ If deployment fails:
 
 1. Verify AWS credentials are configured: `aws configure list-profiles`
 2. Ensure you have the correct permissions for the `agentic` profile
-3. Check that the stack name doesn't conflict with existing stacks 
+3. Check that the stack name doesn't conflict with existing stacks
 
-## Example queries:
+### Redis Connection Issues
 
-Ensure Lambda endpoint is known:
+If you encounter Redis connection problems:
+
+1. Check that Redis is running locally: `redis-cli ping`
+2. Verify Redis connection settings in environment variables
+3. Use the provided Redis troubleshooting scripts: `npm run test:redis`
+
+## Example Queries
+
+### Health Check
+```bash
+curl -X GET http://localhost:3000/status
+```
+
+### MCP Protocol
+```bash
+# Initialize
+curl -X POST http://localhost:3000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize"}'
+
+# Tools List
+curl -X POST http://localhost:3000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+# Get Profile
+curl -X POST http://localhost:3000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_profile","arguments":{"did":"did:example:123"}}}'
+
+# Location Update
+curl -X POST http://localhost:3000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":4,"method":"locationUpdate","params":{"coords":{"latitude":35.6762,"longitude":139.6503}}}'
+
+# Location Query
+curl -X POST http://localhost:3000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":5,"method":"locationQuery"}'
+```
+
+### A2A Endpoints
+```bash
+# HireMe TaskHandler
+curl -X POST http://localhost:3000/a2a/hireme \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"1","method":"tasks/send","params":{"position":"Senior Engineer"},"includeAllUpdates":true}'
+
+# Venture TaskHandler
+curl -X POST http://localhost:3000/a2a/venture \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"1","method":"venture/create","params":{"name":"Test Venture","type":"startup"}}'
+
+# VC TaskHandler
+curl -X POST http://localhost:3000/a2a/vc \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"1","method":"task/send","params":{"investment":"1000000"}}'
+```
+
+### Production Environment
+For production deployment, ensure Lambda endpoint is known:
 
 ```bash
 export AGENTIC_HOST=https://ierurztomh.execute-api.us-west-2.amazonaws.com/dev
 ```
 
-Store user location:
-
-```bash
-curl -X POST $AGENTIC_HOST \
-  -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"locationUpdate","params":{"coords":{"latitude":35.6762,"longitude":139.6503}}}'
-```
-
-Fetch user location:
-
-```bash
-curl -X POST $AGENTIC_HOST \
-  -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"locationQuery"}'
-```
+Then use the same endpoints with the production host.
 
 

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Agentic Profile MCP Service</h1>
+            <p>A scalable A2A/MCP service with Lambda, Redis, DynamoDB, and S3</p>
+        </header>
+
+        <main>
+            <section class="endpoints">
+                <h2>📡 Available Endpoints</h2>
+                
+                <div class="endpoint-group">
+                    <h3>Health Check</h3>
+                    <div class="endpoint">
+                        <span class="method">GET</span>
+                        <span class="path">/status</span>
+                        <span class="description">Service health status</span>
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>MCP Protocol</h3>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/</span>
+                        <span class="description">JSON-RPC 2.0 endpoint</span>
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>A2A TaskHandlers</h3>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/hireme</span>
+                        <span class="description">HireMe task operations</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/venture</span>
+                        <span class="description">Venture management</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/vc</span>
+                        <span class="description">VC operations</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="testing">
+                <h2>🧪 Test the API</h2>
+                <div class="test-buttons">
+                    <button onclick="testHealth()">Test Health Check</button>
+                    <button onclick="testInitialize()">Test MCP Initialize</button>
+                    <button onclick="testHireMe()">Test HireMe A2A</button>
+                </div>
+                <div id="results" class="results"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

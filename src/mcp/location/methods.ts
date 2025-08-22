@@ -2,19 +2,6 @@ import { JsonRPCRequest, JsonRPCResponse } from '../../types';
 import { storeValue, getValue } from '../../cache/redis';
 import { rpcResult, rpcError, rpcContent } from '../../rpc/util';
 
-export async function handleInitialize(request: JsonRPCRequest): Promise<JsonRPCResponse> {
-    return rpcResult(request.id, {
-        protocolVersion: '2024-11-05',
-        capabilities: {
-            tools: {}
-        },
-        serverInfo: {
-            name: 'agentic-profile-mcp',
-            version: '1.0.0'
-        }
-    });
-}
-
 export async function handleToolsList(request: JsonRPCRequest): Promise<JsonRPCResponse> {
     return rpcResult(request.id, {
         tools: [
@@ -90,10 +77,6 @@ export async function handleToolsCall(request: JsonRPCRequest): Promise<JsonRPCR
     const { name, arguments: args } = request.params || {};
     
     switch (name) {
-        case 'get_profile':
-            return await handleGetProfile(request, args);
-        case 'update_profile':
-            return await handleUpdateProfile(request, args);
         case 'location/update':
             return await handleLocationUpdate(request, args);
         case 'location/query':
@@ -102,42 +85,6 @@ export async function handleToolsCall(request: JsonRPCRequest): Promise<JsonRPCR
             return rpcError(request.id, -32601, 'Tool not found');
     }
 }
-
-async function handleGetProfile(request: JsonRPCRequest, args: any): Promise<JsonRPCResponse> {
-    const { did } = args;
-    
-    if (!did) {
-        return rpcError(request.id, -32602, 'Invalid params: did is required');
-    }
-
-    // Mock profile data - in a real implementation, this would fetch from a database
-    const profile = {
-        did,
-        name: 'Agent Profile',
-        description: 'An agentic profile',
-        created: new Date().toISOString(),
-        updated: new Date().toISOString()
-    };
-
-        return rpcContent(request.id, profile);
-}
-
-async function handleUpdateProfile(request: JsonRPCRequest, args: any): Promise<JsonRPCResponse> {
-    const { did, profile } = args;
-    
-    if (!did || !profile) {
-        return rpcError(request.id, -32602, 'Invalid params: did and profile are required');
-    }
-
-    // Mock update - in a real implementation, this would update a database
-    const updatedProfile = {
-        ...profile,
-        did,
-        updated: new Date().toISOString()
-    };
-
-    return rpcContent(request.id, `Profile updated successfully: ${JSON.stringify(updatedProfile, null, 2)}`);
-} 
 
 export async function handleLocationUpdate(request: JsonRPCRequest, args: any): Promise<JsonRPCResponse> {
     const { coords } = args;
