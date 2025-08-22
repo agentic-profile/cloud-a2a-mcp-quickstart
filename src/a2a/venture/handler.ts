@@ -1,80 +1,50 @@
-import { TaskContext, TaskYieldUpdate } from '../../types';
+import { v4 as uuidv4 } from 'uuid';
+import {
+    AgentExecutor,
+    RequestContext,
+    ExecutionEventBus,
+    AgentExecutionEvent,
+} from "@a2a-js/sdk/server";
 
-// Core Venture task handler
-export async function* handleVentureTasks(context: TaskContext): AsyncGenerator<TaskYieldUpdate, void, unknown> {
-    const { method } = context;
-    
-    switch (method) {
-        case 'tasks/send':
-            // Simulate a multi-step venture funding process
-            yield {
-                taskId: `venture_task_${Date.now()}`,
-                state: 'running',
-                message: 'Processing your venture funding request...',
-                progress: 25,
+
+export class VentureExecutor implements AgentExecutor {  
+    public cancelTask = async (
+        taskId: string,
+        _eventBus: ExecutionEventBus
+    ): Promise<void> => {
+        console.log(`VentureExecutor:cancelTask is not supported: ${taskId}`);
+    };
+  
+    async execute(
+        requestContext: RequestContext,
+        eventBus: ExecutionEventBus
+    ): Promise<void> {
+        const { taskId, contextId /*, userMessage */ } = requestContext;
+
+        const finalUpdate: AgentExecutionEvent = {
+            kind: "status-update",
+            taskId,
+            contextId,
+            status: {
+                state: "completed",
+                message: {
+                    kind: "message",
+                    role: "agent",
+                    messageId: uuidv4(),
+                    taskId,
+                    contextId,
+                    parts: [
+                        {
+                            kind: "text",
+                            text: "Hello, world!"
+                        }
+                    ],
+                },
                 timestamp: new Date().toISOString(),
-                metadata: {
-                    service: 'venture-service',
-                    operation: 'tasks/send',
-                    step: 'initializing'
-                }
-            };
-            
-            // Simulate some processing time
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            yield {
-                taskId: `venture_task_${Date.now()}`,
-                state: 'running',
-                message: 'Reviewing your venture proposal...',
-                progress: 50,
-                timestamp: new Date().toISOString(),
-                metadata: {
-                    service: 'venture-service',
-                    operation: 'tasks/send',
-                    step: 'reviewing'
-                }
-            };
-            
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            yield {
-                taskId: `venture_task_${Date.now()}`,
-                state: 'running',
-                message: 'Preparing funding details...',
-                progress: 75,
-                timestamp: new Date().toISOString(),
-                metadata: {
-                    service: 'venture-service',
-                    operation: 'tasks/send',
-                    step: 'preparing'
-                }
-            };
-            
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Final completion
-            yield {
-                taskId: `venture_task_${Date.now()}`,
-                state: 'completed',
-                message: 'Fund me! Here are my terms...',
-                progress: 100,
-                timestamp: new Date().toISOString(),
-                metadata: {
-                    service: 'venture-service',
-                    operation: 'tasks/send',
-                    status: 'success',
-                    funding: {
-                        amount: '$2M Series A',
-                        equity: '15%',
-                        terms: 'Standard Series A terms',
-                        timeline: '30 days'
-                    }
-                }
-            };
-            break;
-                        
-        default:
-            throw new Error(`Method not supported: ${method}`);
+            },
+            final: true,
+        };
+        eventBus.publish(finalUpdate);
+        eventBus.finished();
     }
 }
