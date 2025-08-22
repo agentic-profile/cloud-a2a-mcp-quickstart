@@ -1,0 +1,12 @@
+{
+  "id": "test-task-1",
+  "method": "tasks/send",
+  "params": {
+    "position": "Senior Software Engineer",
+    "experience": "5+ years",
+    "skills": ["TypeScript", "Node.js", "AWS"]
+  },
+  "userId": "user-123",
+  "sessionId": "sess-456",
+  "includeAllUpdates": true
+}

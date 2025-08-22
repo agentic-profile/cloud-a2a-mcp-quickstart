@@ -1,11 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { JsonRPCRequest, JsonRPCResponse } from './types';
 import { handleInitialize, handleToolsList, handleToolsCall, handleLocationUpdate, handleLocationQuery } from './mcp/location/methods';
-import { handleVentureJsonRPC } from './a2a/venture/handler';
-import { handleVCJsonRPC } from './a2a/vc/handler';
+import { handleVentureTasks } from './a2a/venture/handler';
+import { handleVCTasks } from './a2a/vc/handler';
+import { handleHireMeTasks } from './a2a/hireme/handler';
 
 // Create Express app
-import express from 'express';
+import { withDefaultMiddleware, handleA2ARequest } from './a2a/utils';
 const app = express();
 
 // Middleware
@@ -20,82 +21,36 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
+// A2A setup
+const handleHireMeTasksWithMiddleware = withDefaultMiddleware(handleHireMeTasks);
+const handleVentureTasksWithMiddleware = withDefaultMiddleware(handleVentureTasks);
+const handleVCTasksWithMiddleware = withDefaultMiddleware(handleVCTasks);
+
 // Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
+const started = new Date().toISOString();
+app.get('/status', (_req: Request, res: Response) => {
     res.json({
         status: 'healthy',
+        started,
         timestamp: new Date().toISOString(),
         service: 'agentic-profile-mcp'
     });
 });
 
-// Main JSON-RPC endpoint
-app.post('/', async (req: Request, res: Response) => {
-    try {
-        console.log('🔍 Handling JSON-RPC request...');
-        const body = req.body;
-        console.log('🔍 Request body:', JSON.stringify(body, null, 2));
-        
-        const response = await handleJsonRPCRequest(body);
-        res.json(response);
-    } catch (error) {
-        console.error('Error processing request:', error);
-        res.status(500).json({
-            jsonrpc: '2.0',
-            id: 'error',
-            error: {
-                code: -32603,
-                message: 'Internal error',
-                data: error instanceof Error ? error.message : 'Unknown error'
-            }
-        });
-    }
+
+// A2A HireMe TaskHandler endpoint (new)
+app.post('/a2a/hireme', async (req: Request, res: Response) => {
+    await handleA2ARequest( req, res, handleHireMeTasksWithMiddleware );
 });
 
-// A2A Venture endpoint
-app.post('/venture', async (req: Request, res: Response) => {
-    try {
-        console.log('🚀 Handling A2A venture JSON-RPC request...');
-        const body = req.body;
-        console.log('🚀 Request body:', JSON.stringify(body, null, 2));
-        
-        const response = await handleVentureJsonRPC(body);
-        res.json(response);
-    } catch (error) {
-        console.error('Error processing venture request:', error);
-        res.status(500).json({
-            jsonrpc: '2.0',
-            id: 'error',
-            error: {
-                code: -32603,
-                message: 'Internal error',
-                data: error instanceof Error ? error.message : 'Unknown error'
-            }
-        });
-    }
+// A2A Venture TaskHandler endpoint (new)
+app.post('/a2a/venture', async (req: Request, res: Response) => {
+    await handleA2ARequest(req, res, handleVentureTasksWithMiddleware);
 });
 
-// A2A VC (Venture Capital) endpoint
-app.post('/vc', async (req: Request, res: Response) => {
-    try {
-        console.log('💰 Handling A2A VC JSON-RPC request...');
-        const body = req.body;
-        console.log('💰 Request body:', JSON.stringify(body, null, 2));
-        
-        const response = await handleVCJsonRPC(body);
-        res.json(response);
-    } catch (error) {
-        console.error('Error processing VC request:', error);
-        res.status(500).json({
-            jsonrpc: '2.0',
-            id: 'error',
-            error: {
-                code: -32603,
-                message: 'Internal error',
-                data: error instanceof Error ? error.message : 'Unknown error'
-            }
-        });
-    }
+// A2A VC TaskHandler endpoint (new)
+app.post('/a2a/vc', async (req: Request, res: Response) => {
+    await handleA2ARequest(req, res, handleVCTasksWithMiddleware);
 });
 
 // Handle OPTIONS for CORS preflight

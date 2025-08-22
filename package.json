@@ -24,7 +24,9 @@
     "test:venture-create": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-venture-create.json --template mcp-service.yaml",
     "test:vc": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-vc-initialize.json --template mcp-service.yaml",
     "test:vc-task-send": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-vc-task-send.json --template mcp-service.yaml",
-    "test:all": "npm run test:local && npm run test:tools-list && npm run test:get-profile && npm run test:venture && npm run test:venture-create && npm run test:vc && npm run test:vc-task-send",
+    "test:hireme": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-hireme-task-send.json --template mcp-service.yaml",
+    "test:hireme-taskhandler": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-hireme-taskhandler.json --template mcp-service.yaml",
+    "test:all": "npm run test:local && npm run test:tools-list && npm run test:get-profile && npm run test:venture && npm run test:venture-create && npm run test:vc && npm run test:vc-task-send && npm run test:hireme && npm run test:hireme-taskhandler",
     "foundation:up": "aws cloudformation deploy --template-file foundation.yaml --stack-name agentic-foundation-dev --parameter-overrides Environment=dev --capabilities CAPABILITY_IAM",
     "foundation:up:prod": "aws cloudformation deploy --template-file foundation.yaml --stack-name agentic-foundation-prod --parameter-overrides Environment=prod --capabilities CAPABILITY_IAM",
     "foundation:down": "aws cloudformation delete-stack --stack-name agentic-foundation-dev",
@@ -52,7 +54,7 @@
     "@codegenie/serverless-express": "^4.17.0",
     "@modelcontextprotocol/sdk": "^1.17.3",
     "dotenv": "^16.3.1",
-    "express": "^4.21.2",
+    "express": "^5.1.0",
     "ioredis": "^5.6.1",
     "redis": "^5.7.0"
   },
@@ -65,5 +67,8 @@
     "ts-jest": "^29.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.0.0"
+  },
+  "overrides": {
+    "express": "^5.1.0"
   }
 }

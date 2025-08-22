@@ -104,6 +104,110 @@ Updates an agentic profile.
 - `did` (string, required): The DID of the profile to update
 - `profile` (object, required): The profile data to update
 
+## A2A TaskHandler Pattern
+
+The service now supports an advanced A2A TaskHandler pattern using higher-order components (HOCs) for enhanced task management and monitoring.
+
+### TaskHandler Architecture
+
+The TaskHandler pattern provides:
+- **AsyncGenerator-based task execution** with progress updates
+- **Higher-order component middleware** for cross-cutting concerns
+- **Real-time task state tracking** with detailed metadata
+- **Composable middleware** for logging, timing, error handling, and progress tracking
+
+### Available HOCs
+
+- **`withLogging`**: Adds comprehensive logging to task execution
+- **`withTiming`**: Measures and logs task execution time
+- **`withErrorHandling`**: Provides standardized error handling and reporting
+- **`withProgress`**: Adds progress tracking with percentage updates
+- **`withDefaultMiddleware`**: Combines all HOCs for production use
+
+### Example Usage
+
+```typescript
+// Core task handler
+async function* handleHireMeTask(context: TaskContext): AsyncGenerator<TaskYieldUpdate, void, unknown> {
+    yield {
+        taskId: `task_${Date.now()}`,
+        state: 'running',
+        message: 'Processing request...',
+        progress: 25,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Task logic here...
+    
+    yield {
+        taskId: `task_${Date.now()}`,
+        state: 'completed',
+        message: 'Task completed successfully',
+        progress: 100,
+        timestamp: new Date().toISOString()
+    };
+}
+
+// Apply HOC middleware
+export const handleHireMeTaskWithMiddleware = withDefaultMiddleware(handleHireMeTask);
+```
+
+### TaskHandler Endpoints
+
+#### `/hireme/task` - HireMe TaskHandler
+
+**Request:**
+```json
+{
+  "id": "task-1",
+  "method": "tasks/send",
+  "params": {
+    "position": "Senior Software Engineer",
+    "experience": "5+ years"
+  },
+  "userId": "user-123",
+  "includeAllUpdates": true
+}
+```
+
+**Response:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "task-1",
+  "result": {
+    "taskId": "hireme_task_1234567890",
+    "state": "completed",
+    "message": "I accept! Here are my terms...",
+    "progress": 100,
+    "timestamp": "2025-01-15T10:30:00.000Z",
+    "metadata": {
+      "service": "hireme-service",
+      "operation": "tasks/send",
+      "status": "success",
+      "offer": {
+        "position": "Senior Software Engineer",
+        "salary": "Competitive",
+        "benefits": ["Health", "Dental", "Vision", "401k"]
+      }
+    },
+    "allUpdates": [
+      // Array of all task updates during execution
+    ]
+  }
+}
+```
+
+### Testing TaskHandler
+
+```bash
+# Test the new TaskHandler endpoint
+npm run test:hireme-taskhandler
+
+# Test all endpoints including TaskHandler
+npm run test:all
+```
+
 ## Project Structure
 
 ```
