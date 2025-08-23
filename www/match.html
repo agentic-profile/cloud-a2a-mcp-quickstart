@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Matching - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏢 Business Matching</h1>
+            <p>Test business matching and management services</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > Business Matching
+        </nav>
+
+        <main>
+            <section class="business-testing">
+                <h2>🏢 Business Matching</h2>
+                <div class="business-inputs">
+                    <div class="input-group">
+                        <label for="businessName">Business Name:</label>
+                        <input type="text" id="businessName" value="Joe's Pizza" />
+                    </div>
+                    <div class="input-group">
+                        <label for="businessDescription">Description:</label>
+                        <input type="text" id="businessDescription" value="Best pizza in town" />
+                    </div>
+                    <div class="input-group">
+                        <label for="businessCategory">Category:</label>
+                        <select id="businessCategory">
+                            <option value="restaurant">Restaurant</option>
+                            <option value="retail">Retail</option>
+                            <option value="service">Service</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="entertainment">Entertainment</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="businessLatitude">Latitude:</label>
+                        <input type="number" id="businessLatitude" value="40.7128" step="any" />
+                    </div>
+                    <div class="input-group">
+                        <label for="businessLongitude">Longitude:</label>
+                        <input type="number" id="businessLongitude" value="-74.0060" step="any" />
+                    </div>
+                    <div class="input-group">
+                        <label for="businessAddress">Address:</label>
+                        <input type="text" id="businessAddress" value="123 Main St, New York, NY" />
+                    </div>
+                </div>
+                <div class="business-buttons">
+                    <button onclick="testBusinessAdd()">Test Business Add</button>
+                    <button onclick="testBusinessFind()">Test Business Find</button>
+                </div>
+                
+                <div id="results" class="results"></div>
+            </section>
+
+
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="match.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Endpoints - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Available Endpoints</h1>
+            <p>Complete list of all API endpoints and their descriptions</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > Available Endpoints
+        </nav>
+
+        <main>
+            <section class="endpoints">
+                <div class="endpoint-group">
+                    <h3>Health Check</h3>
+                    <div class="endpoint">
+                        <span class="method">GET</span>
+                        <span class="path">/status</span>
+                        <span class="description">Service health status</span>
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>MCP Protocol</h3>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/mcp/location</span>
+                        <span class="description">Location management</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/mcp/match</span>
+                        <span class="description">Business matching</span>
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>A2A TaskHandlers</h3>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/hireme</span>
+                        <span class="description">HireMe task operations</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/venture</span>
+                        <span class="description">Venture management</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/a2a/vc</span>
+                        <span class="description">VC operations</span>
+                    </div>
+                </div>
+            </section>
+
+
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+</body>
+</html>

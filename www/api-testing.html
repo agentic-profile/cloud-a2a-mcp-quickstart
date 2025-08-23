@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic API Testing - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Basic API Testing</h1>
+            <p>Test core API functionality including health checks and A2A endpoints</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > Basic API Testing
+        </nav>
+
+        <main>
+            <section class="testing">
+                <h2>🧪 Test the API</h2>
+                <div class="test-buttons">
+                    <button onclick="testHealth()">Test Health Check</button>
+                    <button onclick="testHireMe()">Test HireMe A2A</button>
+                </div>
+                
+                <div class="health-results" id="healthResults"></div>
+            </section>
+
+
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="api-testing.js"></script>
+</body>
+</html>

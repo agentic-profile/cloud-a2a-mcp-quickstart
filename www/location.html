@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📍 Location</h1>
+            <p>Test location management and geolocation services</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > Location
+        </nav>
+
+        <main>
+            <section class="location-testing">
+                <h2>📍 Location</h2>
+                <div class="location-inputs">
+                    <div class="input-group">
+                        <label for="latitude">Latitude:</label>
+                        <input type="number" id="latitude" value="40.7128" step="any" />
+                    </div>
+                    <div class="input-group">
+                        <label for="longitude">Longitude:</label>
+                        <input type="number" id="longitude" value="-74.0060" step="any" />
+                    </div>
+                </div>
+                <div class="location-buttons">
+                    <button onclick="testLocationUpdate()">Test Location Update</button>
+                    <button onclick="testLocationQuery()">Test Location Query</button>
+                </div>
+                
+                <div id="results" class="results"></div>
+            </section>
+
+
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="location.js"></script>
+</body>
+</html>
