@@ -30,8 +30,13 @@
                     <h3>MCP Protocol</h3>
                     <div class="endpoint">
                         <span class="method">POST</span>
-                        <span class="path">/</span>
-                        <span class="description">JSON-RPC 2.0 endpoint</span>
+                        <span class="path">/mcp/location</span>
+                        <span class="description">Location management</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method">POST</span>
+                        <span class="path">/mcp/match</span>
+                        <span class="description">Business matching</span>
                     </div>
                 </div>
 
@@ -59,9 +64,69 @@
                 <h2>🧪 Test the API</h2>
                 <div class="test-buttons">
                     <button onclick="testHealth()">Test Health Check</button>
-                    <button onclick="testInitialize()">Test MCP Initialize</button>
                     <button onclick="testHireMe()">Test HireMe A2A</button>
                 </div>
+                
+                <div class="health-results" id="healthResults"></div>
+                
+                <div class="location-testing">
+                    <h3>📍 Location Testing</h3>
+                    <div class="location-inputs">
+                        <div class="input-group">
+                            <label for="latitude">Latitude:</label>
+                            <input type="number" id="latitude" value="40.7128" step="any" />
+                        </div>
+                        <div class="input-group">
+                            <label for="longitude">Longitude:</label>
+                            <input type="number" id="longitude" value="-74.0060" step="any" />
+                        </div>
+                    </div>
+                    <div class="location-buttons">
+                        <button onclick="testLocationUpdate()">Test Location Update</button>
+                        <button onclick="testLocationQuery()">Test Location Query</button>
+                    </div>
+                </div>
+                
+                <div class="business-testing">
+                    <h3>🏢 Business Testing</h3>
+                    <div class="business-inputs">
+                        <div class="input-group">
+                            <label for="businessName">Business Name:</label>
+                            <input type="text" id="businessName" value="Joe's Pizza" />
+                        </div>
+                        <div class="input-group">
+                            <label for="businessDescription">Description:</label>
+                            <input type="text" id="businessDescription" value="Best pizza in town" />
+                        </div>
+                        <div class="input-group">
+                            <label for="businessCategory">Category:</label>
+                            <select id="businessCategory">
+                                <option value="restaurant">Restaurant</option>
+                                <option value="retail">Retail</option>
+                                <option value="service">Service</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="entertainment">Entertainment</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="businessLatitude">Latitude:</label>
+                            <input type="number" id="businessLatitude" value="40.7128" step="any" />
+                        </div>
+                        <div class="input-group">
+                            <label for="businessLongitude">Longitude:</label>
+                            <input type="number" id="businessLongitude" value="-74.0060" step="any" />
+                        </div>
+                        <div class="input-group">
+                            <label for="businessAddress">Address:</label>
+                            <input type="text" id="businessAddress" value="123 Main St, New York, NY" />
+                        </div>
+                    </div>
+                    <div class="business-buttons">
+                        <button onclick="testBusinessAdd()">Test Business Add</button>
+                        <button onclick="testBusinessFind()">Test Business Find</button>
+                    </div>
+                </div>
+                
                 <div id="results" class="results"></div>
             </section>
         </main>

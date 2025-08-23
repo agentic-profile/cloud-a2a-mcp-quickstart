@@ -21,7 +21,7 @@ export type JsonRpcResponse = {
 )
 
 // Create RPC response with direct result
-export function rpcResult(id: string | number, result: any): JsonRpcResponse {
+export function jrpcResult(id: string | number, result: any): JsonRpcResponse {
     return {
         jsonrpc: '2.0',
         id: id as string | number,
@@ -30,7 +30,7 @@ export function rpcResult(id: string | number, result: any): JsonRpcResponse {
 }
 
 // Create RPC response with error
-export function rpcError(id: string | number, code: number, message: string): JsonRpcResponse {
+export function jrpcError(id: string | number, code: number, message: string): JsonRpcResponse {
     return {
         jsonrpc: '2.0',
         id: id as string | number,

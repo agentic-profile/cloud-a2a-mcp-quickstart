@@ -1,41 +1,19 @@
 // API testing functions
 async function testHealth() {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.textContent = 'Testing health check...';
+    const healthResultsDiv = document.getElementById('healthResults');
+    healthResultsDiv.textContent = 'Testing health check...';
     
     try {
         const response = await fetch('/status');
         const data = await response.json();
         
-        resultsDiv.textContent = `Health Check Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+        healthResultsDiv.textContent = `Health Check Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
     } catch (error) {
-        resultsDiv.textContent = `Error: ${error.message}`;
+        healthResultsDiv.textContent = `Error: ${error.message}`;
     }
 }
 
-async function testInitialize() {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.textContent = 'Testing MCP initialize...';
-    
-    try {
-        const response = await fetch('/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'initialize',
-            }),
-        });
-        
-        const data = await response.json();
-        resultsDiv.textContent = `MCP Initialize Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
-    } catch (error) {
-        resultsDiv.textContent = `Error: ${error.message}`;
-    }
-}
+
 
 async function testHireMe() {
     const resultsDiv = document.getElementById('results');
@@ -63,6 +41,175 @@ async function testHireMe() {
         resultsDiv.textContent = `HireMe A2A Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
     } catch (error) {
         resultsDiv.textContent = `Error: ${error.message}`;
+    }
+}
+
+async function testLocationUpdate() {
+    const resultsDiv = document.getElementById('results');
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+    
+    if (!latitude || !longitude) {
+        resultsDiv.textContent = 'Error: Please enter both latitude and longitude values.';
+        return;
+    }
+    
+    resultsDiv.textContent = 'Testing Location Update...';
+    
+    try {
+        const response = await fetch('/mcp/location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'tools/call',
+                params: {
+                    name: 'update',
+                    arguments: {
+                        coords: {
+                            latitude: parseFloat(latitude),
+                            longitude: parseFloat(longitude)
+                        }
+                    }
+                },
+            }),
+        });
+        
+        const data = await response.json();
+        resultsDiv.textContent = `Location Update Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+        showSuccess('Location update test completed successfully!');
+    } catch (error) {
+        resultsDiv.textContent = `Error: ${error.message}`;
+        showError('Location update test failed!');
+    }
+}
+
+async function testLocationQuery() {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.textContent = 'Testing Location Query...';
+    
+    try {
+        const response = await fetch('/mcp/location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'tools/call',
+                params: {
+                    name: 'query',
+                    arguments: {}
+                },
+            }),
+        });
+        
+        const data = await response.json();
+        resultsDiv.textContent = `Location Query Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+        showSuccess('Location query test completed successfully!');
+    } catch (error) {
+        resultsDiv.textContent = `Error: ${error.message}`;
+        showError('Location query test failed!');
+    }
+}
+
+async function testBusinessAdd() {
+    const resultsDiv = document.getElementById('results');
+    const businessName = document.getElementById('businessName').value;
+    const businessDescription = document.getElementById('businessDescription').value;
+    const businessCategory = document.getElementById('businessCategory').value;
+    const businessLatitude = document.getElementById('businessLatitude').value;
+    const businessLongitude = document.getElementById('businessLongitude').value;
+    const businessAddress = document.getElementById('businessAddress').value;
+    
+    if (!businessName || !businessDescription || !businessCategory || !businessLatitude || !businessLongitude || !businessAddress) {
+        resultsDiv.textContent = 'Error: Please fill in all business fields.';
+        return;
+    }
+    
+    resultsDiv.textContent = 'Testing Business Add...';
+    
+    try {
+        const response = await fetch('/mcp/match', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'tools/call',
+                params: {
+                    name: 'add',
+                    arguments: {
+                        business: {
+                            name: businessName,
+                            description: businessDescription,
+                            category: businessCategory,
+                            location: {
+                                latitude: parseFloat(businessLatitude),
+                                longitude: parseFloat(businessLongitude),
+                                address: businessAddress
+                            }
+                        }
+                    }
+                },
+            }),
+        });
+        
+        const data = await response.json();
+        resultsDiv.textContent = `Business Add Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+        showSuccess('Business add test completed successfully!');
+    } catch (error) {
+        resultsDiv.textContent = `Error: ${error.message}`;
+        showError('Business add test failed!');
+    }
+}
+
+async function testBusinessFind() {
+    const resultsDiv = document.getElementById('results');
+    const businessCategory = document.getElementById('businessCategory').value;
+    const businessLatitude = document.getElementById('businessLatitude').value;
+    const businessLongitude = document.getElementById('businessLongitude').value;
+    
+    resultsDiv.textContent = 'Testing Business Find...';
+    
+    try {
+        const response = await fetch('/mcp/match', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'tools/call',
+                params: {
+                    name: 'find',
+                    arguments: {
+                        criteria: {
+                            category: businessCategory,
+                            location: {
+                                latitude: parseFloat(businessLatitude),
+                                longitude: parseFloat(businessLongitude),
+                                radius: 10 // 10km radius
+                            }
+                        }
+                    }
+                },
+            }),
+        });
+        
+        const data = await response.json();
+        resultsDiv.textContent = `Business Find Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+        showSuccess('Business find test completed successfully!');
+    } catch (error) {
+        resultsDiv.textContent = `Error: ${error.message}`;
+        showError('Business find test failed!');
     }
 }
 
@@ -96,11 +243,23 @@ document.addEventListener('keydown', function(event) {
                 break;
             case '2':
                 event.preventDefault();
-                testInitialize();
-                break;
-            case '3':
-                event.preventDefault();
                 testHireMe();
+                break;
+            case '4':
+                event.preventDefault();
+                testLocationUpdate();
+                break;
+            case '5':
+                event.preventDefault();
+                testLocationQuery();
+                break;
+            case '6':
+                event.preventDefault();
+                testBusinessAdd();
+                break;
+            case '7':
+                event.preventDefault();
+                testBusinessFind();
                 break;
         }
     }

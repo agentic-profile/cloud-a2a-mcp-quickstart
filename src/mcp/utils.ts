@@ -1,6 +1,11 @@
-import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
+import {
+    ContentBlock,
+    JSONRPCRequest,
+    JSONRPCResponse,
+    JSONRPCError
+} from '@modelcontextprotocol/sdk/types.js';
 import { Request, Response } from 'express';
-import { rpcError, describeJsonRpcRequestError } from '../rpc';
+import { jrpcError, describeJsonRpcRequestError } from '../json-rpc';
 
 export type MCPMethodHandler = (rpcRequest: JSONRPCRequest) => Promise<JSONRPCResponse | JSONRPCError | null>;
 
@@ -12,7 +17,7 @@ export async function handleMCPMethod(req: Request, res: Response, methodHandler
         // Validate JSON-RPC request
         const requestError = describeJsonRpcRequestError( rpcRequest );
         if ( requestError ) {
-            res.status(400).json( rpcError( id || 'unknown', -32600, requestError ) );
+            res.status(400).json( jrpcError( id || 'unknown', -32600, requestError ) );
             return;
         }
 
@@ -20,23 +25,15 @@ export async function handleMCPMethod(req: Request, res: Response, methodHandler
         if( result ) {
             res.json(result); // Return error response as-is
         } else {
-            res.status(400).json( rpcError( id!, -32601, `Method ${method} not found` ) );
+            res.status(400).json( jrpcError( id!, -32601, `Method ${method} not found` ) );
         }
     } catch (error) {
-        res.status(500).json( rpcError( req.body.id || 'unknown', -32603, 'Internal error' ) );
+        res.status(500).json( jrpcError( req.body.id || 'unknown', -32603, 'Internal error' ) );
     }
 }
 
 // Create RPC response with content (MCP standard format)
-export function rpcContent(id: string | number, content: string | any): JSONRPCResponse {
-    if( typeof content === 'string' )
-        content = [
-            {
-                type: 'text',
-                text: content
-            }
-        ];
-
+export function mcpContentResponse(id: string | number, content: ContentBlock[]): JSONRPCResponse {
     return {
         jsonrpc: '2.0',
         id,
@@ -46,3 +43,7 @@ export function rpcContent(id: string | number, content: string | any): JSONRPCR
     };
 }
 
+export function mcpTextContentResponse( id: string | number, text: string ): JSONRPCResponse {
+    const content = [{ type: "text" as const, text }];
+    return mcpContentResponse( id, content );
+}

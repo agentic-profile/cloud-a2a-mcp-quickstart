@@ -7,8 +7,9 @@ import { VCExecutor } from './a2a/vc/handler';
 import { HireMeExecutor } from './a2a/hireme/handler';
 import { handleA2ARequest } from './a2a/utils';
 
-// MCP handler
+// MCP handlers
 import locationRouter from "./mcp/location/router";
+import matchRouter from "./mcp/match/router";
 
 // Create Express app
 const app = express();
@@ -23,6 +24,10 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     next();
+});
+
+app.options(/^\/(.+)$/, (_req: Request, res: Response) => {
+    res.sendStatus(200);
 });
 
 // Health check endpoint
@@ -53,24 +58,7 @@ app.post('/a2a/vc', async (req: Request, res: Response) => {
 
 // MCP handlers
 app.use('/mcp/location', locationRouter);
-
-// Handle OPTIONS for CORS preflight - Express 5.x compatible
-// Use specific routes instead of wildcards
-app.options('/a2a/hireme', (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
-app.options('/a2a/venture', (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
-app.options('/a2a/vc', (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
-app.options('/mcp/location', (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
-app.options('/', (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
+app.use('/mcp/match', matchRouter);
 
 // Serve the web interface for non-API routes
 app.get('/', (_req: Request, res: Response) => {
@@ -93,18 +81,5 @@ app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
         }
     });
 });
-
-// 404 handler - Express 5.x compatible
-// Remove wildcard route and let Express handle 404s naturally
-// app.use('/*', (_req: Request, res: Response) => {
-//     res.status(404).json({
-//         jsonrpc: '2.0',
-//         id: 'not-found',
-//         error: {
-//             code: -32601,
-//             message: 'Method not found'
-//         }
-//     });
-// });
 
 export { app }; 
