@@ -4,21 +4,22 @@ import {
     ExecutionEventBus,
     AgentExecutionEvent
 } from '@a2a-js/sdk/server';
-import { JSONRPCRequest, MessageSendParams } from '@a2a-js/sdk';
+import { JSONRPCRequest, MessageSendParams, TaskStatus } from '@a2a-js/sdk';
 import { Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function handleA2ARequest( req: Request, res: Response, executor: AgentExecutor ) {
     try {
         console.log('💼 Handling A2A request with executor...');
         const rpcReq = req.body as JSONRPCRequest;
-        const { contextId, includeAllUpdates = false } = req.body
-        console.log('💼 Request body:', JSON.stringify(rpcReq, null, 2));
+        const { contextId = uuidv4(), includeAllUpdates = false } = req.body
+        console.log('💼 Request body:', JSON.stringify(rpcReq, null, 4));
         
         // Create request context from request body
-        const { /*jsonrpc, method, */ params, id } = rpcReq;
+        const { params, id } = rpcReq;
         const sendParams = params as unknown as MessageSendParams;
         const requestContext: RequestContext = {
-            taskId: `${id}`,
+            taskId: id ? `${id}` : '', // RequestContext doesn't support null/undefined, even though A2A allows it
             contextId,
             userMessage: sendParams.message
         };
@@ -51,27 +52,31 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
         await executor.execute(requestContext, eventBus);
         
         // Find the final update
-        const finalUpdate = updates.find(update => update.kind === "status-update" && update.status.state === "completed") || updates[updates.length - 1];
-        
-        if (!finalUpdate) {
+        let result;
+        if( updates.length == 0 ) {
             throw new Error('No task updates received from executor');
+        } else if( updates.length == 1 && updates[0].kind === "message" ) {
+            result = updates[0];
+        } else {
+            const finalUpdate = updates.find(update => update.kind === "status-update" && update.status.state === "completed") || updates[updates.length - 1];
+            if( !finalUpdate ) {
+                throw new Error('No task updates received from executor');
+            }
+
+            const status: TaskStatus | undefined = (finalUpdate as any).status as TaskStatus;
+
+            result = {
+                taskId: id,
+                ...finalUpdate,
+                final: status?.state === "completed",
+                ...(includeAllUpdates && { allUpdates: updates })
+            };
         }
 
-        // Return the final update (or all updates if requested)
-        //const includeAllUpdates = req.body.includeAllUpdates === true;
-        
         res.json({
             jsonrpc: '2.0',
             id,
-            result: {
-                taskId: id,
-                contextId: finalUpdate.contextId,
-                //state: finalUpdate.status?.state,
-                //message: finalUpdate.status?.message,
-                //timestamp: finalUpdate.status?.timestamp,
-                //final: finalUpdate.status?.state === "completed",
-                ...(includeAllUpdates && { allUpdates: updates })
-            }
+            result
         });
         
     } catch (error) {

@@ -56,6 +56,14 @@ document.addEventListener('keydown', function(event) {
                 event.preventDefault();
                 window.location.href = 'match.html';
                 break;
+            case '5':
+                event.preventDefault();
+                window.location.href = 'venture.html';
+                break;
+            case '6':
+                event.preventDefault();
+                window.location.href = 'chat.html';
+                break;
         }
     }
 });

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generic Chat - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>A2A Chat</h1>
+            <p>Test any A2A endpoint with chat simulation</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > A2A Chat
+        </nav>
+
+        <main>
+            <section class="generic-chat">
+                <h2>💬 A2A Chat Interface</h2>
+                <div class="endpoint-row">
+                    <label for="targetUrl"><strong>Agent URL:</strong></label>
+                    <span id="targetUrl" class="url-display">Loading...</span>
+                    <button onclick="changeEndpoint()" class="change-endpoint-button">Change Endpoint</button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <textarea id="messageInput" placeholder="Type your message here..." rows="3"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button onclick="sendMessage()" class="send-button">Send Message</button>
+                            <button onclick="clearChat()" class="clear-button">Clear Chat</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="request-response-display">
+                    <h3>Request & Response Details</h3>
+                    
+                    <div class="json-section">
+                        <h4>Sent A2A Request:</h4>
+                        <pre id="sentRequest" class="json-display">No request sent yet</pre>
+                    </div>
+                    
+                    <div class="json-section">
+                        <h4>A2A Response:</h4>
+                        <pre id="receivedResponse" class="json-display">No response received yet</pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venture - Agentic Profile MCP Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Venture</h1>
+            <p>Test venture management A2A endpoint with chat simulation</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> > Venture
+        </nav>
+
+        <main>
+            <section class="venture-chat">
+                <h2>🚀 Venture Chat</h2>
+                
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message system">
+                            <div class="message-content">
+                                <strong>System:</strong> Welcome to the Venture chat! Send a message to test the A2A venture endpoint.
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="messageInput">Message:</label>
+                                <textarea id="messageInput" placeholder="Type your message here..." rows="3"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button onclick="sendMessage()" class="send-button">Send Message</button>
+                            <button onclick="clearChat()" class="clear-button">Clear Chat</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Express.js and TypeScript</p>
+        </footer>
+    </div>
+
+    <script src="venture.js"></script>
+</body>
+</html>
