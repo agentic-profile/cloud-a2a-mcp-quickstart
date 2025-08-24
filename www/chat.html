@@ -14,7 +14,7 @@
         </header>
 
         <nav class="breadcrumb">
-            <a href="index.html">Home</a> > <span id="breadcrumbTitle">A2A Chat</span>
+            <a href="index.html">Home</a><span id="breadcrumbTitle">A2A Chat</span>
         </nav>
 
         <main>
@@ -23,11 +23,6 @@
                     <label for="targetUrl"><strong>Agent URL:</strong></label>
                     <span id="targetUrl" class="url-display">Loading...</span>
                     <button onclick="changeEndpoint()" class="change-endpoint-button">Change Endpoint</button>
-                </div>
-                
-                <div class="request-url-display">
-                    <label><strong>Request will be sent to:</strong></label>
-                    <span id="fullRequestUrl" class="full-url-display">Loading...</span>
                 </div>
                 
                 <div class="chat-container">
@@ -49,15 +44,15 @@
                 </div>
                 
                 <div class="request-response-display">
-                    <h3>Request & Response Details</h3>
-                    
                     <div class="json-section">
-                        <h4>Sent A2A Request:</h4>
+                        <h4>Sent A2A Request to: <span id="requestUrl" class="request-url">Loading...</span></h4>
+                        <div class="request-time">Request sent at: <span id="requestTime">-</span></div>
                         <pre id="sentRequest" class="json-display">No request sent yet</pre>
                     </div>
                     
                     <div class="json-section">
                         <h4>A2A Response:</h4>
+                        <div class="response-time">Response received in: <span id="responseDuration">-</span> seconds</div>
                         <pre id="receivedResponse" class="json-display">No response received yet</pre>
                     </div>
                 </div>

@@ -453,6 +453,26 @@ main {
     font-weight: 600;
 }
 
+.request-url {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--md-success);
+    font-weight: 500;
+}
+
+.request-time, .response-time {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--md-text-hint);
+    font-style: italic;
+}
+
+.request-time span, .response-time span {
+    color: var(--md-text-secondary);
+    font-weight: 500;
+    font-style: normal;
+}
+
 .json-display {
     background: var(--md-bg-primary);
     border: 1px solid var(--md-border);

@@ -1,6 +1,7 @@
 // Generic chat functionality
 let messageCounter = 0;
 let currentEndpoint = '';
+let requestStartTime = null;
 
 function generateMessageId() {
     // Generate a UUID v4 format message ID
@@ -12,38 +13,66 @@ function generateMessageId() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    
     // Get endpoint and title from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const agentUrl = urlParams.get('agentUrl');
     const title = urlParams.get('title');
     
+    console.log('URL Parameters:', { agentUrl, title });
+    console.log('Current URL:', window.location.href);
+    
     // Update page content based on title parameter
     if (title) {
-        // Update page title
-        document.getElementById('pageTitle').textContent = `${title} - Agentic Profile MCP Service`;
-        
-        // Update header
-        document.getElementById('pageHeader').textContent = title;
-        
-        // Update description
-        document.getElementById('pageDescription').textContent = `Test ${title.toLowerCase()} A2A endpoint with chat simulation`;
-        
-        // Update section title
-        document.getElementById('sectionTitle').textContent = `💬 ${title} Chat Interface`;
-        
-        // Update breadcrumb
-        document.getElementById('breadcrumbTitle').textContent = title;
+        try {
+            // Update page title
+            document.getElementById('pageTitle').textContent = `${title} - Agentic Profile MCP Service`;
+            
+            // Update header
+            document.getElementById('pageHeader').textContent = title;
+            
+            // Update description
+            document.getElementById('pageDescription').textContent = `Test ${title.toLowerCase()} A2A endpoint with chat simulation`;
+            
+            // Update breadcrumb
+            document.getElementById('breadcrumbTitle').textContent = title;
+        } catch (error) {
+            console.error('Error updating title elements:', error);
+        }
     }
     
     if (agentUrl) {
         currentEndpoint = agentUrl;
-        document.getElementById('targetUrl').textContent = currentEndpoint;
-        updateFullRequestUrl();
+        console.log('Setting currentEndpoint to:', currentEndpoint);
+        try {
+            const targetUrlElement = document.getElementById('targetUrl');
+            if (targetUrlElement) {
+                targetUrlElement.textContent = currentEndpoint;
+                console.log('Updated targetUrl element to:', currentEndpoint);
+            } else {
+                console.error('targetUrl element not found');
+            }
+            updateRequestUrl();
+        } catch (error) {
+            console.error('Error updating targetUrl:', error);
+        }
     } else {
         // Default endpoint if none specified
         currentEndpoint = '/a2a/hireme';
-        document.getElementById('targetUrl').textContent = currentEndpoint;
-        updateFullRequestUrl();
+        console.log('Using default endpoint:', currentEndpoint);
+        try {
+            const targetUrlElement = document.getElementById('targetUrl');
+            if (targetUrlElement) {
+                targetUrlElement.textContent = currentEndpoint;
+                console.log('Updated targetUrl element to default:', currentEndpoint);
+            } else {
+                console.error('targetUrl element not found');
+            }
+            updateRequestUrl();
+        } catch (error) {
+            console.error('Error updating targetUrl with default:', error);
+        }
     }
     
     // Add enter key support for textarea
@@ -60,8 +89,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function updateFullRequestUrl() {
-    const fullUrl = `${window.location.origin}${currentEndpoint}`;
-    document.getElementById('fullRequestUrl').textContent = fullUrl;
+    try {
+        const fullUrl = `${window.location.origin}${currentEndpoint}`;
+        console.log('Updating full request URL to:', fullUrl);
+        const fullUrlElement = document.getElementById('fullRequestUrl');
+        if (fullUrlElement) {
+            fullUrlElement.textContent = fullUrl;
+            console.log('Successfully updated full request URL');
+        } else {
+            console.error('fullRequestUrl element not found');
+        }
+    } catch (error) {
+        console.error('Error updating full request URL:', error);
+    }
+}
+
+function updateRequestUrl() {
+    try {
+        const fullUrl = `${window.location.origin}${currentEndpoint}`;
+        console.log('Updating request URL to:', fullUrl);
+        const requestUrlElement = document.getElementById('requestUrl');
+        if (requestUrlElement) {
+            requestUrlElement.textContent = fullUrl;
+            console.log('Successfully updated request URL');
+        } else {
+            console.error('requestUrl element not found');
+        }
+    } catch (error) {
+        console.error('Error updating request URL:', error);
+    }
 }
 
 function changeEndpoint() {
@@ -70,7 +126,7 @@ function changeEndpoint() {
     if (newEndpoint && newEndpoint.trim()) {
         currentEndpoint = newEndpoint.trim();
         document.getElementById('targetUrl').textContent = currentEndpoint;
-        updateFullRequestUrl();
+        updateRequestUrl();
         
         // Update URL parameter
         const url = new URL(window.location);
@@ -102,6 +158,13 @@ function sendMessage() {
 
 async function callA2AEndpoint(message) {
     try {
+        // Record request start time
+        requestStartTime = new Date();
+        const requestTimeString = requestStartTime.toLocaleTimeString();
+        
+        // Update request time display
+        document.getElementById('requestTime').textContent = requestTimeString;
+        
         // Show typing indicator
         addTypingIndicator();
         
@@ -142,8 +205,13 @@ async function callA2AEndpoint(message) {
         if (response.ok) {
             const data = await response.json();
             
+            // Calculate response duration
+            const responseEndTime = new Date();
+            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
+            
             // Display the received response
             document.getElementById('receivedResponse').textContent = JSON.stringify(data, null, 4);
+            document.getElementById('responseDuration').textContent = responseDuration;
             
             // Add response to chat
             const text = resolveResponseMessage(data);
@@ -152,12 +220,24 @@ async function callA2AEndpoint(message) {
             const errorText = `Error: ${response.status} - ${response.statusText}`;
             document.getElementById('receivedResponse').textContent = errorText;
             addMessage('agent', errorText, 'error');
+            
+            // Still calculate duration for errors
+            const responseEndTime = new Date();
+            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
+            document.getElementById('responseDuration').textContent = responseDuration;
         }
     } catch (error) {
         removeTypingIndicator();
         const errorText = `Network error: ${error.message}`;
         document.getElementById('receivedResponse').textContent = errorText;
         addMessage('agent', errorText, 'error');
+        
+        // Still calculate duration for network errors
+        if (requestStartTime) {
+            const responseEndTime = new Date();
+            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
+            document.getElementById('responseDuration').textContent = responseDuration;
+        }
     }
 }
 
@@ -228,14 +308,7 @@ function getCurrentTime() {
 
 function clearChat() {
     const chatMessages = document.getElementById('chatMessages');
-    chatMessages.innerHTML = `
-        <div class="message system">
-            <div class="message-content">
-                <strong>System:</strong> Chat cleared. Send a new message to test the A2A endpoint.
-            </div>
-            <div class="message-time">Just now</div>
-        </div>
-    `;
+    chatMessages.innerHTML = '';
     messageCounter = 0;
     
     // Clear request/response display
