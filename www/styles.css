@@ -1,3 +1,51 @@
+/* Google Material Design Color Palette */
+:root {
+    /* Primary Colors */
+    --md-primary: #2196f3;
+    --md-primary-dark: #1976d2;
+    --md-primary-light: #e3f2fd;
+    
+    /* Secondary Colors */
+    --md-secondary: #9c27b0;
+    --md-secondary-dark: #7b1fa2;
+    --md-secondary-light: #f3e5f5;
+    
+    /* Success Colors */
+    --md-success: #4caf50;
+    --md-success-dark: #388e3c;
+    --md-success-light: #e8f5e8;
+    
+    /* Warning Colors */
+    --md-warning: #ff9800;
+    --md-warning-dark: #f57c00;
+    --md-warning-light: #fff3e0;
+    
+    /* Error Colors */
+    --md-error: #f44336;
+    --md-error-dark: #d32f2f;
+    --md-error-light: #ffebee;
+    
+    /* Info Colors */
+    --md-info: #17a2b8;
+    --md-info-dark: #138496;
+    --md-info-light: #e0f2f1;
+    
+    /* Neutral Colors */
+    --md-text-primary: #212121;
+    --md-text-secondary: #424242;
+    --md-text-disabled: #757575;
+    --md-text-hint: #9e9e9e;
+    
+    /* Background Colors */
+    --md-bg-primary: #ffffff;
+    --md-bg-secondary: #fafafa;
+    --md-bg-tertiary: #f5f5f5;
+    
+    /* Border Colors */
+    --md-border: #e0e0e0;
+    --md-border-light: #f0f0f0;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,8 +55,8 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--md-text-secondary);
+    background: linear-gradient(135deg, var(--md-bg-tertiary) 0%, var(--md-bg-primary) 100%);
     min-height: 100vh;
 }
 
@@ -21,22 +69,23 @@ body {
 header {
     text-align: center;
     margin-bottom: 3rem;
-    color: white;
+    color: var(--md-text-primary);
 }
 
 header h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    color: var(--md-text-primary);
+    text-shadow: none;
 }
 
 header p {
     font-size: 1.2rem;
-    opacity: 0.9;
+    color: var(--md-text-secondary);
 }
 
 main {
-    background: white;
+    background: var(--md-bg-primary);
     border-radius: 12px;
     padding: 2rem;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
@@ -48,7 +97,7 @@ main {
 }
 
 .endpoints h2, .welcome h2, .navigation h2, .quick-info h2 {
-    color: #2c3e50;
+    color: var(--md-text-primary);
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
 }
@@ -56,9 +105,9 @@ main {
 .endpoint-group {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: var(--md-bg-secondary);
     border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--md-primary);
 }
 
 .welcome {
@@ -68,7 +117,7 @@ main {
 
 .welcome p {
     font-size: 1.1rem;
-    color: #6c757d;
+    color: var(--md-text-disabled);
     max-width: 800px;
     margin: 0 auto;
     line-height: 1.8;
@@ -86,7 +135,7 @@ main {
     text-decoration: none;
     color: inherit;
     padding: 2rem;
-    background: #f8f9fa;
+    background: var(--md-bg-secondary);
     border-radius: 12px;
     border: 2px solid transparent;
     transition: all 0.3s ease;
@@ -95,8 +144,8 @@ main {
 
 .nav-card:hover {
     transform: translateY(-5px);
-    border-color: #667eea;
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    border-color: var(--md-primary);
+    box-shadow: 0 10px 25px rgba(33, 150, 243, 0.2);
 }
 
 .nav-icon {
@@ -105,13 +154,13 @@ main {
 }
 
 .nav-card h3 {
-    color: #2c3e50;
+    color: var(--md-text-primary);
     margin-bottom: 1rem;
     font-size: 1.4rem;
 }
 
 .nav-card p {
-    color: #6c757d;
+    color: var(--md-text-disabled);
     line-height: 1.6;
 }
 
@@ -124,32 +173,32 @@ main {
 
 .info-card {
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: var(--md-success-light);
     border-radius: 8px;
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--md-success);
     text-align: center;
 }
 
 .info-card h4 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
 }
 
 .info-card div {
-    color: #2c3e50;
+    color: var(--md-text-primary);
     font-size: 1.2rem;
     font-weight: 600;
 }
 
 .breadcrumb {
     margin-bottom: 2rem;
-    color: white;
+    color: var(--md-text-disabled);
     font-size: 1rem;
 }
 
 .breadcrumb a {
-    color: white;
+    color: var(--md-primary);
     text-decoration: none;
     font-weight: 600;
 }
@@ -161,9 +210,9 @@ main {
 .navigation-links {
     margin-top: 3rem;
     padding: 2rem;
-    background: #f8f9fa;
+    background: var(--md-bg-secondary);
     border-radius: 8px;
-    border-left: 4px solid #17a2b8;
+    border-left: 4px solid var(--md-primary);
 }
 
 .nav-buttons {
@@ -176,7 +225,7 @@ main {
 .nav-button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
-    background: #17a2b8;
+    background: var(--md-primary);
     color: white;
     text-decoration: none;
     border-radius: 6px;
@@ -185,9 +234,9 @@ main {
 }
 
 .nav-button:hover {
-    background: #138496;
+    background: var(--md-primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
 /* Venture Chat Styles */
@@ -196,9 +245,9 @@ main {
 }
 
 .chat-container {
-    background: #f8f9fa;
+    background: var(--md-bg-secondary);
     border-radius: 12px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--md-border);
     overflow: hidden;
 }
 
@@ -218,26 +267,26 @@ main {
 
 .message.user {
     margin-left: auto;
-    background: #667eea;
+    background: var(--md-primary);
     color: white;
 }
 
 .message.venture {
     margin-right: auto;
-    background: #28a745;
+    background: var(--md-success);
     color: white;
 }
 
 .message.system {
     margin: 0 auto;
-    background: #6c757d;
+    background: var(--md-text-hint);
     color: white;
     text-align: center;
     max-width: 90%;
 }
 
 .message.error {
-    background: #dc3545;
+    background: var(--md-error);
     color: white;
 }
 
@@ -247,7 +296,7 @@ main {
 }
 
 .message.typing {
-    background: #17a2b8;
+    background: var(--md-info);
     color: white;
     font-style: italic;
 }
@@ -265,8 +314,8 @@ main {
 
 .chat-input-area {
     padding: 1.5rem;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background: var(--md-bg-secondary);
+    border-top: 1px solid var(--md-border);
 }
 
 .input-row {
@@ -386,14 +435,14 @@ main {
 
 .request-response-display {
     margin-top: 2rem;
-    background: #f8f9fa;
+    background: var(--md-bg-secondary);
     border-radius: 8px;
     padding: 1.5rem;
-    border-left: 4px solid #6f42c1;
+    border-left: 4px solid var(--md-secondary);
 }
 
 .request-response-display h3 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 1.5rem;
     font-size: 1.3rem;
 }
@@ -403,14 +452,14 @@ main {
 }
 
 .json-section h4 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
 }
 
 .json-display {
-    background: white;
-    border: 1px solid #e9ecef;
+    background: var(--md-bg-primary);
+    border: 1px solid var(--md-border);
     border-radius: 4px;
     padding: 1rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -423,12 +472,12 @@ main {
 }
 
 .message.agent {
-    background: #6f42c1;
+    background: var(--md-secondary);
     color: white;
 }
 
 .endpoint-group h3 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 1rem;
     font-size: 1.3rem;
 }
@@ -439,13 +488,13 @@ main {
     gap: 1rem;
     margin-bottom: 0.5rem;
     padding: 0.75rem;
-    background: white;
+    background: var(--md-bg-primary);
     border-radius: 6px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--md-border);
 }
 
 .method {
-    background: #28a745;
+    background: var(--md-success);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
@@ -457,20 +506,20 @@ main {
 
 .path {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    background: #e9ecef;
+    background: var(--md-primary-light);
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
     font-size: 0.9rem;
-    color: #495057;
+    color: var(--md-primary-dark);
 }
 
 .description {
-    color: #6c757d;
+    color: var(--md-text-disabled);
     flex: 1;
 }
 
 .testing h2 {
-    color: #2c3e50;
+    color: var(--md-text-primary);
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
 }
@@ -483,8 +532,8 @@ main {
 }
 
 .health-results {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--md-bg-secondary);
+    border: 1px solid var(--md-border);
     border-radius: 6px;
     padding: 1rem;
     min-height: 60px;
@@ -497,20 +546,20 @@ main {
 
 .health-results:empty::before {
     content: 'Health check results will appear here...';
-    color: #6c757d;
+    color: var(--md-text-hint);
     font-style: italic;
 }
 
 .location-testing {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: var(--md-success-light);
     border-radius: 8px;
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--md-success);
 }
 
 .location-testing h3 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 1rem;
     font-size: 1.3rem;
 }
@@ -531,13 +580,13 @@ main {
 
 .input-group label {
     font-weight: 600;
-    color: #495057;
+    color: var(--md-text-secondary);
     font-size: 0.9rem;
 }
 
 .input-group input {
     padding: 0.5rem;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--md-border);
     border-radius: 4px;
     font-size: 0.9rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -545,23 +594,23 @@ main {
 
 .input-group input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .input-group select {
     padding: 0.5rem;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--md-border);
     border-radius: 4px;
     font-size: 0.9rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    background: white;
+    background: var(--md-bg-primary);
 }
 
 .input-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .location-buttons {
@@ -573,13 +622,13 @@ main {
 .business-testing {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: var(--md-error-light);
     border-radius: 8px;
-    border-left: 4px solid #ff6b6b;
+    border-left: 4px solid var(--md-error);
 }
 
 .business-testing h3 {
-    color: #495057;
+    color: var(--md-text-secondary);
     margin-bottom: 1rem;
     font-size: 1.3rem;
 }
@@ -598,7 +647,7 @@ main {
 }
 
 button {
-    background: #667eea;
+    background: var(--md-primary);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -609,9 +658,9 @@ button {
 }
 
 button:hover {
-    background: #5a6fd8;
+    background: var(--md-primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
 button:active {
@@ -619,12 +668,12 @@ button:active {
 }
 
 .results {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--md-bg-secondary);
+    border: 1px solid var(--md-border);
     border-radius: 6px;
     padding: 1rem;
     min-height: 100px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-family: 'Monaco', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
     white-space: pre-wrap;
     overflow-x: auto;
@@ -632,7 +681,7 @@ button:active {
 
 .results:empty::before {
     content: 'Test results will appear here...';
-    color: #6c757d;
+    color: var(--md-text-hint);
     font-style: italic;
 }
 
