@@ -43,18 +43,8 @@
                     </div>
                 </div>
                 
-                <div class="request-response-display">
-                    <div class="json-section">
-                        <h4>Sent A2A Request to: <span id="requestUrl" class="request-url">Loading...</span></h4>
-                        <div class="request-time">Request sent at: <span id="requestTime">-</span></div>
-                        <pre id="sentRequest" class="json-display">No request sent yet</pre>
-                    </div>
-                    
-                    <div class="json-section">
-                        <h4>A2A Response:</h4>
-                        <div class="response-time">Response received in: <span id="responseDuration">-</span> seconds</div>
-                        <pre id="receivedResponse" class="json-display">No response received yet</pre>
-                    </div>
+                <div id="debugging-container">
+                    <!-- Debugging HTML will be generated here -->
                 </div>
             </section>
         </main>
@@ -64,6 +54,7 @@
         </footer>
     </div>
 
+    <script src="common-debugging.js"></script>
     <script src="chat.js"></script>
 </body>
 </html>

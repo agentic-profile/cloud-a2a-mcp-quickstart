@@ -9,11 +9,11 @@ export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCR
 }
 
 export async function handleToolsCall(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
-    const { name, arguments: args } = request.params || {};
+    const { name } = request.params || {};
     
     switch (name) {
         case 'update':
-            return await handleLocationUpdate(request, args);
+            return await handleLocationUpdate(request);
         case 'query':
             return await handleLocationQuery(request);
         default:
@@ -21,13 +21,13 @@ export async function handleToolsCall(request: JSONRPCRequest): Promise<JSONRPCR
     }
 }
 
-export async function handleLocationUpdate(request: JSONRPCRequest, args: any): Promise<JSONRPCResponse | JSONRPCError> {
-    const { coords } = args;
+export async function handleLocationUpdate(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
+    const { coords } = request.params || {};
     
     if (!coords) {
         return jrpcError(request.id!, -32602, 'Invalid params: coords with latitude and longitude are required');
     }
-    const { latitude, longitude } = coords;
+    const { latitude, longitude } = coords as { latitude: number; longitude: number };
     if (typeof latitude !== 'number' || typeof longitude !== 'number') {
         return jrpcError(request.id!, -32602, 'Invalid params: both latitude and longitude must be provided and as numbers');
     }

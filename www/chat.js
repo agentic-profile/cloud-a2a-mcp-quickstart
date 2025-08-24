@@ -1,7 +1,7 @@
 // Generic chat functionality
 let messageCounter = 0;
 let currentEndpoint = '';
-let requestStartTime = null;
+let debugging = null;
 
 function generateMessageId() {
     // Generate a UUID v4 format message ID
@@ -14,6 +14,24 @@ function generateMessageId() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
+    
+    // Initialize debugging component
+    debugging = new CommonDebugging({
+        requestUrlElement: 'requestUrl',
+        requestTimeElement: 'requestTime',
+        sentRequestElement: 'sentRequest',
+        receivedResponseElement: 'receivedResponse',
+        responseDurationElement: 'responseDuration'
+    });
+    
+    // Generate debugging HTML
+    const debuggingContainer = document.getElementById('debugging-container');
+    if (debuggingContainer) {
+        debuggingContainer.innerHTML = CommonDebugging.createDebuggingHTML({
+            requestLabel: 'Sent A2A Request to:',
+            responseLabel: 'A2A Response:'
+        });
+    }
     
     // Get endpoint and title from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -53,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 console.error('targetUrl element not found');
             }
-            updateRequestUrl();
+            debugging.setEndpoint(currentEndpoint);
         } catch (error) {
             console.error('Error updating targetUrl:', error);
         }
@@ -69,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 console.error('targetUrl element not found');
             }
-            updateRequestUrl();
+            debugging.setEndpoint(currentEndpoint);
         } catch (error) {
             console.error('Error updating targetUrl with default:', error);
         }
@@ -104,29 +122,13 @@ function updateFullRequestUrl() {
     }
 }
 
-function updateRequestUrl() {
-    try {
-        const fullUrl = `${window.location.origin}${currentEndpoint}`;
-        console.log('Updating request URL to:', fullUrl);
-        const requestUrlElement = document.getElementById('requestUrl');
-        if (requestUrlElement) {
-            requestUrlElement.textContent = fullUrl;
-            console.log('Successfully updated request URL');
-        } else {
-            console.error('requestUrl element not found');
-        }
-    } catch (error) {
-        console.error('Error updating request URL:', error);
-    }
-}
-
 function changeEndpoint() {
     const newEndpoint = prompt('Enter new endpoint URL (e.g., /a2a/hireme, /a2a/venture, /a2a/vc):', currentEndpoint);
     
     if (newEndpoint && newEndpoint.trim()) {
         currentEndpoint = newEndpoint.trim();
         document.getElementById('targetUrl').textContent = currentEndpoint;
-        updateRequestUrl();
+        debugging.setEndpoint(currentEndpoint);
         
         // Update URL parameter
         const url = new URL(window.location);
@@ -158,12 +160,8 @@ function sendMessage() {
 
 async function callA2AEndpoint(message) {
     try {
-        // Record request start time
-        requestStartTime = new Date();
-        const requestTimeString = requestStartTime.toLocaleTimeString();
-        
-        // Update request time display
-        document.getElementById('requestTime').textContent = requestTimeString;
+        // Start request timing
+        debugging.startRequest();
         
         // Show typing indicator
         addTypingIndicator();
@@ -189,7 +187,7 @@ async function callA2AEndpoint(message) {
         };
         
         // Display the sent request
-        document.getElementById('sentRequest').textContent = JSON.stringify(a2aRequest, null, 2);
+        debugging.displaySentRequest(a2aRequest);
         
         const response = await fetch(currentEndpoint, {
             method: 'POST',
@@ -205,39 +203,21 @@ async function callA2AEndpoint(message) {
         if (response.ok) {
             const data = await response.json();
             
-            // Calculate response duration
-            const responseEndTime = new Date();
-            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
-            
-            // Display the received response
-            document.getElementById('receivedResponse').textContent = JSON.stringify(data, null, 4);
-            document.getElementById('responseDuration').textContent = responseDuration;
+            // Complete the request with response data
+            debugging.completeRequest(data);
             
             // Add response to chat
             const text = resolveResponseMessage(data);
             addMessage('agent', text, 'success');
         } else {
             const errorText = `Error: ${response.status} - ${response.statusText}`;
-            document.getElementById('receivedResponse').textContent = errorText;
+            debugging.completeRequest(errorText, true);
             addMessage('agent', errorText, 'error');
-            
-            // Still calculate duration for errors
-            const responseEndTime = new Date();
-            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
-            document.getElementById('responseDuration').textContent = responseDuration;
         }
     } catch (error) {
         removeTypingIndicator();
-        const errorText = `Network error: ${error.message}`;
-        document.getElementById('receivedResponse').textContent = errorText;
-        addMessage('agent', errorText, 'error');
-        
-        // Still calculate duration for network errors
-        if (requestStartTime) {
-            const responseEndTime = new Date();
-            const responseDuration = ((responseEndTime - requestStartTime) / 1000).toFixed(2);
-            document.getElementById('responseDuration').textContent = responseDuration;
-        }
+        debugging.handleError(error);
+        addMessage('agent', `Network error: ${error.message}`, 'error');
     }
 }
 
@@ -311,9 +291,10 @@ function clearChat() {
     chatMessages.innerHTML = '';
     messageCounter = 0;
     
-    // Clear request/response display
-    document.getElementById('sentRequest').textContent = 'No request sent yet';
-    document.getElementById('receivedResponse').textContent = 'No response received yet';
+    // Clear debugging information
+    if (debugging) {
+        debugging.clear();
+    }
 }
 
 // Add keyboard shortcuts

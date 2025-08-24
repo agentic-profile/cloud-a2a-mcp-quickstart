@@ -28,7 +28,8 @@ export async function handleMCPMethod(req: Request, res: Response, methodHandler
             res.status(400).json( jrpcError( id!, -32601, `Method ${method} not found` ) );
         }
     } catch (error) {
-        res.status(500).json( jrpcError( req.body.id || 'unknown', -32603, 'Internal error' ) );
+        console.error('MCP method handler error:', error);
+        res.status(500).json( jrpcError( req.body.id || 'unknown', -32603, `Internal error: ${error}` ) );
     }
 }
 

@@ -38,7 +38,7 @@
     "foundation:events:prod": "aws cloudformation describe-stack-events --stack-name agentic-foundation-prod --query 'StackEvents[0:5]' --output table",
     "test:redis": "node scripts/test-redis-connection.js",
     "test:local-redis": "npm run build && node scripts/test-local-redis.js",
-    "start:local": "tsx src/index.local.ts"
+    "start:local": "tsx --inspect src/index.local.ts"
   },
   "keywords": [
     "lambda",
