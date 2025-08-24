@@ -3,8 +3,8 @@ import {
     AgentExecutor,
     RequestContext,
     ExecutionEventBus,
-    AgentExecutionEvent,
 } from "@a2a-js/sdk/server";
+import { Message } from '@a2a-js/sdk';
 
 
 export class VentureExecutor implements AgentExecutor {  
@@ -19,32 +19,23 @@ export class VentureExecutor implements AgentExecutor {
         requestContext: RequestContext,
         eventBus: ExecutionEventBus
     ): Promise<void> {
-        const { taskId, contextId /*, userMessage */ } = requestContext;
+        const { contextId } = requestContext;
 
-        const finalUpdate: AgentExecutionEvent = {
-            kind: "status-update",
-            taskId,
+        const message: Message = {
+            kind: "message",
             contextId,
-            status: {
-                state: "completed",
-                message: {
-                    kind: "message",
-                    role: "agent",
-                    messageId: uuidv4(),
-                    taskId,
-                    contextId,
-                    parts: [
-                        {
-                            kind: "text",
-                            text: "Hello, world!"
-                        }
-                    ],
-                },
-                timestamp: new Date().toISOString(),
-            },
-            final: true,
+            messageId: uuidv4(),
+            role: "agent",
+            parts: [
+                {
+                    kind: "text",
+                    text: "Cut me a check!"
+                }
+            ],
+            metadata: {}
         };
-        eventBus.publish(finalUpdate);
+
+        eventBus.publish(message);
         eventBus.finished();
     }
 }

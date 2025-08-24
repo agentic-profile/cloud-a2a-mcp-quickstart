@@ -64,11 +64,12 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+    position: relative;
 }
 
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin: 3rem 0 3rem 0;
     color: var(--md-text-primary);
 }
 
@@ -191,20 +192,35 @@ main {
     font-weight: 600;
 }
 
+/* Breadcrumb Navigation */
 .breadcrumb {
-    margin-bottom: 2rem;
-    color: var(--md-text-disabled);
-    font-size: 1rem;
+    position: absolute;
+    top: 1rem;
+    left: 2rem;
+    font-size: 0.9rem;
+    color: var(--md-text-secondary);
 }
 
 .breadcrumb a {
     color: var(--md-primary);
     text-decoration: none;
-    font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 .breadcrumb a:hover {
+    color: var(--md-primary-dark);
     text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: var(--md-text-secondary);
+    font-weight: 500;
+}
+
+.breadcrumb a:not(:last-child)::after {
+    content: ' > ';
+    color: var(--md-text-hint);
+    margin: 0 0.5rem;
 }
 
 .navigation-links {
@@ -225,18 +241,19 @@ main {
 .nav-button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
-    background: var(--md-primary);
+    background: var(--md-success);
     color: white;
     text-decoration: none;
     border-radius: 6px;
     transition: all 0.3s ease;
     font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-button:hover {
-    background: var(--md-primary-dark);
+    background: var(--md-success-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 /* Venture Chat Styles */
@@ -249,13 +266,14 @@ main {
     border-radius: 12px;
     border: 1px solid var(--md-border);
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .chat-messages {
     height: 400px;
     overflow-y: auto;
     padding: 1rem;
-    background: white;
+    background: var(--md-bg-primary);
 }
 
 .message {
@@ -263,18 +281,21 @@ main {
     padding: 0.75rem;
     border-radius: 8px;
     max-width: 80%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .message.user {
     margin-left: auto;
-    background: var(--md-primary);
-    color: white;
+    background: var(--md-primary-light) !important;
+    color: var(--md-text-primary);
+    border: 1px solid var(--md-primary);
 }
 
-.message.venture {
+.message.agent {
     margin-right: auto;
-    background: var(--md-success);
-    color: white;
+    background: var(--md-bg-tertiary);
+    color: var(--md-text-primary);
+    border: 1px solid var(--md-border);
 }
 
 .message.system {
@@ -290,8 +311,8 @@ main {
     color: white;
 }
 
-.message.success {
-    background: #28a745;
+.message.success:not(.user):not(.agent) {
+    background: var(--md-success);
     color: white;
 }
 
@@ -337,54 +358,113 @@ main {
     margin-top: 1rem;
 }
 
+/* Chat buttons now use standardized button system */
 .send-button {
-    background: #28a745;
+    background: var(--md-success);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
+    font-weight: 600;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .send-button:hover {
-    background: #218838;
+    background: var(--md-success-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.send-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .clear-button {
-    background: #6c757d;
-    color: white;
-    border: none;
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+    border: 2px solid var(--md-border);
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
+    font-weight: 600;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .clear-button:hover {
-    background: #5a6268;
+    background: var(--md-bg-secondary);
+    border-color: var(--md-text-secondary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.clear-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .input-group textarea {
     padding: 0.5rem;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--md-border);
     border-radius: 4px;
     font-size: 0.9rem;
     font-family: inherit;
     resize: vertical;
     min-height: 60px;
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .input-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    border-color: var(--md-success);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Request Response Display */
+.request-response-display {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--md-bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--md-border);
+}
+
+.request-response-display h3 {
+    margin-bottom: 1.5rem;
+    color: var(--md-text-primary);
+    font-size: 1.25rem;
+}
+
+.json-section {
+    margin-bottom: 1.5rem;
+}
+
+.json-section h4 {
+    margin-bottom: 0.75rem;
+    color: var(--md-text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.json-display {
+    background: var(--md-bg-primary);
+    border: 1px solid var(--md-border);
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--md-text-primary);
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 /* Generic Chat Styles */
@@ -396,84 +476,123 @@ main {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
-    padding: 0.5rem 0;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--md-bg-secondary);
+    border-radius: 6px;
+    border: 1px solid var(--md-border-light);
 }
 
 .endpoint-row label {
-    color: #495057;
+    margin: 0;
     font-weight: 600;
+    color: var(--md-text-primary);
     white-space: nowrap;
 }
 
 .url-display {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--md-bg-primary);
+    border: 1px solid var(--md-border);
+    border-radius: 4px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
-    color: #2c3e50;
-    background: #f8f9fa;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
-    border: 1px solid #e9ecef;
+    color: var(--md-text-primary);
     min-width: 200px;
 }
 
 .change-endpoint-button {
-    background: #17a2b8;
-    color: white;
-    border: none;
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+    border: 2px solid var(--md-border);
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    cursor: pointer;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .change-endpoint-button:hover {
-    background: #138496;
-    transform: translateY(-1px);
-}
-
-.request-response-display {
-    margin-top: 2rem;
     background: var(--md-bg-secondary);
-    border-radius: 8px;
-    padding: 1.5rem;
-    border-left: 4px solid var(--md-secondary);
+    border-color: var(--md-text-secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.request-response-display h3 {
-    color: var(--md-text-secondary);
+.change-endpoint-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Request URL Display */
+.request-url-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 1.5rem;
-    font-size: 1.3rem;
+    padding: 0.75rem;
+    background: var(--md-bg-tertiary);
+    border-radius: 4px;
+    border: 1px solid var(--md-border-light);
 }
 
-.json-section {
-    margin-bottom: 1.5rem;
+.request-url-display label {
+    margin: 0;
+    font-weight: 600;
+    color: var(--md-text-primary);
+    white-space: nowrap;
 }
 
-.json-section h4 {
-    color: var(--md-text-secondary);
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.json-display {
+.full-url-display {
+    flex: 1;
+    padding: 0.5rem;
     background: var(--md-bg-primary);
     border: 1px solid var(--md-border);
     border-radius: 4px;
-    padding: 1rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    overflow-x: auto;
-    max-height: 300px;
-    overflow-y: auto;
+    font-size: 0.9rem;
+    color: var(--md-text-primary);
+    word-break: break-all;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.message.agent {
-    background: var(--md-secondary);
-    color: white;
+.full-url-display:hover {
+    border-color: var(--md-success);
+    box-shadow: 0 0 0 1px var(--md-success);
+}
+
+/* Enhanced Chat Interface Styling */
+.chat-container {
+    transition: box-shadow 0.3s ease;
+}
+
+.chat-container:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.message {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Button States */
+.send-button:active,
+.clear-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Input Focus States */
+.input-group textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
 }
 
 .endpoint-group h3 {
@@ -506,11 +625,11 @@ main {
 
 .path {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    background: var(--md-primary-light);
+    background: var(--md-success-light);
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
     font-size: 0.9rem;
-    color: var(--md-primary-dark);
+    color: var(--md-success-dark);
 }
 
 .description {
@@ -539,7 +658,6 @@ main {
     min-height: 60px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
-    white-space: pre-wrap;
     overflow-x: auto;
     margin-bottom: 2rem;
 }
@@ -594,8 +712,8 @@ main {
 
 .input-group input:focus {
     outline: none;
-    border-color: var(--md-primary);
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    border-color: var(--md-success);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .input-group select {
@@ -609,8 +727,8 @@ main {
 
 .input-group select:focus {
     outline: none;
-    border-color: var(--md-primary);
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    border-color: var(--md-success);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .location-buttons {
@@ -647,24 +765,27 @@ main {
 }
 
 button {
-    background: var(--md-primary);
+    background: var(--md-success);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
+    font-weight: 600;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background: var(--md-primary-dark);
+    background: var(--md-success-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 button:active {
     transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .results {
@@ -675,7 +796,6 @@ button:active {
     min-height: 100px;
     font-family: 'Monaco', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
-    white-space: pre-wrap;
     overflow-x: auto;
 }
 
@@ -793,4 +913,622 @@ footer {
     button {
         width: 100%;
     }
+}
+
+/* Common Forms System Styles */
+.common-form {
+    background: var(--md-bg-primary);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid var(--md-border-light);
+}
+
+.common-form h3 {
+    margin-bottom: 1.5rem;
+    color: var(--md-text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--md-primary-light);
+    padding-bottom: 0.5rem;
+}
+
+.common-form .input-group {
+    margin-bottom: 1.5rem;
+}
+
+.common-form .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--md-text-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.common-form .input-group input,
+.common-form .input-group select,
+.common-form .input-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--md-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+}
+
+.common-form .input-group input:focus,
+.common-form .input-group textarea:focus,
+.common-form .input-group select:focus {
+    outline: none;
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.common-form .input-group input:hover,
+.common-form .input-group select:hover,
+.common-form .input-group textarea:hover {
+    border-color: var(--md-primary-light);
+}
+
+.common-form .submit-button {
+    background: var(--md-success);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.common-form .submit-button:hover {
+    background: var(--md-success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.common-form .submit-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.common-form .submit-button:disabled {
+    background: var(--md-text-disabled);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.common-form .submit-button.loading {
+    background: var(--md-info);
+    cursor: wait;
+}
+
+.common-form .submit-button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Response styling - Maximum specificity and override */
+.results {
+    margin-top: 0.5rem !important;
+    padding: 0.75rem !important;
+    border-radius: 6px;
+    border: 2px solid var(--md-border);
+    background: var(--md-bg-secondary);
+    min-height: 60px;
+    transition: all 0.3s ease;
+    display: none;
+}
+
+.results:not(:empty) {
+    display: block;
+}
+
+/* Force remove ALL spacing from ANY child element */
+.results *,
+.results > *,
+.results div,
+.results h4,
+.results pre {
+    margin: 0;
+    padding: 0 ;
+    line-height: 1;
+}
+
+/* Specific overrides for response elements */
+.results .response-success,
+.results .response-error,
+.results .response-info {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+.results .response-success h4,
+.results .response-error h4,
+.results .response-info h4 {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.results .response-success h4 {
+    color: var(--md-success-dark);
+}
+
+.results .response-error h4 {
+    color: var(--md-error-dark);
+}
+
+.results .response-info h4 {
+    color: var(--md-info-dark);
+}
+
+.results pre {
+    background: rgba(0,0,0,0.05);
+    padding: 0 !important;
+    margin: 0.5rem 0 0 0 !important;
+    border-radius: 0;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1 !important;
+}
+
+/* Request-Response Layout */
+.request-response-container {
+    margin-top: 0.5rem;
+}
+
+.request-section,
+.response-section {
+    margin-bottom: 1rem;
+}
+
+.request-section h5,
+.response-section h5 {
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--md-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.request-json,
+.response-json {
+    background: rgba(0,0,0,0.05);
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    border-radius: 0;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    border: 1px solid var(--md-border);
+    box-shadow: none;
+}
+
+.request-json {
+    border-left-color: var(--md-info);
+}
+
+.response-json {
+    border-left-color: var(--md-success);
+}
+
+.results.success {
+    border-color: var(--md-success);
+    background: var(--md-success-light);
+}
+
+.results.error {
+    border-color: var(--md-error);
+    background: var(--md-error-light);
+}
+
+.results.info {
+    border-color: var(--md-info);
+    background: var(--md-info-light);
+}
+
+/* Form layout variations */
+.common-form.form-horizontal .input-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.common-form.form-horizontal .input-group label {
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.common-form.form-compact {
+    padding: 1rem;
+}
+
+.common-form.form-compact .input-group {
+    margin-bottom: 1rem;
+}
+
+.common-form.form-compact .input-group input,
+.common-form.form-compact .input-group select,
+.common-form.form-compact .input-group textarea {
+    padding: 0.5rem;
+}
+
+/* Button group styling */
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.button-group .submit-button:first-child {
+    background: var(--md-success);
+    color: white;
+    border: none;
+}
+
+.button-group .submit-button:first-child:hover {
+    background: var(--md-success-dark);
+}
+
+.button-group .submit-button:not(:first-child) {
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+    border: 2px solid var(--md-border);
+}
+
+.button-group .submit-button:not(:first-child):hover {
+    background: var(--md-bg-secondary);
+    border-color: var(--md-text-secondary);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .common-form {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .common-form h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .common-form .submit-button {
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group .submit-button {
+        width: 100%;
+    }
+}
+
+/* Loading spinner for buttons */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 0.5rem;
+}
+
+/* Form validation styles */
+.common-form .input-group input:invalid,
+.common-form .input-group select:invalid,
+.common-form .input-group textarea:invalid {
+    border-color: var(--md-error);
+}
+
+.common-form .input-group input:invalid:focus,
+.common-form .input-group select:invalid:focus,
+.common-form .input-group textarea:invalid:focus {
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+.validation-error {
+    color: var(--md-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Success and error icons */
+.response-success h4::before,
+.response-error h4::before,
+.response-info h4::before {
+    margin-right: 0.5rem;
+    font-size: 1.2em;
+}
+
+.response-success h4::before {
+    content: '✅';
+}
+
+.response-error h4::before {
+    content: '❌';
+}
+
+.response-info h4::before {
+    content: 'ℹ️';
+}
+
+/* Form description styling */
+.form-description {
+    color: var(--md-text-secondary);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background: var(--md-bg-tertiary);
+    border-radius: 4px;
+    border-left: 3px solid var(--md-info);
+}
+
+/* Enhanced input group styling */
+.common-form .input-group {
+    position: relative;
+}
+
+.common-form .input-group input:focus + label,
+.common-form .input-group textarea:focus + label,
+.common-form .input-group select:focus + label {
+    color: var(--md-success);
+}
+
+.common-form .input-group input.invalid,
+.common-form .input-group textarea.invalid,
+.common-form .input-group select.invalid {
+    border-color: var(--md-error);
+    background: var(--md-error-light);
+}
+
+.common-form .input-group input.invalid:focus,
+.common-form .input-group textarea.invalid:focus,
+.common-form .input-group select.invalid:focus {
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+/* Enhanced button styling */
+.common-form .submit-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.common-form .submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.common-form .submit-button:hover::before {
+    left: 100%;
+}
+
+/* Enhanced results styling */
+.results {
+    position: relative;
+    overflow: hidden;
+}
+
+.results::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--md-border);
+    transition: background-color 0.3s ease;
+}
+
+.results.success::before {
+    background: var(--md-success);
+}
+
+.results.error::before {
+    background: var(--md-error);
+}
+
+.results.info::before {
+    background: var(--md-info);
+}
+
+/* Animation for form appearance */
+.common-form {
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced focus states */
+.common-form .input-group input:focus,
+.common-form .input-group textarea:focus,
+.common-form .input-group select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+}
+
+/* Loading state enhancements */
+.common-form .submit-button.loading {
+    background: var(--md-text-disabled);
+    cursor: wait;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+}
+
+.common-form .submit-button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Form validation animations */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.common-form .input-group input.invalid,
+.common-form .input-group textarea.invalid,
+.common-form .input-group select.invalid {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Print styles */
+@media print {
+    .common-form .submit-button,
+    .button-group {
+        display: none;
+    }
+    
+    .common-form {
+        break-inside: avoid;
+        border: 1px solid var(--md-border);
+        background: var(--md-bg-primary);
+    }
+    
+    .results {
+        border: 1px solid var(--md-border);
+        background: var(--md-bg-primary);
+    }
+}
+
+/* Standardized Button System */
+.btn-primary {
+    background: var(--md-success);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+    background: var(--md-success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:disabled {
+    background: var(--md-text-disabled);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: var(--md-bg-primary);
+    color: var(--md-text-primary);
+    border: 2px solid var(--md-border);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover {
+    background: var(--md-bg-secondary);
+    border-color: var(--md-text-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:disabled {
+    background: var(--md-bg-tertiary);
+    color: var(--md-text-disabled);
+    border-color: var(--md-text-disabled);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-disabled {
+    background: var(--md-text-disabled);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: not-allowed;
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.6;
+    box-shadow: none;
 }

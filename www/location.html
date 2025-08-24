@@ -17,35 +17,35 @@
             <a href="index.html">Home</a> > Location
         </nav>
 
-        <main>
-            <section class="location-testing">
-                <h2>📍 Location</h2>
-                <div class="location-inputs">
-                    <div class="input-group">
-                        <label for="latitude">Latitude:</label>
-                        <input type="number" id="latitude" value="40.7128" step="any" />
-                    </div>
-                    <div class="input-group">
-                        <label for="longitude">Longitude:</label>
-                        <input type="number" id="longitude" value="-74.0060" step="any" />
-                    </div>
-                </div>
-                <div class="location-buttons">
-                    <button onclick="testLocationUpdate()">Test Location Update</button>
-                    <button onclick="testLocationQuery()">Test Location Query</button>
-                </div>
-                
-                <div id="results" class="results"></div>
-            </section>
+        <!-- Location Update Form -->
+        <form class="common-form" id="locationUpdateForm">
+            <h3>Update Location</h3>
+            <div class="input-group">
+                <label for="latitude">Latitude</label>
+                <input type="number" id="latitude" name="latitude" value="40.7128" step="any" required />
+            </div>
+            <div class="input-group">
+                <label for="longitude">Longitude</label>
+                <input type="number" id="longitude" name="longitude" value="-74.0060" step="any" required />
+            </div>
+            <button type="submit" class="submit-button">Update Location</button>
+            <div id="updateResults" class="results"></div>
+        </form>
 
-
-        </main>
+        <!-- Location Query Form -->
+        <form class="common-form" id="locationQueryForm">
+            <h3>Query Location</h3>
+            <p class="form-description">Click the button below to query the current location data.</p>
+            <button type="submit" class="submit-button">Query Location</button>
+            <div id="queryResults" class="results"></div>
+        </form>
 
         <footer>
             <p>Built with Express.js and TypeScript</p>
         </footer>
     </div>
 
+    <script src="common-forms.js"></script>
     <script src="location.js"></script>
 </body>
 </html>

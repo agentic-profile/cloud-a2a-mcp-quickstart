@@ -1,155 +1,128 @@
-// Business testing functions
-async function testBusinessAdd() {
-    const resultsDiv = document.getElementById('results');
-    const businessName = document.getElementById('businessName').value;
-    const businessDescription = document.getElementById('businessDescription').value;
-    const businessCategory = document.getElementById('businessCategory').value;
-    const businessLatitude = document.getElementById('businessLatitude').value;
-    const businessLongitude = document.getElementById('businessLongitude').value;
-    const businessAddress = document.getElementById('businessAddress').value;
-    
-    if (!businessName || !businessDescription || !businessCategory || !businessLatitude || !businessLongitude || !businessAddress) {
-        resultsDiv.textContent = 'Error: Please fill in all business fields.';
-        return;
-    }
-    
-    resultsDiv.textContent = 'Testing Business Add...';
-    
-    try {
-        const response = await fetch('/mcp/match', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'tools/call',
-                params: {
-                    name: 'add',
-                    arguments: {
-                        business: {
-                            name: businessName,
-                            description: businessDescription,
-                            category: businessCategory,
-                            location: {
-                                latitude: parseFloat(businessLatitude),
-                                longitude: parseFloat(businessLongitude),
-                                address: businessAddress
-                            }
-                        }
-                    }
-                },
-            }),
-        });
-        
-        const data = await response.json();
-        resultsDiv.textContent = `Business Add Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
-        showSuccess('Business add test completed successfully!');
-    } catch (error) {
-        resultsDiv.textContent = `Error: ${error.message}`;
-        showError('Business add test failed!');
-    }
-}
-
-async function testBusinessFind() {
-    const resultsDiv = document.getElementById('results');
-    const businessCategory = document.getElementById('businessCategory').value;
-    const businessLatitude = document.getElementById('businessLatitude').value;
-    const businessLongitude = document.getElementById('businessLongitude').value;
-    
-    resultsDiv.textContent = 'Testing Business Find...';
-    
-    try {
-        const response = await fetch('/mcp/match', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'tools/call',
-                params: {
-                    name: 'find',
-                    arguments: {
-                        criteria: {
-                            category: businessCategory,
-                            location: {
-                                latitude: parseFloat(businessLatitude),
-                                longitude: parseFloat(businessLongitude),
-                                radius: 10 // 10km radius
-                            }
-                        }
-                    }
-                },
-            }),
-        });
-        
-        const data = await response.json();
-        resultsDiv.textContent = `Business Find Response (${response.status}):\n${JSON.stringify(data, null, 2)}`;
-        showSuccess('Business find test completed successfully!');
-    } catch (error) {
-        resultsDiv.textContent = `Error: ${error.message}`;
-        showError('Business find test failed!');
-    }
-}
-
-// Add loading states to buttons
+// Business matching using the Common Form system
 document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('button');
-    
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Add loading state
-            const originalText = this.textContent;
-            this.textContent = 'Testing...';
-            this.disabled = true;
-            
-            // Reset after a delay (will be overridden by the actual function)
-            setTimeout(() => {
-                this.textContent = originalText;
-                this.disabled = false;
-            }, 5000);
+    // Initialize business add form
+    const businessAddForm = document.getElementById('businessAddForm');
+    const businessAddHandler = FormHandlers.mcp('/mcp/match', 'add', {
+        business: {
+            name: '',
+            description: '',
+            category: '',
+            location: {
+                latitude: 0,
+                longitude: 0
+            },
+            address: ''
+        }
+    });
+
+    businessAddForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(businessAddForm);
+        const inputs = {
+            businessName: formData.get('businessName'),
+            businessDescription: formData.get('businessDescription'),
+            businessCategory: formData.get('businessCategory'),
+            businessLatitude: formData.get('businessLatitude'),
+            businessLongitude: formData.get('businessLongitude'),
+            businessAddress: formData.get('businessAddress')
+        };
+
+        // Transform inputs for the MCP call
+        const transformedInputs = {
+            business: {
+                name: inputs.businessName,
+                description: inputs.businessDescription,
+                category: inputs.businessCategory,
+                location: {
+                    latitude: parseFloat(inputs.businessLatitude),
+                    longitude: parseFloat(inputs.businessLongitude)
+                },
+                address: inputs.businessAddress
+            }
+        };
+
+        const submitButton = businessAddForm.querySelector('.submit-button');
+        await businessAddHandler.handleSubmit(transformedInputs, submitButton, 'addResults');
+    });
+
+    // Initialize business find form
+    const businessFindForm = document.getElementById('businessFindForm');
+    const businessFindHandler = FormHandlers.mcp('/mcp/match', 'find', {
+        query: '',
+        location: {
+            latitude: 0,
+            longitude: 0
+        }
+    });
+
+    businessFindForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(businessFindForm);
+        const inputs = {
+            searchQuery: formData.get('searchQuery'),
+            searchLatitude: formData.get('searchLatitude'),
+            searchLongitude: formData.get('searchLongitude')
+        };
+
+        // Transform inputs for the MCP call
+        const transformedInputs = {
+            query: inputs.searchQuery,
+            location: {
+                latitude: parseFloat(inputs.searchLatitude),
+                longitude: parseFloat(inputs.searchLongitude)
+            }
+        };
+
+        const submitButton = businessFindForm.querySelector('.submit-button');
+        await businessFindHandler.handleSubmit(transformedInputs, submitButton, 'findResults');
+    });
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey || event.metaKey) {
+            switch(event.key) {
+                case '1':
+                    event.preventDefault();
+                    businessAddForm.dispatchEvent(new Event('submit'));
+                    break;
+                case '2':
+                    event.preventDefault();
+                    businessFindForm.dispatchEvent(new Event('submit'));
+                    break;
+            }
+        }
+    });
+
+    // Add form validation feedback
+    const allInputs = document.querySelectorAll('input[required], select[required]');
+    allInputs.forEach(input => {
+        input.addEventListener('invalid', function(e) {
+            e.preventDefault();
+            this.classList.add('invalid');
         });
+        
+        input.addEventListener('input', function() {
+            if (this.validity.valid) {
+                this.classList.remove('invalid');
+            }
+        });
+    });
+
+    // Add select change handler for better UX
+    const categorySelect = document.getElementById('businessCategory');
+    categorySelect.addEventListener('change', function() {
+        this.classList.remove('invalid');
     });
 });
 
-// Add keyboard shortcuts
-document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey || event.metaKey) {
-        switch(event.key) {
-            case '1':
-                event.preventDefault();
-                testBusinessAdd();
-                break;
-            case '2':
-                event.preventDefault();
-                testBusinessFind();
-                break;
-        }
-    }
-});
-
-// Add some visual feedback for successful API calls
-function showSuccess(message) {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.style.borderColor = '#28a745';
-    resultsDiv.style.backgroundColor = '#d4edda';
-    
-    setTimeout(() => {
-        resultsDiv.style.borderColor = '#e9ecef';
-        resultsDiv.style.backgroundColor = '#f8f9fa';
-    }, 3000);
+// Utility functions for external use
+function clearBusinessResults() {
+    CommonForm.clearResults('addResults');
+    CommonForm.clearResults('findResults');
 }
 
-function showError(message) {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.style.borderColor = '#dc3545';
-    resultsDiv.style.backgroundColor = '#f8d7da';
-    
-    setTimeout(() => {
-        resultsDiv.style.borderColor = '#e9ecef';
-        resultsDiv.style.backgroundColor = '#f8f9fa';
-    }, 3000);
+function showBusinessMessage(message, type = 'info') {
+    CommonForm.showMessage(message, type, 3000, 'addResults');
 }

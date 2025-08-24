@@ -12,17 +12,38 @@ function generateMessageId() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Get endpoint from URL parameter
+    // Get endpoint and title from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const agenturl = urlParams.get('agenturl');
+    const agentUrl = urlParams.get('agentUrl');
+    const title = urlParams.get('title');
     
-    if (agenturl) {
-        currentEndpoint = agenturl;
+    // Update page content based on title parameter
+    if (title) {
+        // Update page title
+        document.getElementById('pageTitle').textContent = `${title} - Agentic Profile MCP Service`;
+        
+        // Update header
+        document.getElementById('pageHeader').textContent = title;
+        
+        // Update description
+        document.getElementById('pageDescription').textContent = `Test ${title.toLowerCase()} A2A endpoint with chat simulation`;
+        
+        // Update section title
+        document.getElementById('sectionTitle').textContent = `💬 ${title} Chat Interface`;
+        
+        // Update breadcrumb
+        document.getElementById('breadcrumbTitle').textContent = title;
+    }
+    
+    if (agentUrl) {
+        currentEndpoint = agentUrl;
         document.getElementById('targetUrl').textContent = currentEndpoint;
+        updateFullRequestUrl();
     } else {
         // Default endpoint if none specified
         currentEndpoint = '/a2a/hireme';
         document.getElementById('targetUrl').textContent = currentEndpoint;
+        updateFullRequestUrl();
     }
     
     // Add enter key support for textarea
@@ -38,16 +59,22 @@ document.addEventListener('DOMContentLoaded', function() {
     messageTextarea.focus();
 });
 
+function updateFullRequestUrl() {
+    const fullUrl = `${window.location.origin}${currentEndpoint}`;
+    document.getElementById('fullRequestUrl').textContent = fullUrl;
+}
+
 function changeEndpoint() {
     const newEndpoint = prompt('Enter new endpoint URL (e.g., /a2a/hireme, /a2a/venture, /a2a/vc):', currentEndpoint);
     
     if (newEndpoint && newEndpoint.trim()) {
         currentEndpoint = newEndpoint.trim();
         document.getElementById('targetUrl').textContent = currentEndpoint;
+        updateFullRequestUrl();
         
         // Update URL parameter
         const url = new URL(window.location);
-        url.searchParams.set('agenturl', currentEndpoint);
+        url.searchParams.set('agentUrl', currentEndpoint);
         window.history.replaceState({}, '', url);
         
         // Add system message about endpoint change
