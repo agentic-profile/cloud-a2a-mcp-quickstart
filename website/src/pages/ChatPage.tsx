@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 interface Message {
     id: string;
@@ -55,27 +56,32 @@ export const ChatPage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-gray-900 dark:text-white transition-colors duration-300">
             {/* Header */}
-            <header className="container mx-auto px-6 py-8">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/" 
-                            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        >
-                            <ArrowLeftIcon className="h-5 w-5" />
-                            <span>Back to Home</span>
-                        </Link>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                            Chat with Agent
-                        </h1>
+            <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+                <div className="container mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <Link 
+                                to="/" 
+                                className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <ArrowLeftIcon className="h-5 w-5" />
+                                <span className="text-sm">Back</span>
+                            </Link>
+                        </div>
+                        <div className="flex-1 text-center">
+                            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                Chat
+                            </h1>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <ThemeToggle />
+                        </div>
                     </div>
                 </div>
             </header>
 
             {/* Chat Interface */}
-            <main className="container mx-auto px-6 pb-8">
+            <main className="container mx-auto px-6 py-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Messages Container */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 h-96 overflow-y-auto p-6 mb-6">
