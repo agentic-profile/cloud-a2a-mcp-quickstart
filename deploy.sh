@@ -47,14 +47,25 @@ fi
 
 echo -e "${GREEN}✅ Build completed successfully${NC}"
 
-# Check if function.zip exists
-echo -e "${YELLOW}📦 Checking for function.zip...${NC}"
-if [ ! -f "function.zip" ]; then
-    echo -e "${RED}❌ function.zip not found. Please run 'npm run package' first.${NC}"
+# Package the project
+echo -e "${YELLOW}📦 Packaging project into function.zip...${NC}"
+npm run package
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Package failed${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Function package found${NC}"
+echo -e "${GREEN}✅ Package completed successfully${NC}"
+
+# Verify function.zip was created
+echo -e "${YELLOW}📦 Verifying function.zip...${NC}"
+if [ ! -f "function.zip" ]; then
+    echo -e "${RED}❌ function.zip not found after packaging${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Function package verified${NC}"
 
 # Check if foundation stack exists
 FOUNDATION_STACK_NAME="agentic-foundation-${ENVIRONMENT}"
