@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
+    <script>
+      // Theme initialization script to prevent FOUC
+      (function() {
+        try {
+          const savedTheme = localStorage.getItem('theme-storage');
+          if (savedTheme) {
+            const parsed = JSON.parse(savedTheme);
+            if (parsed.state?.theme) {
+              document.documentElement.classList.add(parsed.state.theme);
+              return;
+            }
+          }
+          
+          // Default to dark theme
+          document.documentElement.classList.add('dark');
+        } catch (e) {
+          // Default to dark theme if anything fails
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
