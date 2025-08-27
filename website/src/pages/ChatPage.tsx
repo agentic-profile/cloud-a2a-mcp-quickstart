@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { ThemeToggle } from '../components/ThemeToggle';
 
 interface Message {
     id: string;
@@ -54,23 +53,6 @@ export const ChatPage = () => {
 
     return (
         <div className="flex-1 flex flex-col">
-            {/* Page Header */}
-            <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                Chat with Agent
-                            </h1>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Interact with your decentralized AI agent
-                            </p>
-                        </div>
-                        <ThemeToggle />
-                    </div>
-                </div>
-            </div>
-
             {/* Chat Interface */}
             <div className="flex-1 bg-gray-50 dark:bg-gray-900">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
