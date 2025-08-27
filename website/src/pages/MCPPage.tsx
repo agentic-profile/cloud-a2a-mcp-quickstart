@@ -4,7 +4,7 @@ import {
     WrenchScrewdriverIcon,
     GlobeAltIcon,
     CloudIcon,
-    DatabaseIcon,
+    CircleStackIcon,
     CpuChipIcon,
     BoltIcon,
     CheckCircleIcon
@@ -40,7 +40,7 @@ const MCPPage = () => {
             id: '2',
             name: 'Database Connector',
             description: 'Connect to various databases including PostgreSQL, MySQL, and MongoDB',
-            icon: DatabaseIcon,
+            icon: CircleStackIcon,
             category: 'Database',
             status: 'active',
             version: '2.1.0',

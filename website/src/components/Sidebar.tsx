@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
     HomeIcon,
-    ChatBubbleLeftRightIcon,
     UserGroupIcon,
     ServerIcon,
+    Cog6ToothIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
 
@@ -17,9 +17,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
     const navigation = [
         { name: 'Home', href: '/', icon: HomeIcon, current: location.pathname === '/' },
-        { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: location.pathname === '/chat' },
         { name: 'Agents', href: '/agents', icon: UserGroupIcon, current: location.pathname === '/agents' },
         { name: 'MCP', href: '/mcp', icon: ServerIcon, current: location.pathname === '/mcp' },
+        { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, current: location.pathname === '/settings' },
     ];
 
     return (

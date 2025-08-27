@@ -4,6 +4,7 @@ import { ChatPage } from './pages/ChatPage';
 import HomePage from './pages/HomePage';
 import AgentsPage from './pages/AgentsPage';
 import MCPPage from './pages/MCPPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
     return (
@@ -13,6 +14,7 @@ function App() {
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/agents" element={<AgentsPage />} />
                 <Route path="/mcp" element={<MCPPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
             </Routes>
         </Layout>
     );
