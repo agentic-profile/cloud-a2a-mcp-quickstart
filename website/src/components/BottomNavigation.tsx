@@ -2,8 +2,8 @@ import { useLocation, Link } from 'react-router-dom';
 import { 
     HomeIcon,
     ChatBubbleLeftRightIcon,
-    Cog6ToothIcon,
-    UserIcon
+    UserGroupIcon,
+    ServerIcon
 } from '@heroicons/react/24/outline';
 
 const BottomNavigation = () => {
@@ -12,8 +12,8 @@ const BottomNavigation = () => {
     const navigation = [
         { name: 'Home', href: '/', icon: HomeIcon, current: location.pathname === '/' },
         { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: location.pathname === '/chat' },
-        { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, current: location.pathname === '/settings' },
-        { name: 'Profile', href: '/profile', icon: UserIcon, current: location.pathname === '/profile' },
+        { name: 'Agents', href: '/agents', icon: UserGroupIcon, current: location.pathname === '/agents' },
+        { name: 'MCP', href: '/mcp', icon: ServerIcon, current: location.pathname === '/mcp' },
     ];
 
     return (
