@@ -21,12 +21,17 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, current: location.pathname === '/settings' },
     ];
 
+    const handleNavigation = () => {
+        // Always close sidebar after navigation
+        onClose();
+    };
+
     return (
         <>
             {/* Mobile Overlay */}
             {isOpen && (
                 <div 
-                    className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
+                    className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40"
                     onClick={onClose}
                 />
             )}
@@ -35,10 +40,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <div className={`
                 bg-white dark:bg-gray-800 border-r-4 border-red-500
                 transition-transform duration-300 ease-in-out
-                w-full max-w-xs lg:w-64
+                w-full max-w-xs lg:w-56
+                fixed inset-y-0 left-0 z-50
                 ${isOpen 
-                    ? 'fixed inset-y-0 left-0 z-50 translate-x-0 lg:static lg:translate-x-0' 
-                    : 'fixed inset-y-0 left-0 z-50 -translate-x-full lg:static lg:translate-x-0 lg:hidden'
+                    ? 'translate-x-0' 
+                    : '-translate-x-full'
                 }
             `}>
                 {/* Navigation */}
@@ -53,12 +59,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                         ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-r-2 border-purple-500'
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                                 }`}
-                                onClick={() => {
-                                    // Close sidebar on mobile after navigation
-                                    if (window.innerWidth < 1024) {
-                                        onClose();
-                                    }
-                                }}
+                                onClick={handleNavigation}
                             >
                                 <div className="w-5 h-5 flex items-center justify-center mr-3">
                                     <item.icon 

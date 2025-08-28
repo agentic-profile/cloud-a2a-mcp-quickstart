@@ -29,35 +29,31 @@ const Layout = ({ children }: LayoutProps) => {
         return () => window.removeEventListener('resize', checkIsMobile);
     }, []);
 
-    // Close sidebar when route changes on mobile
+    // Close sidebar when route changes
     useEffect(() => {
-        if (isMobile) {
-            setSidebarOpen(false);
-        }
-    }, [location.pathname, isMobile]);
+        setSidebarOpen(false);
+    }, [location.pathname]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-gray-900 dark:text-white transition-colors duration-300 overflow-x-hidden max-w-full">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-gray-900 dark:text-white transition-colors duration-300">
             {/* Top Navigation - Always visible */}
             <TopNavigation 
                 onSidebarToggle={setSidebarOpen}
                 sidebarOpen={sidebarOpen}
             />
 
-            {/* Main Content Area */}
-            <div className="flex overflow-x-hidden max-w-full">
-                {/* Sidebar - Only render when open or on desktop */}
-                {(sidebarOpen || !isMobile) && (
-                    <Sidebar 
-                        isOpen={sidebarOpen}
-                        onClose={() => setSidebarOpen(false)}
-                    />
-                )}
+            {/* Main Content Area - Always full width */}
+            <div className="w-full">
+                {/* Sidebar - Always rendered as overlay */}
+                <Sidebar 
+                    isOpen={sidebarOpen}
+                    onClose={() => setSidebarOpen(false)}
+                />
 
-                {/* Main Content - Takes remaining space */}
-                <div className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
+                {/* Main Content - Takes full width, sidebar overlays */}
+                <div className="w-full">
                     {/* Content with bottom padding for mobile navigation */}
-                    <div className="pb-20 md:pb-0 px-4 lg:px-0 w-full max-w-full">
+                    <div className="pb-20 md:pb-0 px-4 lg:px-0">
                         {children}
                     </div>
                 </div>
