@@ -92,11 +92,8 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
                         {/* Logo - Hidden on mobile, shown on desktop */}
                         <div className="hidden lg:flex items-center">
                             <Link to="/" className="flex items-center space-x-3">
-                                <div className="h-8 w-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <span className="text-white font-bold text-sm">DA</span>
-                                </div>
                                 <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                                    Decentralized Agents
+                                    A2A and MCP Quickstart
                                 </span>
                             </Link>
                         </div>

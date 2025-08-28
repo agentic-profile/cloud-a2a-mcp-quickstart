@@ -10,12 +10,12 @@ const HomePage = () => {
     const features = [
         {
             icon: ChatBubbleLeftRightIcon,
-            title: 'Intelligent Conversations',
+            title: 'Universal Authentication',
             description: 'Engage with AI agents that understand context and provide meaningful responses.'
         },
         {
             icon: ShieldCheckIcon,
-            title: 'Decentralized Security',
+            title: 'Cloud',
             description: 'Your conversations are secured through blockchain technology and distributed networks.'
         },
         {
@@ -35,25 +35,16 @@ const HomePage = () => {
                             <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                                 <div className="sm:text-center lg:text-left">
                                     <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                                        <span className="block xl:inline">Welcome to the future of</span>{' '}
+                                        <span className="block xl:inline">Welcome to the </span>{' '}
                                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 xl:inline">
-                                            Decentralized AI
+                                            Agentic Economy
                                         </span>
                                     </h1>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                        Experience the next generation of AI agents powered by blockchain technology. 
-                                        Chat with intelligent, decentralized agents that operate without central control.
+                                        This open-source quickstart will help you deploy A2A and MCP services
+                                        on popular cloud providers with support for universal authentication.
                                     </p>
                                     <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                                        <div className="rounded-md shadow">
-                                            <Link
-                                                to="/chat"
-                                                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 md:py-4 md:text-lg md:px-10 transition-all duration-200 transform hover:scale-105"
-                                            >
-                                                Start Chatting
-                                                <ArrowRightIcon className="ml-2 h-5 w-5" />
-                                            </Link>
-                                        </div>
                                         <div className="mt-3 sm:mt-0 sm:ml-3">
                                             <a
                                                 href="#features"

@@ -35,31 +35,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {/* Sidebar */}
             <div className={`
                 w-64 bg-white dark:bg-gray-800 border-r-4 border-red-500
-                lg:block lg:static
-                ${isOpen ? 'fixed inset-y-0 left-0 z-50 translate-x-0' : 'fixed inset-y-0 left-0 z-50 -translate-x-full lg:translate-x-0'}
                 transition-transform duration-300 ease-in-out
+                ${isOpen 
+                    ? 'fixed inset-y-0 left-0 z-50 translate-x-0 lg:static lg:translate-x-0' 
+                    : 'fixed inset-y-0 left-0 z-50 -translate-x-full lg:static lg:translate-x-0 lg:hidden'
+                }
             `}>
-                {/* Header */}
-                <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-3">
-                        <div className="h-8 w-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-sm">DA</span>
-                        </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                            Decentralized Agents
-                        </span>
-                    </div>
-                    {/* Close button - only visible on mobile */}
-                    <button
-                        onClick={onClose}
-                        className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
-                    >
-                        <div className="w-5 h-5 flex items-center justify-center">
-                            <XMarkIcon className="w-5 h-5" />
-                        </div>
-                    </button>
-                </div>
-
                 {/* Navigation */}
                 <nav className="mt-8 px-4">
                     <div className="space-y-1">
