@@ -24,7 +24,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
     return (
         <>
-            {/* Overlay */}
+            {/* Mobile Overlay */}
             {isOpen && (
                 <div 
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
@@ -33,9 +33,13 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             )}
 
             {/* Sidebar */}
-            <div className={`hidden lg:block fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 border-r-4 border-red-500 ${
-                isOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}>
+            <div className={`
+                w-64 bg-white dark:bg-gray-800 border-r-4 border-red-500
+                lg:block lg:static
+                ${isOpen ? 'fixed inset-y-0 left-0 z-50 translate-x-0' : 'fixed inset-y-0 left-0 z-50 -translate-x-full lg:translate-x-0'}
+                transition-transform duration-300 ease-in-out
+            `}>
+                {/* Header */}
                 <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
                         <div className="h-8 w-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -45,6 +49,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                             Decentralized Agents
                         </span>
                     </div>
+                    {/* Close button - only visible on mobile */}
                     <button
                         onClick={onClose}
                         className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
@@ -55,6 +60,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     </button>
                 </div>
 
+                {/* Navigation */}
                 <nav className="mt-8 px-4">
                     <div className="space-y-1">
                         {navigation.map((item) => (
@@ -88,7 +94,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     </div>
                 </nav>
 
-                {/* Sidebar Footer */}
+                {/* Footer */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                         <p>v1.0.0</p>

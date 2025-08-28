@@ -16,10 +16,9 @@ const Layout = ({ children }: LayoutProps) => {
     // Handle responsive behavior
     useEffect(() => {
         const checkIsMobile = () => {
-            setIsMobile(window.innerWidth < 1024);
-            if (window.innerWidth >= 1024) {
-                setSidebarOpen(true); // Always show sidebar on desktop
-            } else {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            if (mobile) {
                 setSidebarOpen(false); // Hide sidebar on mobile
             }
         };
@@ -47,18 +46,16 @@ const Layout = ({ children }: LayoutProps) => {
 
             {/* Main Content Area */}
             <div className="flex">
-                {/* Sidebar - Hidden on mobile, visible on desktop */}
+                {/* Sidebar - Always rendered, positioned absolutely on mobile, statically on desktop */}
                 <Sidebar 
                     isOpen={sidebarOpen}
                     onClose={() => setSidebarOpen(false)}
                 />
 
-                {/* Main Content */}
-                <div className={`flex-1 transition-all duration-300 ${
-                    sidebarOpen && !isMobile ? 'lg:ml-64' : ''
-                }`}>
+                {/* Main Content - Takes remaining space */}
+                <div className="flex-1 min-w-0">
                     {/* Content with bottom padding for mobile navigation */}
-                    <div className={`pb-20 md:pb-0`}>
+                    <div className="pb-20 md:pb-0">
                         {children}
                     </div>
                 </div>
