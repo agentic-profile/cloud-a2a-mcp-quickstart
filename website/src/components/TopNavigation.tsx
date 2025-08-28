@@ -31,11 +31,23 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
     const breadcrumbs = getBreadcrumbs();
 
     return (
-        <nav className="hidden lg:block bg-white dark:bg-gray-800 shadow-sm border-b-4 border-red-500 dark:border-gray-700">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
-                    {/* Left side - Sidebar toggle and Breadcrumbs */}
-                    <div className="flex items-center">
+        <nav className="hidden lg:block bg-white dark:bg-gray-800 shadow-sm border-b-4 border-red-500 dark:border-gray-700 w-full max-w-full overflow-hidden">
+            <div className="w-full px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16 w-full max-w-full">
+                    {/* Left side - Logo, Sidebar toggle, and Breadcrumbs */}
+                    <div className="flex items-center space-x-4 min-w-0 flex-1">
+                        {/* Logo - Always visible on desktop */}
+                        <div className="flex items-center flex-shrink-0">
+                            <Link to="/" className="flex items-center space-x-3">
+                                <div className="h-8 w-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <span className="text-white font-bold text-sm">DA</span>
+                                </div>
+                                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                                    A2A and MCP Quickstart
+                                </span>
+                            </Link>
+                        </div>
+
                         {/* Sidebar Toggle */}
                         <button
                             onClick={() => onSidebarToggle(!sidebarOpen)}
@@ -52,7 +64,7 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
                         </button>
 
                         {/* Breadcrumbs */}
-                        <div className="hidden md:flex items-center ml-4">
+                        <div className="hidden md:flex items-center min-w-0">
                             <nav className="flex" aria-label="Breadcrumb">
                                 <ol className="flex items-center space-x-2">
                                     {breadcrumbs.map((breadcrumb, index) => (
@@ -87,17 +99,8 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
                         </div>
                     </div>
 
-                    {/* Right side - Logo and Theme Toggle */}
-                    <div className="flex items-center space-x-4">
-                        {/* Logo - Hidden on mobile, shown on desktop */}
-                        <div className="hidden lg:flex items-center">
-                            <Link to="/" className="flex items-center space-x-3">
-                                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                                    A2A and MCP Quickstart
-                                </span>
-                            </Link>
-                        </div>
-                        
+                    {/* Right side - Theme Toggle */}
+                    <div className="flex items-center flex-shrink-0">
                         <ThemeToggle />
                     </div>
                 </div>

@@ -3,8 +3,7 @@ import {
     HomeIcon,
     UserGroupIcon,
     ServerIcon,
-    Cog6ToothIcon,
-    XMarkIcon
+    Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -34,15 +33,16 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
             {/* Sidebar */}
             <div className={`
-                w-64 bg-white dark:bg-gray-800 border-r-4 border-red-500
+                bg-white dark:bg-gray-800 border-r-4 border-red-500
                 transition-transform duration-300 ease-in-out
+                w-full max-w-xs lg:w-64
                 ${isOpen 
                     ? 'fixed inset-y-0 left-0 z-50 translate-x-0 lg:static lg:translate-x-0' 
                     : 'fixed inset-y-0 left-0 z-50 -translate-x-full lg:static lg:translate-x-0 lg:hidden'
                 }
             `}>
                 {/* Navigation */}
-                <nav className="mt-8 px-4">
+                <nav className="pt-8 px-4">
                     <div className="space-y-1">
                         {navigation.map((item) => (
                             <Link

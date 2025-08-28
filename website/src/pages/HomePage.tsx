@@ -10,29 +10,30 @@ const HomePage = () => {
     const features = [
         {
             icon: ChatBubbleLeftRightIcon,
-            title: 'Universal Authentication',
-            description: 'Engage with AI agents that understand context and provide meaningful responses.'
+            title: 'Trust and Accountability',
+            description: 'Any agent must be able to prove its identity to any other agent in the Agentic Economy. ' +
+            'With identity verification, agents can be held accountable for their actions and develop reputation.'
         },
         {
             icon: ShieldCheckIcon,
-            title: 'Cloud',
-            description: 'Your conversations are secured through blockchain technology and distributed networks.'
+            title: 'Reliability, Availability, and Scalability',
+            description: 'Agents must be able to operate in a decentralized and fault-tolerant manner.'
         },
         {
             icon: GlobeAltIcon,
-            title: 'Global Access',
-            description: 'Access agents from anywhere in the world with no central point of failure.'
+            title: 'Standards and Interoperability',
+            description: 'Agents must be able to communicate with each other.'
         }
     ];
 
     return (
         <>
             {/* Hero Section */}
-            <main className="flex-1">
-                <div className="relative overflow-hidden">
-                    <div className="max-w-7xl mx-auto">
+            <main className="flex-1 w-full max-w-full overflow-hidden">
+                <div className="relative w-full max-w-full overflow-hidden">
+                    <div className="w-full max-w-full">
                         <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-                            <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                            <div className="mt-10 mx-auto w-full max-w-full px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                                 <div className="sm:text-center lg:text-left">
                                     <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
                                         <span className="block xl:inline">Welcome to the </span>{' '}
@@ -41,8 +42,12 @@ const HomePage = () => {
                                         </span>
                                     </h1>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                        This open-source quickstart will help you deploy A2A and MCP services
-                                        on popular cloud providers with support for universal authentication.
+                                        This open-source quickstart makes it easy to deploy scalable A2A and MCP services
+                                        on popular cloud providers.
+                                    </p>
+                                    <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                        Quickstart examples support global discovery, decentralized
+                                        authentication, and transactions in the Agentic Economy.
                                     </p>
                                     <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                                         <div className="mt-3 sm:mt-0 sm:ml-3">
@@ -58,23 +63,26 @@ const HomePage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-                        <div className="h-56 w-full bg-gradient-to-r from-purple-400 to-pink-400 dark:from-purple-600 dark:to-pink-600 sm:h-72 md:h-96 lg:w-full lg:h-full rounded-l-3xl lg:rounded-l-none"></div>
-                    </div>
                 </div>
 
                 {/* Features Section */}
-                <div id="features" className="py-12 bg-white dark:bg-gray-800">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div id="features" className="py-12 bg-white dark:bg-gray-800 w-full max-w-full">
+                    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
                         <div className="lg:text-center">
                             <h2 className="text-base text-purple-600 dark:text-purple-400 font-semibold tracking-wide uppercase">
                                 Features
                             </h2>
                             <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                                Why Choose Decentralized Agents?
+                                Key Ingredients of the Agentic Economy
                             </p>
                             <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-300 lg:mx-auto">
-                                Our platform combines cutting-edge AI with blockchain technology to create a truly decentralized experience.
+                                There are many great agent orchestration frameworks like LangChain and CrewAI.  These frameworks
+                                enable the composition of cooperative agents with established authentication systems.
+                            </p>
+                            <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-300 lg:mx-auto">
+                                <b>The Agentic Economy will flourish</b> when an agent built in one orchestration framework can discover,
+                                authenticate, and transact with agents built in other frameworks and representing other
+                                entities such as people, businesses, and governments.
                             </p>
                         </div>
 
@@ -99,8 +107,8 @@ const HomePage = () => {
                 </div>
 
                 {/* CTA Section */}
-                <div className="bg-gradient-to-r from-purple-600 to-pink-600">
-                    <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
+                <div className="bg-gradient-to-r from-purple-600 to-pink-600 w-full max-w-full">
+                    <div className="w-full max-w-full mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
                         <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
                             <span className="block">Ready to get started?</span>
                             <span className="block">Start chatting with our agents today.</span>
