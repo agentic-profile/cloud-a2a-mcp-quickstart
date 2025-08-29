@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import Page from '@/components/Page';
+import { Button } from '@/components/Button';
 
 interface Message {
     id: string;
@@ -99,14 +100,14 @@ export const ChatPage = () => {
                         placeholder="Type your message here..."
                                                         className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-transparent"
                     />
-                    <button
+                    <Button
                         onClick={handleSendMessage}
                         disabled={!inputText.trim()}
-                                                        className="px-4 py-2 bg-dodgerblue hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg text-white transition-colors duration-200 flex items-center space-x-2"
+                        variant="primary"
                     >
                         <PaperAirplaneIcon className="h-4 w-4" />
                         <span className="hidden sm:inline">Send</span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 

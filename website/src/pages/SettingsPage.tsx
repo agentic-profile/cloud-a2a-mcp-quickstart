@@ -8,6 +8,7 @@ import {
     XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Switch } from '@/components/Switch';
+import { Button } from '@/components/Button';
 import Page from '@/components/Page';
 import { useSettingsStore } from '@/stores';
 
@@ -114,33 +115,37 @@ const SettingsPage = () => {
                                         className="flex-1 px-3 py-2 border-2 border-dodgerblue rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue"
                                         autoFocus
                                     />
-                                    <button
+                                    <Button
                                         onClick={item.onSave}
-                                        className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                                        variant="success"
+                                        size="sm"
                                     >
                                         <CheckIcon className="w-4 h-4" />
                                         <span>Save</span>
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={item.onCancel}
-                                        className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                                        variant="secondary"
+                                        size="sm"
                                     >
                                         <XMarkIcon className="w-4 h-4" />
                                         <span>Cancel</span>
-                                    </button>
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="flex items-center space-x-2">
                                     <span className="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                                         {item.value}
                                     </span>
-                                    <button
+                                    <Button
                                         onClick={item.onEdit}
-                                        className="px-2 py-1 text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-200 flex items-center space-x-1"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="px-2 py-1 text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                     >
                                         <PencilIcon className="w-4 h-4" />
                                         <span className="text-xs">Edit</span>
-                                    </button>
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -296,12 +301,12 @@ const SettingsPage = () => {
 
             {/* Action Buttons */}
             <div className="mt-8 flex justify-end space-x-3">
-                <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
+                <Button variant="ghost">
                     Cancel
-                </button>
-                <button className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-dodgerblue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
+                </Button>
+                <Button variant="primary">
                     Save Changes
-                </button>
+                </Button>
             </div>
         </Page>
     );

@@ -5,6 +5,7 @@ import {
     GlobeAltIcon,
     ArrowRightIcon 
 } from '@heroicons/react/24/outline';
+import { Button } from '@/components/Button';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 const HomePage = () => {
@@ -67,12 +68,14 @@ const HomePage = () => {
                                     </p>
                                     <div className="mt-5 sm:mt-8 flex justify-center">
                                         <div className="mt-3 sm:mt-0">
-                                            <button
+                                            <Button
                                                 onClick={scrollToFeatures}
-                                                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-900/30 md:py-4 md:text-lg md:px-10 transition-colors duration-200 cursor-pointer"
+                                                variant="secondary"
+                                                size="lg"
+                                                className="w-full"
                                             >
                                                 Learn More
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
