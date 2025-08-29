@@ -36,7 +36,7 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
                         <div className="flex items-center flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-3">
                                 <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                                    A2A and MCP Quickstart
+                                    Cloud A2A and MCP Quickstart
                                 </span>
                             </Link>
                         </div>

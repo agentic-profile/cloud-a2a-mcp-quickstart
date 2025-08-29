@@ -5,6 +5,7 @@ import {
     ShieldCheckIcon,
     CloudIcon
 } from '@heroicons/react/24/outline';
+import Page from '@/components/Page';
 
 const SettingsPage = () => {
     const [darkMode, setDarkMode] = useState(false);
@@ -221,15 +222,10 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-6">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Settings
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Manage your account preferences and application settings
-                </p>
-            </div>
+        <Page
+            title="Settings"
+            subtitle="Manage your account preferences and application settings"
+        >
 
             <div className="space-y-6">
                 {settingsSections.map((section) => (
@@ -269,7 +265,7 @@ const SettingsPage = () => {
                     Save Changes
                 </button>
             </div>
-        </div>
+        </Page>
     );
 };
 

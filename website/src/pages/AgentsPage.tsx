@@ -3,6 +3,9 @@ import {
     StarIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
+import { Card, CardBody } from '@/components/Card';
+import { Avatar, Chip, Button } from '@heroui/react';
+import Page from '@/components/Page';
 
 interface Agent {
     id: string;
@@ -73,13 +76,13 @@ const AgentsPage = () => {
     const getStatusColor = (status: Agent['status']) => {
         switch (status) {
             case 'online':
-                return 'bg-green-500';
+                return 'success';
             case 'busy':
-                return 'bg-yellow-500';
+                return 'warning';
             case 'offline':
-                return 'bg-gray-400';
+                return 'default';
             default:
-                return 'bg-gray-400';
+                return 'default';
         }
     };
 
@@ -96,92 +99,105 @@ const AgentsPage = () => {
         }
     };
 
+    const getAvatarColor = (status: Agent['status']) => {
+        switch (status) {
+            case 'online':
+                return 'success';
+            case 'busy':
+                return 'warning';
+            case 'offline':
+                return 'default';
+            default:
+                return 'default';
+        }
+    };
+
+    console.log('AgentsPage rendering, agents count:', agents.length);
+    
     return (
-        <div className="max-w-4xl mx-auto px-4 py-6">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    AI Agents
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Connect with specialized AI agents for various tasks and expertise areas
-                </p>
-            </div>
+        <Page
+            title={`AI Agents (${agents.length})`}
+            subtitle="Connect with specialized AI agents for various tasks and expertise areas"
+        >
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
                 {agents.map((agent) => (
-                    <div
-                        key={agent.id}
-                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-200"
-                    >
-                        <div className="flex items-start space-x-4">
-                            {/* Avatar */}
-                            <div className="relative">
-                                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                    {agent.avatar}
-                                </div>
-                                <div className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(agent.status)} rounded-full border-2 border-white dark:border-gray-800`} />
-                            </div>
+                    <Card key={agent.id} className="w-full rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800">
+                        <CardBody>
+                            <div className="flex items-start space-x-4">
+                                {/* Avatar */}
+                                <Avatar
+                                    name={agent.avatar}
+                                    size="lg"
+                                    color={getAvatarColor(agent.status)}
+                                    className="text-lg font-bold"
+                                />
 
-                            {/* Agent Info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {agent.name}
-                                    </h3>
-                                    <div className="flex items-center space-x-2">
-                                        <StarIcon className="w-5 h-5 text-yellow-400" />
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {agent.rating}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                                    {agent.description}
-                                </p>
-
-                                {/* Specialties */}
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                    {agent.specialties.map((specialty, index) => (
-                                        <span
-                                            key={index}
-                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200"
-                                        >
-                                            {specialty}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                {/* Status and Last Seen */}
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                            agent.status === 'online' 
-                                                ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-                                                : agent.status === 'busy'
-                                                ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200'
-                                                : 'bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200'
-                                        }`}>
-                                            {getStatusText(agent.status)}
-                                        </span>
-                                        <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-                                            <ClockIcon className="w-4 h-4" />
-                                            <span>{agent.lastSeen}</span>
+                                {/* Agent Info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-lg font-semibold">
+                                            {agent.name}
+                                        </h3>
+                                        <div className="flex items-center space-x-2">
+                                            <StarIcon className="w-5 h-5 text-yellow-400" />
+                                            <span className="text-sm font-medium">
+                                                {agent.rating}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    {/* Chat Button */}
-                                    <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
-                                        <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
-                                        Chat
-                                    </button>
+                                    <p className="text-foreground-500 mb-3">
+                                        {agent.description}
+                                    </p>
+
+                                    {/* Specialties */}
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {agent.specialties.map((specialty, index) => (
+                                            <Chip
+                                                key={index}
+                                                size="sm"
+                                                color="secondary"
+                                                variant="flat"
+                                            >
+                                                {specialty}
+                                            </Chip>
+                                        ))}
+                                    </div>
+
+                                    {/* Status and Last Seen */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <Chip
+                                                size="sm"
+                                                color={getStatusColor(agent.status)}
+                                                variant="flat"
+                                            >
+                                                {getStatusText(agent.status)}
+                                            </Chip>
+                                            <div className="flex items-center space-x-1 text-sm text-foreground-500">
+                                                <ClockIcon className="w-4 h-4" />
+                                                <span>{agent.lastSeen}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Chat Button */}
+                                        <Button
+                                            color="secondary"
+                                            variant="solid"
+                                            size="sm"
+                                            startContent={<ChatBubbleLeftRightIcon className="w-4 h-4" />}
+                                        >
+                                            Chat
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </CardBody>
+                    </Card>
                 ))}
             </div>
-        </div>
+        </Page>
     );
 };
 

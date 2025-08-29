@@ -9,6 +9,7 @@ import {
     BoltIcon,
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import Page from '@/components/Page';
 
 interface MCPService {
     id: string;
@@ -132,15 +133,11 @@ const MCPPage = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    MCP Services
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Manage and interact with Model Context Protocol services for extended functionality
-                </p>
-            </div>
+        <Page
+            title="MCP Services"
+            subtitle="Manage and interact with Model Context Protocol services for extended functionality"
+            maxWidth="6xl"
+        >
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcpServices.map((service) => (
@@ -238,7 +235,7 @@ const MCPPage = () => {
                     </div>
                 ))}
             </div>
-        </div>
+        </Page>
     );
 };
 

@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* HeroUI CSS Variables */
+:root {
+  --heroui-card-radius: 0.75rem;
+  --heroui-card-border: 1px solid rgb(229 231 235);
+  --heroui-card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --heroui-card-bg: rgb(255 255 255);
+}
+
+.dark {
+  --heroui-card-border: 1px solid rgb(55 65 81);
+  --heroui-card-bg: rgb(31 41 55);
+}
+
+/* Basic HeroUI component styling */
+.heroui-card {
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm;
+}
+
+.heroui-button {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+.heroui-button-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.heroui-chip {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.heroui-chip-secondary {
+  @apply bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200;
+}
+
+.heroui-chip-success {
+  @apply bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200;
+}
+
+.heroui-chip-warning {
+  @apply bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200;
+}
+
+.heroui-chip-default {
+  @apply bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
