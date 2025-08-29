@@ -17,7 +17,7 @@ const BottomNavigation = () => {
     ];
 
     return (
-        <nav className="block lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t-4 border-green-500 z-50 w-full max-w-full overflow-hidden">
+        <nav className="block lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 z-50 w-full max-w-full overflow-hidden">
             <div className="flex justify-around w-full">
                 {navigation.map((item) => (
                     <Link

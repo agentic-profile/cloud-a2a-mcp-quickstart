@@ -48,25 +48,25 @@ const HomePage = () => {
             <main className="flex-1 w-full max-w-full overflow-hidden">
                 <div className="relative w-full max-w-full overflow-hidden">
                     <div className="w-full max-w-full">
-                        <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-                            <div className="mt-10 mx-auto w-full max-w-full px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-                                <div className="sm:text-center lg:text-left">
-                                    <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+                        <div className="relative z-10 flex items-center justify-center min-h-screen pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+                            <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+                                <div className="text-center">
+                                    <h1 className="text-4xl tracking-tight font-bold text-gray-900 dark:text-white sm:text-5xl md:text-6xl leading-tight">
                                         <span className="block xl:inline">Welcome to the </span>{' '}
-                                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 xl:inline">
+                                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 xl:inline leading-tight">
                                             Agentic Economy
                                         </span>
                                     </h1>
-                                    <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                    <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
                                         This open-source quickstart makes it easy to deploy scalable A2A and MCP services
                                         on popular cloud providers.
                                     </p>
-                                    <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                    <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
                                         Quickstart examples support global discovery, decentralized
                                         authentication, and transactions in the Agentic Economy.
                                     </p>
-                                    <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                                        <div className="mt-3 sm:mt-0 sm:ml-3">
+                                    <div className="mt-5 sm:mt-8 flex justify-center">
+                                        <div className="mt-3 sm:mt-0">
                                             <button
                                                 onClick={scrollToFeatures}
                                                 className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-900/30 md:py-4 md:text-lg md:px-10 transition-colors duration-200 cursor-pointer"
@@ -152,16 +152,13 @@ const HomePage = () => {
                             {/* Company Info */}
                             <div className="col-span-1 md:col-span-2">
                                 <div className="flex items-center space-x-3 mb-4">
-                                    <div className="h-8 w-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <span className="text-white font-bold text-sm">DA</span>
-                                    </div>
                                     <span className="text-xl font-bold text-white">
-                                        Decentralized Agents
+                                        Agent World Congress
                                     </span>
                                 </div>
                                 <p className="text-gray-300 text-sm leading-6 max-w-md">
-                                    Empowering the future of AI through decentralized agent orchestration, 
-                                    authentication, and interoperability across frameworks.
+                                    Connecting agent builders with technology providers, cloud services,
+                                    and capital partners to create the next 80 billion agents in 18 months.
                                 </p>
                             </div>
 
