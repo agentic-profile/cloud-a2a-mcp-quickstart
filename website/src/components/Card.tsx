@@ -13,7 +13,7 @@ import Icon from "./Icon";
 
 
 export function Card({ className = "", ...props }: React.ComponentProps<typeof HeroCard> ) {
-    return <HeroCard className={clsx("p-2",className)} {...props} />
+    return <HeroCard className={clsx("p-2 rounded-xl",className)} {...props} />
 }
 
 type CardHeaderProps = {
@@ -30,7 +30,7 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, spinne
         : ( Boolean(onRefresh) ? <Icon src={refreshIcon} onClick={onRefresh} /> : null );
 
     return (
-        <HeroCardHeader className={clsx("relative p-2 font-bold",className)} {...props}>
+        <HeroCardHeader className={clsx("relative p-2 font-bold rounded-xl",className)} {...props}>
             <div className="absolute flex top-3 right-3 gap-3">
                 { Boolean(onEdit) && <Icon src={editIcon} onClick={onEdit} /> }
                 { refreshSpinner }
@@ -42,5 +42,5 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, spinne
 }
 
 export function CardBody({ className = "", ...props }: any ) {
-    return <HeroCardBody className={clsx("p-2",className)} {...props} />
+    return <HeroCardBody className={clsx("p-2 rounded-xl",className)} {...props} />
 }

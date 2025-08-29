@@ -55,6 +55,37 @@ export const Switch = forwardRef<HTMLButtonElement, CustomSwitchProps>(
             }
         };
 
+        const getOutlineClasses = () => {
+            if (disabled) return 'border-gray-300 dark:border-gray-600';
+            
+            switch (color) {
+                case 'primary':
+                    return isSelected 
+                        ? 'border-dodgerblue dark:border-dodgerblue' 
+                        : 'border-gray-300 dark:border-gray-600';
+                case 'secondary':
+                    return isSelected 
+                        ? 'border-purple-500 dark:border-purple-500' 
+                        : 'border-gray-300 dark:border-gray-600';
+                case 'success':
+                    return isSelected 
+                        ? 'border-green-500 dark:border-green-500' 
+                        : 'border-gray-300 dark:border-gray-600';
+                case 'warning':
+                    return isSelected 
+                        ? 'border-yellow-500 dark:border-yellow-500' 
+                        : 'border-gray-300 dark:border-gray-600';
+                case 'danger':
+                    return isSelected 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-gray-300 dark:border-gray-600';
+                default:
+                    return isSelected 
+                        ? 'border-dodgerblue dark:border-dodgerblue' 
+                        : 'border-gray-300 dark:border-gray-600';
+            }
+        };
+
         const getSizeClasses = () => {
             switch (size) {
                 case 'sm':
@@ -106,6 +137,7 @@ export const Switch = forwardRef<HTMLButtonElement, CustomSwitchProps>(
                     relative inline-flex items-center rounded-full transition-all duration-300 ease-in-out 
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue 
                     disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
+                    border-2 ${getOutlineClasses()}
                     ${getSizeClasses()}
                     ${getColorClasses()}
                     ${className}

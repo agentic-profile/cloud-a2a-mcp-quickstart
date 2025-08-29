@@ -9,7 +9,11 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        dodgerblue: '#1E90FF',
+      },
+    },
   },
   plugins: [heroui()],
 }

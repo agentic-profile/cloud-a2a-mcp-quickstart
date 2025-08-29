@@ -12,7 +12,7 @@ interface TopNavigationProps {
 
 const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => {
     return (
-        <nav className="hidden lg:block bg-white dark:bg-gray-800 shadow-sm border-b-4 border-red-500 dark:border-gray-700 w-full max-w-full overflow-hidden">
+        <nav className="hidden lg:block bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 w-full max-w-full overflow-hidden">
             <div className="w-full px-2">
                 <div className="flex justify-between items-center h-16 w-full max-w-full">
                     {/* Left side - Sidebar toggle and Logo */}
