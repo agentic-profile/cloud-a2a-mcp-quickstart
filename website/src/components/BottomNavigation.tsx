@@ -25,7 +25,7 @@ const BottomNavigation = () => {
                         to={item.href}
                         className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 transition-colors duration-200 ${
                             item.current
-                                ? 'text-purple-600 dark:text-purple-400'
+                                ? 'text-dodgerblue dark:text-dodgerblue'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                         }`}
                     >

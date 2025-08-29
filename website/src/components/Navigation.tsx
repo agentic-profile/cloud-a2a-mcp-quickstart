@@ -41,8 +41,8 @@ const Navigation = () => {
                                     to={item.href}
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
                                         item.current
-                                            ? 'border-purple-500 text-gray-900 dark:text-white'
-                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
+                                                                                ? 'border-dodgerblue text-gray-900 dark:text-white'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                                     }`}
                                 >
                                     {item.name}
@@ -58,7 +58,7 @@ const Navigation = () => {
                         {/* Mobile menu button */}
                         <button
                             onClick={toggleMobileMenu}
-                            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
+                            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-dodgerblue"
                             aria-expanded="false"
                         >
                             <span className="sr-only">Open main menu</span>
@@ -81,7 +81,7 @@ const Navigation = () => {
                             to={item.href}
                             className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                                 item.current
-                                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-l-4 border-purple-500'
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-dodgerblue dark:text-dodgerblue border-l-4 border-dodgerblue'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                             onClick={() => setIsMobileMenuOpen(false)}

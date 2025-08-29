@@ -1,76 +1,70 @@
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import { 
     Cog6ToothIcon,
-    UserIcon,
     ShieldCheckIcon,
-    CloudIcon
+    PencilIcon,
+    CheckIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { Switch } from '@/components/Switch';
 import Page from '@/components/Page';
+import { useSettingsStore } from '@/stores';
 
 const SettingsPage = () => {
-    const [darkMode, setDarkMode] = useState(false);
-    const [notifications, setNotifications] = useState(true);
-    const [autoSave, setAutoSave] = useState(true);
-    const [language, setLanguage] = useState('en');
+    const [isEditingServerUrl, setIsEditingServerUrl] = useState(false);
+    const [tempServerUrl, setTempServerUrl] = useState('');
+    const { theme, setTheme } = useTheme();
+
+    const {
+        serverUrl,
+        setServerUrl
+    } = useSettingsStore();
+
+    const handleEditServerUrl = () => {
+        setTempServerUrl(serverUrl);
+        setIsEditingServerUrl(true);
+    };
+
+    const handleSaveServerUrl = () => {
+        setServerUrl(tempServerUrl);
+        setIsEditingServerUrl(false);
+    };
+
+    const handleCancelServerUrl = () => {
+        setTempServerUrl(serverUrl);
+        setIsEditingServerUrl(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSaveServerUrl();
+        } else if (e.key === 'Escape') {
+            handleCancelServerUrl();
+        }
+    };
 
     const settingsSections = [
-        {
-            title: 'Profile',
-            icon: UserIcon,
-            items: [
-                {
-                    name: 'Display Name',
-                    value: 'John Doe',
-                    type: 'text',
-                    editable: true
-                },
-                {
-                    name: 'Email',
-                    value: 'john.doe@example.com',
-                    type: 'email',
-                    editable: true
-                },
-                {
-                    name: 'Bio',
-                    value: 'AI enthusiast and developer',
-                    type: 'textarea',
-                    editable: true
-                }
-            ]
-        },
         {
             title: 'Preferences',
             icon: Cog6ToothIcon,
             items: [
                 {
+                    name: 'Server URL',
+                    value: isEditingServerUrl ? tempServerUrl : serverUrl,
+                    isEditing: isEditingServerUrl,
+                    type: 'editable-text',
+                    onEdit: handleEditServerUrl,
+                    onSave: handleSaveServerUrl,
+                    onCancel: handleCancelServerUrl,
+                    onChange: setTempServerUrl,
+                    placeholder: 'http://localhost:3000'
+                },
+                {
                     name: 'Dark Mode',
-                    value: darkMode,
+                    value: theme === 'dark',
                     type: 'toggle',
-                    onChange: setDarkMode
-                },
-                {
-                    name: 'Notifications',
-                    value: notifications,
-                    type: 'toggle',
-                    onChange: setNotifications
-                },
-                {
-                    name: 'Auto Save',
-                    value: autoSave,
-                    type: 'toggle',
-                    onChange: setAutoSave
-                },
-                {
-                    name: 'Language',
-                    value: language,
-                    type: 'select',
-                    options: [
-                        { value: 'en', label: 'English' },
-                        { value: 'es', label: 'Spanish' },
-                        { value: 'fr', label: 'French' },
-                        { value: 'de', label: 'German' }
-                    ],
-                    onChange: setLanguage
+                    onChange: (enabled: boolean) => setTheme(enabled ? 'dark' : 'light')
                 }
             ]
         },
@@ -97,35 +91,85 @@ const SettingsPage = () => {
                     onChange: () => {}
                 }
             ]
-        },
-        {
-            title: 'Integrations',
-            icon: CloudIcon,
-            items: [
-                {
-                    name: 'AWS Services',
-                    value: true,
-                    type: 'toggle',
-                    onChange: () => {}
-                },
-                {
-                    name: 'Database Connections',
-                    value: 3,
-                    type: 'info',
-                    subtitle: '3 active connections'
-                },
-                {
-                    name: 'API Keys',
-                    value: '2 active keys',
-                    type: 'info',
-                    subtitle: 'Last rotated: 30 days ago'
-                }
-            ]
         }
     ];
 
     const renderSettingItem = (item: any) => {
         switch (item.type) {
+            case 'editable-text':
+                return (
+                    <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                {item.name}
+                            </p>
+                            {item.isEditing ? (
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="text"
+                                        value={item.value}
+                                        onChange={(e) => item.onChange(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder={item.placeholder}
+                                        className="flex-1 px-3 py-2 border-2 border-dodgerblue rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={item.onSave}
+                                        className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <CheckIcon className="w-4 h-4" />
+                                        <span>Save</span>
+                                    </button>
+                                    <button
+                                        onClick={item.onCancel}
+                                        className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <XMarkIcon className="w-4 h-4" />
+                                        <span>Cancel</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                        {item.value}
+                                    </span>
+                                    <button
+                                        onClick={item.onEdit}
+                                        className="px-2 py-1 text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                        <span className="text-xs">Edit</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            
+            case 'text':
+                return (
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {item.name}
+                            </p>
+                            {item.subtitle && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {item.subtitle}
+                                </p>
+                            )}
+                        </div>
+                        <input
+                            type="text"
+                            value={item.value}
+                            onChange={(e) => item.onChange(e.target.value)}
+                            placeholder={item.placeholder}
+                            className="block w-64 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:border-dodgerblue focus:ring-dodgerblue"
+                        />
+                    </div>
+                );
+            
             case 'toggle':
                 return (
                     <div className="flex items-center justify-between">
@@ -139,18 +183,12 @@ const SettingsPage = () => {
                                 </p>
                             )}
                         </div>
-                        <button
-                            onClick={() => item.onChange(!item.value)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                                item.value ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'
-                            }`}
-                        >
-                            <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                    item.value ? 'translate-x-6' : 'translate-x-1'
-                                }`}
-                            />
-                        </button>
+                        <Switch
+                            isSelected={item.value}
+                            onValueChange={item.onChange}
+                            size="sm"
+                            color="primary"
+                        />
                     </div>
                 );
             
@@ -170,7 +208,7 @@ const SettingsPage = () => {
                         <select
                             value={item.value}
                             onChange={(e) => item.onChange(e.target.value)}
-                            className="block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                            className="block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:border-dodgerblue focus:ring-dodgerblue"
                         >
                             {item.options.map((option: any) => (
                                 <option key={option.value} value={option.value}>
@@ -235,7 +273,7 @@ const SettingsPage = () => {
                     >
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                             <div className="flex items-center space-x-3">
-                                <section.icon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                <section.icon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue" />
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     {section.title}
                                 </h2>
@@ -258,10 +296,10 @@ const SettingsPage = () => {
 
             {/* Action Buttons */}
             <div className="mt-8 flex justify-end space-x-3">
-                <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
                     Cancel
                 </button>
-                <button className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                <button className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-dodgerblue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
                     Save Changes
                 </button>
             </div>

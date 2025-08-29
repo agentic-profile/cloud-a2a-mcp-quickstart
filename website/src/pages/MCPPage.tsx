@@ -10,6 +10,8 @@ import {
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import Page from '@/components/Page';
+import { Card, CardBody } from '@/components/Card';
+import { Chip } from '@heroui/react';
 
 interface MCPService {
     id: string;
@@ -97,13 +99,13 @@ const MCPPage = () => {
     const getStatusColor = (status: MCPService['status']) => {
         switch (status) {
             case 'active':
-                return 'bg-green-500';
+                return 'success';
             case 'maintenance':
-                return 'bg-yellow-500';
+                return 'warning';
             case 'inactive':
-                return 'bg-red-500';
+                return 'danger';
             default:
-                return 'bg-gray-400';
+                return 'default';
         }
     };
 
@@ -120,16 +122,16 @@ const MCPPage = () => {
         }
     };
 
-    const getCategoryColor = (category: string) => {
-        const colors = {
-            'Cloud Services': 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200',
-            'Database': 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200',
-            'File System': 'bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200',
-            'Web Tools': 'bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200',
-            'AI/ML': 'bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-200',
-            'Productivity': 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-200'
+    const getCategoryColor = (category: string): "default" | "success" | "warning" | "danger" | "secondary" | "primary" => {
+        const colors: Record<string, "default" | "success" | "warning" | "danger" | "secondary" | "primary"> = {
+            'Cloud Services': 'secondary',
+            'Database': 'success',
+            'File System': 'secondary',
+            'Web Tools': 'warning',
+            'AI/ML': 'danger',
+            'Productivity': 'primary'
         };
-        return colors[category as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200';
+        return colors[category] || 'default';
     };
 
     return (
@@ -141,10 +143,11 @@ const MCPPage = () => {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcpServices.map((service) => (
-                    <div
+                    <Card
                         key={service.id}
-                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-200"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow duration-200"
                     >
+                        <CardBody>
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center space-x-3">
@@ -155,17 +158,22 @@ const MCPPage = () => {
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         {service.name}
                                     </h3>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(service.category)}`}>
+                                    <Chip
+                                        size="sm"
+                                        color={getCategoryColor(service.category)}
+                                        variant="flat"
+                                    >
                                         {service.category}
-                                    </span>
+                                    </Chip>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <div className={`w-3 h-3 ${getStatusColor(service.status)} rounded-full`} />
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    {getStatusText(service.status)}
-                                </span>
-                            </div>
+                            <Chip
+                                size="sm"
+                                color={getStatusColor(service.status)}
+                                variant="flat"
+                            >
+                                {getStatusText(service.status)}
+                            </Chip>
                         </div>
 
                         {/* Description */}
@@ -186,18 +194,24 @@ const MCPPage = () => {
                             </h4>
                             <div className="flex flex-wrap gap-1">
                                 {service.features.slice(0, 3).map((feature, index) => (
-                                    <span
+                                    <Chip
                                         key={index}
-                                        className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                        size="sm"
+                                        color="secondary"
+                                        variant="flat"
+                                        startContent={<CheckCircleIcon className="w-3 h-3" />}
                                     >
-                                        <CheckCircleIcon className="w-3 h-3 mr-1" />
                                         {feature}
-                                    </span>
+                                    </Chip>
                                 ))}
                                 {service.features.length > 3 && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <Chip
+                                        size="sm"
+                                        color="secondary"
+                                        variant="flat"
+                                    >
                                         +{service.features.length - 3} more
-                                    </span>
+                                    </Chip>
                                 )}
                             </div>
                         </div>
@@ -223,16 +237,17 @@ const MCPPage = () => {
 
                         {/* Actions */}
                         <div className="flex space-x-2">
-                            <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                            <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-dodgerblue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
                                 <WrenchScrewdriverIcon className="w-4 h-4 mr-2" />
                                 Configure
                             </button>
-                            <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                            <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dodgerblue transition-colors duration-200">
                                 <ServerIcon className="w-4 h-4 mr-2" />
                                 Test
                             </button>
                         </div>
-                    </div>
+                        </CardBody>
+                    </Card>
                 ))}
             </div>
         </Page>

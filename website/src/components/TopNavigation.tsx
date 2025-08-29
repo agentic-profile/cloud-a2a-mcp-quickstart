@@ -20,7 +20,7 @@ const TopNavigation = ({ onSidebarToggle, sidebarOpen }: TopNavigationProps) => 
                         {/* Sidebar Toggle - Far left */}
                         <button
                             onClick={() => onSidebarToggle(!sidebarOpen)}
-                            className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 flex-shrink-0"
+                            className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-dodgerblue flex-shrink-0"
                         >
                             <span className="sr-only">Toggle sidebar</span>
                             <div className="w-5 h-5 flex items-center justify-center">

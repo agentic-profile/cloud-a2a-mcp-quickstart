@@ -56,18 +56,18 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                 to={item.href}
                                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                                     item.current
-                                        ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-r-2 border-purple-500'
+                                        ? 'bg-blue-100 dark:bg-blue-900/20 text-dodgerblue dark:text-dodgerblue border-r-2 border-dodgerblue'
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                                 onClick={handleNavigation}
                             >
                                 <div className="w-5 h-5 flex items-center justify-center mr-3">
                                     <item.icon 
-                                        className={`w-5 h-5 transition-colors duration-200 ${
-                                            item.current
-                                                ? 'text-purple-500 dark:text-purple-400'
-                                                : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400'
-                                        }`}
+                                                                            className={`w-5 h-5 transition-colors duration-200 ${
+                                        item.current
+                                            ? 'text-dodgerblue dark:text-dodgerblue'
+                                            : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400'
+                                    }`}
                                     />
                                 </div>
                                 {item.name}

@@ -69,17 +69,17 @@ export const ChatPage = () => {
                         >
                             <div
                                 className={`max-w-xs sm:max-w-sm lg:max-w-md px-4 py-2 rounded-lg ${
-                                    message.sender === 'user'
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                                                message.sender === 'user'
+                                                ? 'bg-dodgerblue text-white'
+                                                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
                                 }`}
                             >
                                 <p className="text-sm">{message.text}</p>
-                                <p className={`text-xs mt-1 ${
-                                    message.sender === 'user' 
-                                        ? 'text-purple-200' 
-                                        : 'text-gray-500 dark:text-gray-400'
-                                }`}>
+                                <p                                         className={`text-xs mt-1 ${
+                                            message.sender === 'user' 
+                                                ? 'text-blue-200' 
+                                                : 'text-gray-500 dark:text-gray-400'
+                                        }`}>
                                     {message.timestamp.toLocaleTimeString()}
                                 </p>
                             </div>
@@ -97,12 +97,12 @@ export const ChatPage = () => {
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Type your message here..."
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-transparent"
                     />
                     <button
                         onClick={handleSendMessage}
                         disabled={!inputText.trim()}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg text-white transition-colors duration-200 flex items-center space-x-2"
+                                                        className="px-4 py-2 bg-dodgerblue hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg text-white transition-colors duration-200 flex items-center space-x-2"
                     >
                         <PaperAirplaneIcon className="h-4 w-4" />
                         <span className="hidden sm:inline">Send</span>
