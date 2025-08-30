@@ -81,6 +81,9 @@ const Page: React.FC<PageProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Bottom spacing to ensure content isn't covered by BottomNavigation */}
+            <div className="h-20 lg:hidden"></div>
         </div>
     );
 };

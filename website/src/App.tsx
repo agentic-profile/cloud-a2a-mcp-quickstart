@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import AgentsPage from './pages/AgentsPage';
 import VenturePage from './pages/agents/VenturePage';
 import MCPPage from './pages/MCPPage';
+import McpDebugPage from './pages/mcp/McpDebugPage';
 import SettingsPage from './pages/SettingsPage';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                     <Route path="/agents" element={<AgentsPage />} />
                     <Route path="/agents/venture" element={<VenturePage />} />
                     <Route path="/mcp" element={<MCPPage />} />
+                    <Route path="/mcp/debug" element={<McpDebugPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
             </Layout>

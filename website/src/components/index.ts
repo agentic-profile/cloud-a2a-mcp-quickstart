@@ -13,3 +13,9 @@ export { Switch } from './Switch';
 
 // Card components
 export { Card, CardBody, CardHeader } from './Card';
+
+// Debug components
+export { JsonRpcDebug } from './JsonRpcDebug';
+
+// Loading components
+export { Spinner } from './Spinner';

@@ -7,10 +7,12 @@ import {
     CircleStackIcon,
     CpuChipIcon,
     BoltIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    BugAntIcon
 } from '@heroicons/react/24/outline';
 import { Chip } from '@heroui/react';
 import { Page, Card, CardBody, Button } from '@/components';
+import { Link } from 'react-router-dom';
 
 interface MCPService {
     id: string;
@@ -139,6 +141,29 @@ const MCPPage = () => {
             subtitle="Manage and interact with Model Context Protocol services for extended functionality"
             maxWidth="6xl"
         >
+            {/* JSON RPC Debug Link */}
+            <div className="mb-6">
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <CardBody>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    JSON RPC Debug Tool
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Test JSON RPC requests to your MCP agents with our interactive debug tool
+                                </p>
+                            </div>
+                            <Link to="/mcp/debug">
+                                <Button color="primary" size="lg">
+                                    <BugAntIcon className="w-5 h-5 mr-2" />
+                                    Open Debug Tool
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcpServices.map((service) => (
