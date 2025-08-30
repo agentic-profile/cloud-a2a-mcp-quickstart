@@ -1,14 +1,16 @@
 import { 
-
     UserGroupIcon,
-
+    ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { Card, CardBody } from '@/components/Card';
 import { Button } from '@heroui/react';
 import Page from '@/components/Page';
 
 const VenturePage = () => {
-
+    const handleChatClick = () => {
+        // Navigate to the ChatPage
+        window.location.href = '/chat';
+    };
 
     return (
         <Page
@@ -45,6 +47,19 @@ const VenturePage = () => {
                         </div>
                     </CardBody>
                 </Card>
+            </div>
+
+            {/* Chat Button */}
+            <div className="mt-8 text-center">
+                <Button
+                    color="success"
+                    size="lg"
+                    variant="solid"
+                    startContent={<ChatBubbleLeftRightIcon className="w-5 h-5" />}
+                    onClick={handleChatClick}
+                >
+                    Start Chat
+                </Button>
             </div>
         </Page>
     );

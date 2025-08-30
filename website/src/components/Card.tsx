@@ -43,5 +43,5 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, spinne
 }
 
 export function CardBody({ className = "", ...props }: any ) {
-    return <HeroCardBody className={clsx("p-2 rounded-xl",className)} {...props} />
+    return <HeroCardBody className={clsx("p-2",className)} {...props} />
 }
