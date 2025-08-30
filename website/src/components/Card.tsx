@@ -13,7 +13,8 @@ import Icon from "./Icon";
 
 
 export function Card({ className = "", ...props }: React.ComponentProps<typeof HeroCard> ) {
-    return <HeroCard className={clsx("p-2 rounded-xl",className)} {...props} />
+    const baseClasses = "p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow duration-200";
+    return <HeroCard className={clsx(baseClasses,className)} {...props} />
 }
 
 type CardHeaderProps = {
