@@ -1,5 +1,6 @@
 import React from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { PageHeader } from './PageHeader';
 
 interface PageProps {
     children: React.ReactNode;
@@ -61,18 +62,10 @@ const Page: React.FC<PageProps> = ({
                         {headerContent ? (
                             headerContent
                         ) : (
-                            <>
-                                {title && (
-                                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                                        {title}
-                                    </h1>
-                                )}
-                                {subtitle && (
-                                    <p className="text-gray-600 dark:text-gray-400">
-                                        {subtitle}
-                                    </p>
-                                )}
-                            </>
+                            <PageHeader 
+                                title={title || ''} 
+                                subtitle={subtitle}
+                            />
                         )}
                     </div>
                 )}

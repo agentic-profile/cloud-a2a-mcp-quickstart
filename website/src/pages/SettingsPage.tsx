@@ -117,8 +117,7 @@ const SettingsPage = () => {
                                     />
                                     <Button
                                         onClick={item.onSave}
-                                        variant="success"
-                                        size="sm"
+                                        variant="primary"
                                     >
                                         <CheckIcon className="w-4 h-4" />
                                         <span>Save</span>
@@ -126,7 +125,6 @@ const SettingsPage = () => {
                                     <Button
                                         onClick={item.onCancel}
                                         variant="secondary"
-                                        size="sm"
                                     >
                                         <XMarkIcon className="w-4 h-4" />
                                         <span>Cancel</span>
@@ -297,16 +295,6 @@ const SettingsPage = () => {
                         </div>
                     </div>
                 ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 flex justify-end space-x-3">
-                <Button variant="ghost">
-                    Cancel
-                </Button>
-                <Button variant="primary">
-                    Save Changes
-                </Button>
             </div>
         </Page>
     );
