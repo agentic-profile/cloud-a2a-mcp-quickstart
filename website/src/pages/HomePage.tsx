@@ -5,8 +5,7 @@ import {
     GlobeAltIcon,
     ArrowRightIcon 
 } from '@heroicons/react/24/outline';
-import { Button } from '@/components/Button';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { Button, ThemeToggle } from '@/components';
 
 const HomePage = () => {
     const features = [

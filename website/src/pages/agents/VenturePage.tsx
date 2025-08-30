@@ -1,20 +1,42 @@
 import { 
-    UserGroupIcon,
     ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
-import { Card, CardBody } from '@/components/Card';
-import { Button } from '@heroui/react';
-import Page from '@/components/Page';
+import { Button, Card, CardBody, Page } from '@/components';
+import agentsData from '@/data/agents.json';
 
 const VenturePage = () => {
+    // Find the venture agent from the agents data
+    const ventureAgent = agentsData.find(agent => agent.id === 'venture');
+    
     const handleChatClick = () => {
-        // Navigate to the ChatPage
-        window.location.href = '/chat';
+        if (ventureAgent?.agentUrl) {
+            // Navigate to ChatPage with the venture agent's agentUrl parameter
+            window.location.href = `/chat?agentUrl=${encodeURIComponent(ventureAgent.agentUrl)}`;
+        } else {
+            // Fallback to regular chat page
+            window.location.href = '/chat';
+        }
     };
+
+    if (!ventureAgent) {
+        return (
+            <Page
+                title="Venture Agent"
+                subtitle="Agent not found"
+                maxWidth="6xl"
+            >
+                <div className="text-center">
+                    <p className="text-gray-600 dark:text-gray-400">
+                        Venture Agent data not found. Please check the agents configuration.
+                    </p>
+                </div>
+            </Page>
+        );
+    }
 
     return (
         <Page
-            title="Venture Agent"
+            title={ventureAgent.name}
             subtitle="Your AI-powered business development partner for strategic growth and partnerships"
             maxWidth="6xl"
         >
@@ -27,24 +49,6 @@ const VenturePage = () => {
                         <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
                             Let the Venture Agent help you build strategic partnerships and unlock new opportunities
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button
-                                color="primary"
-                                size="lg"
-                                variant="solid"
-                                startContent={<UserGroupIcon className="w-5 h-5" />}
-                            >
-                                Start Partnership Search
-                            </Button>
-                            <Button
-                                color="secondary"
-                                size="lg"
-                                variant="bordered"
-                                startContent={<UserGroupIcon className="w-5 h-5" />}
-                            >
-                                Learn More
-                            </Button>
-                        </div>
                     </CardBody>
                 </Card>
             </div>
@@ -54,10 +58,9 @@ const VenturePage = () => {
                 <Button
                     color="success"
                     size="lg"
-                    variant="solid"
-                    startContent={<ChatBubbleLeftRightIcon className="w-5 h-5" />}
                     onClick={handleChatClick}
                 >
+                    <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
                     Start Chat
                 </Button>
             </div>

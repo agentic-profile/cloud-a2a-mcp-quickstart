@@ -7,9 +7,7 @@ import {
     CheckIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import { Switch } from '@/components/Switch';
-import { Button } from '@/components/Button';
-import Page from '@/components/Page';
+import { Switch, Button, Page } from '@/components';
 import { useSettingsStore } from '@/stores';
 
 const SettingsPage = () => {

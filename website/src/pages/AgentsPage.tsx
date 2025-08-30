@@ -1,6 +1,6 @@
-import { Card, CardBody } from '@/components/Card';
 import { Avatar } from '@heroui/react';
-import Page from '@/components/Page';
+import { Button, Card, CardBody, Page } from '@/components';
+import agentsData from '@/data/agents.json';
 
 interface Agent {
     id: string;
@@ -8,19 +8,12 @@ interface Agent {
     description: string;
     avatar: string;
     route: string;
+    agentUrl: string;
 }
 
 const AgentsPage = () => {
-    // Agent definitions - in a real app this could be dynamically loaded from the agents directory
-    const agents: Agent[] = [
-        {
-            id: 'venture',
-            name: 'Venture Agent',
-            description: 'Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, new hires, and technology partners.',
-            avatar: 'VA',
-            route: '/agents/venture'
-        }
-    ];
+    // Import agents data from the JSON file
+    const agents: Agent[] = agentsData;
 
     const handleAgentAction = (agent: Agent) => {
         if (agent.route) {
@@ -29,6 +22,16 @@ const AgentsPage = () => {
         } else {
             // Default chat action
             console.log(`Starting chat with ${agent.name}`);
+        }
+    };
+
+    const handleChatClick = (agent: Agent) => {
+        // Navigate to ChatPage with agentUrl parameter
+        if (agent.agentUrl) {
+            window.location.href = `/chat?agentUrl=${encodeURIComponent(agent.agentUrl)}`;
+        } else {
+            // Fallback to regular chat page
+            window.location.href = '/chat';
         }
     };
     
@@ -40,10 +43,7 @@ const AgentsPage = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
                 {agents.map((agent) => (
                     <Card key={agent.id} className="w-full">
-                        <CardBody 
-                            onClick={() => handleAgentAction(agent)}
-                            className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
+                        <CardBody>
                             <Avatar
                                 name={agent.avatar}
                                 size="lg"
@@ -57,6 +57,24 @@ const AgentsPage = () => {
                             <p className="text-foreground-500 mb-3">
                                 {agent.description}
                             </p>
+                            
+                            {/* Action Buttons */}
+                            <div className="flex space-x-2 mt-4">
+                                <Button
+                                    color="primary"
+                                    size="sm"
+                                    onClick={() => handleAgentAction(agent)}
+                                >
+                                    Details
+                                </Button>
+                                <Button
+                                    color="secondary"
+                                    size="sm"
+                                    onClick={() => handleChatClick(agent)}
+                                >
+                                    Chat
+                                </Button>
+                            </div>
                         </CardBody>
                     </Card>
                 ))}

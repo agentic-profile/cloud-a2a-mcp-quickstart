@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import TopNavigation from './TopNavigation';
-import BottomNavigation from './BottomNavigation';
-import Sidebar from './Sidebar';
+import { TopNavigation, BottomNavigation, Sidebar } from './index';
 
 interface LayoutProps {
     children: React.ReactNode;

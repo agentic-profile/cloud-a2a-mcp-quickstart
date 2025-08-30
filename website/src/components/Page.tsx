@@ -1,6 +1,5 @@
 import React from 'react';
-import { ThemeToggle } from './ThemeToggle';
-import { PageHeader } from './PageHeader';
+import { ThemeToggle, PageHeader } from './index';
 
 interface PageProps {
     children: React.ReactNode;

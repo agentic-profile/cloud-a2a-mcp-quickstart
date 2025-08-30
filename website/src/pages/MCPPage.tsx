@@ -9,10 +9,8 @@ import {
     BoltIcon,
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
-import Page from '@/components/Page';
-import { Card, CardBody } from '@/components/Card';
 import { Chip } from '@heroui/react';
-import { Button } from '@/components/Button';
+import { Page, Card, CardBody, Button } from '@/components';
 
 interface MCPService {
     id: string;
