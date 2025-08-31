@@ -26,3 +26,7 @@ export { UserProfileStatus } from './UserProfileStatus';
 // Identity components
 export { CreateIdentityForm } from './CreateIdentityForm';
 export { UserProfileDisplay } from './UserProfileDisplay';
+
+// Utility components
+export { LabelValue } from './LabelValue';
+export { LabelJson } from './LabelJson';

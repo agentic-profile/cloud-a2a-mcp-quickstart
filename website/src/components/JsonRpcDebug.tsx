@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, CardBody, Spinner } from './index';
+import { Card, CardBody, Spinner, LabelValue, LabelJson } from './index';
 
 interface Result {
     fetchResponse: Response | undefined;
@@ -96,14 +96,6 @@ export const JsonRpcDebug = ({
         }
     }, [request]);
 
-    const formatJson = (data: any): string => {
-        try {
-            return JSON.stringify(data, null, 4);
-        } catch {
-            return String(data);
-        }
-    };
-
     const getHttpStatusColor = (status?: number): string => {
         if (!status) return 'text-gray-600 dark:text-gray-400';
         if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
@@ -133,41 +125,25 @@ export const JsonRpcDebug = ({
             {request && (
                 <Card>
                     <CardBody>
-                        <h3>
-                            JSON RPC Request
-                        </h3>
-                        
-                        {/* Request URL */}
-                        <div className="mb-3">
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                URL:
-                            </div>
-                            <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm">
-                                {url}
-                            </code>
-                        </div>
+                        <h3>JSON RPC Request</h3>
+                        <LabelValue label="URL" value={url} />
 
                         {/* Request Headers */}
                         {requestInit?.headers && (
-                            <div className="mb-3">
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Request Headers:
-                                </div>
-                                <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-xs overflow-x-auto border border-gray-200 dark:border-gray-700">
-                                    {formatJson(formatHeaders(requestInit?.headers))}
-                                </pre>
-                            </div>
+                            <LabelJson
+                                label="Request Headers"
+                                data={formatHeaders(requestInit?.headers)}
+                                className="mb-3"
+                                preClassName="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm overflow-x-auto border border-blue-200 dark:border-blue-700"
+                            />
                         )}
 
                         {/* Request Body */}
-                        <div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                Request Body:
-                            </div>
-                            <pre className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm overflow-x-auto border border-blue-200 dark:border-blue-700">
-                                {typeof requestInit?.body === 'string' ? requestInit.body : ''}
-                            </pre>
-                        </div>
+                        <LabelJson 
+                            label="Request Body" 
+                            data={typeof requestInit?.body === 'string' ? requestInit.body : ''}
+                            preClassName="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm overflow-x-auto border border-blue-200 dark:border-blue-700"
+                        />
                     </CardBody>
                 </Card>
             )}
@@ -197,35 +173,18 @@ export const JsonRpcDebug = ({
                         {/* HTTP Status */}
                         {result.fetchResponse && (
                             <div className="mb-3">
-                                <h4>
-                                    HTTP Status:
-                                </h4>
-                                <div className="flex items-center">
-                                    <span className={`font-mono text-lg ${getHttpStatusColor(result.fetchResponse.status)}`}>
-                                        {result.fetchResponse.status} {result.fetchResponse.statusText}
-                                    </span>
-                                </div>
-                                <h4>
-                                    Response Headers:
-                                </h4>
-                                <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-xs overflow-x-auto border border-gray-200 dark:border-gray-700">
-                                    {formatJson(formatHeaders(result.fetchResponse.headers))}
-                                </pre>
+                                <LabelValue label="HTTP Status" value={`${result.fetchResponse.status} ${result.fetchResponse.statusText}`} />
+                                <LabelJson label="Response Headers" data={formatHeaders(result.fetchResponse.headers)} />
                             </div>
                         )}
 
                         {/* Response Body */}
                         <div className="mb-3">
-                            <h4>
-                                Response Body:
-                            </h4>
-                            <pre className={`p-3 rounded-md text-sm overflow-x-auto border ${
-                                result.error || (result.fetchResponse && !result.fetchResponse.ok)
-                                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' 
-                                    : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
-                            }`}>
-                                {result.data ? formatJson(result.data) : (result.text || 'No response body')}
-                            </pre>
+                            <LabelJson 
+                                label="Response Body" 
+                                data={result.data ? result.data : (result.text || 'No response body')}
+                                variant={result.error || (result.fetchResponse && !result.fetchResponse.ok) ? 'failure' : 'success'}
+                            />
                         </div>
 
                         {/* Error Details */}

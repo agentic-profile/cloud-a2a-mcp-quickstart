@@ -1,25 +1,11 @@
 import React, { useState } from 'react';
-import { Page, Card, CardBody, Button, JsonRpcDebug } from '@/components';
+import { Page, Card, CardBody, Button, JsonRpcDebug, LabelValue } from '@/components';
 import { MapPinIcon, MagnifyingGlassIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import { useSettingsStore } from '@/stores';
 
 interface LocationData {
     latitude: number;
     longitude: number;
-}
-
-interface MCPResponse {
-    jsonrpc: string;
-    id: number;
-    result?: {
-        content: Array<{
-            type: string;
-            text: string;
-        }>;
-    };
-    error?: {
-        code: number;
-        message: string;
-    };
 }
 
 interface Result {
@@ -30,14 +16,16 @@ interface Result {
 }
 
 const McpLocationPage = () => {
+    const { serverUrl } = useSettingsStore();
     const [locationData, setLocationData] = useState<LocationData>({
         latitude: 40.7128,
         longitude: -74.0060
     });
-    const [queryResult, setQueryResult] = useState<string>('');
-    const [isQuerying, setIsQuerying] = useState(false);
-    const [showUpdateDebug, setShowUpdateDebug] = useState(false);
-    const [updateRequest, setUpdateRequest] = useState<RequestInit | null>(null);
+
+    const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
+
+    // Construct the MCP endpoint URL
+    const mcpEndpoint = new URL('/mcp/location', serverUrl).toString();
 
     const handleLocationUpdate = () => {
         const mcpRequest = {
@@ -61,58 +49,35 @@ const McpLocationPage = () => {
             body: JSON.stringify(mcpRequest),
         };
 
-        setUpdateRequest(request);
-        setShowUpdateDebug(true);
+        setMcpRequest(request);
     };
 
-    const handleLocationQuery = async () => {
-        setIsQuerying(true);
-        setQueryResult('Querying location...');
-
-        try {
-            const mcpRequest = {
-                jsonrpc: "2.0",
-                id: 1,
-                method: "tools/call",
-                params: {
-                    name: "query",
-                }
-            };
-
-            const response = await fetch('/mcp/location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(mcpRequest),
-            });
-
-            if (response.ok) {
-                const data: MCPResponse = await response.json();
-                if (data.result?.content?.[0]?.text) {
-                    setQueryResult(data.result.content[0].text);
-                } else if (data.error) {
-                    setQueryResult(`Error: ${data.error.message}`);
-                } else {
-                    setQueryResult('No location data found');
-                }
-            } else {
-                setQueryResult(`HTTP Error: ${response.status} - ${response.statusText}`);
+    const handleLocationQuery = () => {
+        const mcpRequest = {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "tools/call",
+            params: {
+                name: "query",
             }
-        } catch (error) {
-            setQueryResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        } finally {
-            setIsQuerying(false);
-        }
+        };
+
+        const request: RequestInit = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(mcpRequest),
+        };
+
+        setMcpRequest(request);
     };
 
     const clearResults = () => {
-        setQueryResult('');
-        setShowUpdateDebug(false);
-        setUpdateRequest(null);
+        setMcpRequest(null);
     };
 
-    const handleUpdateResult = (result: Result) => {
+    const handleMcpResult = (result: Result) => {
         // Handle the result from JsonRpcDebug if needed
         console.log('Update result:', result);
     };
@@ -133,9 +98,7 @@ const McpLocationPage = () => {
                     </div>
                     
                     <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                        <p>
-                            <strong>Endpoint:</strong> <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">/mcp/location</code>
-                        </p>
+                        <LabelValue label="Endpoint" value={mcpEndpoint} />
                         <p>
                             <strong>Available Tools:</strong>
                         </p>
@@ -219,44 +182,23 @@ const McpLocationPage = () => {
                         
                         <Button
                             onClick={handleLocationQuery}
-                            disabled={isQuerying}
                             className="w-full"
                             color="success"
                         >
-                            {isQuerying ? 'Querying...' : 'Query Location'}
+                            Query Location
                         </Button>
-                        
-                        {queryResult && (
-                            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Result:</h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{queryResult}</p>
-                            </div>
-                        )}
                     </CardBody>
                 </Card>
             </div>
 
             {/* JsonRpcDebug Component for Update Location */}
-            {showUpdateDebug && updateRequest && (
+            {mcpRequest && (
                 <div className="mt-6">
                     <JsonRpcDebug
-                        url="/mcp/location"
-                        request={updateRequest}
-                        onResult={handleUpdateResult}
+                        url={mcpEndpoint}
+                        request={mcpRequest}
+                        onResult={handleMcpResult}
                     />
-                </div>
-            )}
-
-            {/* Clear Results Button */}
-            {(queryResult || showUpdateDebug) && (
-                <div className="mt-6 flex justify-center">
-                    <Button
-                        onClick={clearResults}
-                        variant="ghost"
-                        color="neutral"
-                    >
-                        Clear Results
-                    </Button>
                 </div>
             )}
         </Page>

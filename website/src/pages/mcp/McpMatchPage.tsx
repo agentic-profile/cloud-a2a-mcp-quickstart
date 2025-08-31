@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Page, Card, CardBody, Button } from '@/components';
+import { Page, Card, CardBody, Button, LabelValue } from '@/components';
 import { UserGroupIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useSettingsStore } from '@/stores';
 
 interface BusinessData {
     name: string;
@@ -27,6 +28,7 @@ interface MCPResponse {
 }
 
 const McpMatchPage = () => {
+    const { serverUrl } = useSettingsStore();
     const [businessData, setBusinessData] = useState<BusinessData>({
         name: '',
         description: '',
@@ -44,6 +46,9 @@ const McpMatchPage = () => {
     const [searchResult, setSearchResult] = useState<string>('');
     const [isAdding, setIsAdding] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+
+    // Construct the MCP endpoint URL
+    const mcpEndpoint = new URL('/mcp/match', serverUrl).toString();
 
     const handleBusinessAdd = async () => {
         if (!businessData.name || !businessData.description || !businessData.address) {
@@ -65,7 +70,7 @@ const McpMatchPage = () => {
                 }
             };
 
-            const response = await fetch('/mcp/match', {
+            const response = await fetch(mcpEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -115,7 +120,7 @@ const McpMatchPage = () => {
                 }
             };
 
-            const response = await fetch('/mcp/match', {
+            const response = await fetch(mcpEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -163,6 +168,33 @@ const McpMatchPage = () => {
             title="Match MCP Service"
             subtitle="Test business matching and connection services"
         >
+            {/* Service Information */}
+            <Card className="mb-6">
+                <CardBody>
+                    <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                            <UserGroupIcon className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="text-lg font-semibold">Match MCP Service</h3>
+                    </div>
+                    
+                    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                        <LabelValue label="Server URL" value={serverUrl} />
+                        <LabelValue label="Endpoint" value={mcpEndpoint} />
+                        <p>
+                            <strong>Available Tools:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 ml-4">
+                            <li><strong>business_add:</strong> Add a new business to the matching system</li>
+                            <li><strong>business_find:</strong> Find businesses based on criteria like category, name, and location</li>
+                        </ul>
+                        <p>
+                            <strong>Features:</strong> The service supports location-based business matching, allowing users to find businesses within a specified radius and filter by category and name.
+                        </p>
+                    </div>
+                </CardBody>
+            </Card>
+
             <div className="grid gap-6 md:grid-cols-2">
                 {/* Business Add Form */}
                 <Card>
@@ -390,34 +422,6 @@ const McpMatchPage = () => {
                     </Button>
                 </div>
             )}
-
-            {/* Service Information */}
-            <Card className="mt-6">
-                <CardBody>
-                    <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                            <UserGroupIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold">Match MCP Service</h3>
-                    </div>
-                    
-                    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                        <p>
-                            <strong>Endpoint:</strong> <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">/mcp/match</code>
-                        </p>
-                        <p>
-                            <strong>Available Tools:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li><strong>business_add:</strong> Add a new business to the matching system</li>
-                            <li><strong>business_find:</strong> Find businesses based on criteria like category, name, and location</li>
-                        </ul>
-                        <p>
-                            <strong>Features:</strong> The service supports location-based business matching, allowing users to find businesses within a specified radius and filter by category and name.
-                        </p>
-                    </div>
-                </CardBody>
-            </Card>
         </Page>
     );
 };
