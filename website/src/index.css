@@ -87,3 +87,20 @@ body {
 }
 
 /* Remove conflicting button styles that override Tailwind */
+
+/* Global heading styles */
+h1 {
+  @apply text-3xl font-bold mb-4 text-gray-900 dark:text-white;
+}
+
+h2 {
+  @apply text-2xl font-semibold mb-4 text-gray-900 dark:text-white;
+}
+
+h3 {
+  @apply text-lg font-semibold mb-3 text-gray-900 dark:text-white;
+}
+
+h4 {
+  @apply text-base font-medium mb-2 text-gray-800 dark:text-gray-200;
+}

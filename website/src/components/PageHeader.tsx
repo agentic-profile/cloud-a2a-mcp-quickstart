@@ -55,7 +55,7 @@ export const PageHeader = ({
                         <ChevronLeftIcon className="w-7 h-7 text-gray-600 dark:text-gray-400" />
                     </button>
                 )}
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="mb-0">
                     {title}
                 </h1>
             </div>

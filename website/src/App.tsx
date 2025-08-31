@@ -5,9 +5,11 @@ import { ChatPage } from './pages/ChatPage';
 import HomePage from './pages/HomePage';
 import AgentsPage from './pages/AgentsPage';
 import VenturePage from './pages/agents/VenturePage';
+import A2ADebugPage from './pages/agents/A2ADebugPage';
 import MCPPage from './pages/MCPPage';
 import McpDebugPage from './pages/mcp/McpDebugPage';
 import SettingsPage from './pages/SettingsPage';
+import IdentityPage from './pages/IdentityPage';
 
 function App() {
     return (
@@ -18,9 +20,11 @@ function App() {
                     <Route path="/chat" element={<ChatPage />} />
                     <Route path="/agents" element={<AgentsPage />} />
                     <Route path="/agents/venture" element={<VenturePage />} />
+                    <Route path="/a2a/debug" element={<A2ADebugPage />} />
                     <Route path="/mcp" element={<MCPPage />} />
                     <Route path="/mcp/debug" element={<McpDebugPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/identity" element={<IdentityPage />} />
                 </Routes>
             </Layout>
         </HeroUIProvider>

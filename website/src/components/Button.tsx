@@ -23,7 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 case 'primary':
                     return 'bg-dodgerblue hover:bg-blue-600 text-white border-transparent focus:ring-dodgerblue';
                 case 'secondary':
-                    return 'bg-gray-500 hover:bg-gray-600 text-white border-transparent focus:ring-gray-500';
+                    return 'bg-white dark:bg-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600 text-black dark:text-white border-gray-300 dark:border-transparent focus:ring-gray-500';
                 case 'success':
                     return 'bg-green-500 hover:bg-green-600 text-white border-transparent focus:ring-green-500';
                 case 'warning':

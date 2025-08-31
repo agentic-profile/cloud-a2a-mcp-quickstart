@@ -1,5 +1,6 @@
 import { Avatar } from '@heroui/react';
 import { Button, Card, CardBody, Page } from '@/components';
+import { Link } from 'react-router-dom';
 import agentsData from '@/data/agents.json';
 
 interface Agent {
@@ -40,6 +41,29 @@ const AgentsPage = () => {
             title={`AI Agents (${agents.length})`}
             subtitle="Connect with specialized AI agents for various tasks and expertise areas"
         >
+            {/* A2A Debug Tool Link */}
+            <div className="mb-6">
+                <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <CardBody>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3>
+                                    A2A Debug Tool
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Test and debug A2A (Agent-to-Agent) API endpoints for Venture, VC, and HireMe agents
+                                </p>
+                            </div>
+                            <Link to="/a2a/debug">
+                                <Button color="primary">
+                                    Open Debug Tool
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
                 {agents.map((agent) => (
                     <Card key={agent.id} className="w-full">
@@ -50,7 +74,7 @@ const AgentsPage = () => {
                                 className="text-lg font-bold"
                             />
 
-                            <h3 className="text-lg font-semibold">
+                            <h3>
                                 {agent.name}
                             </h3>
 

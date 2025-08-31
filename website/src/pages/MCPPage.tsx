@@ -7,8 +7,7 @@ import {
     CircleStackIcon,
     CpuChipIcon,
     BoltIcon,
-    CheckCircleIcon,
-    BugAntIcon
+    CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { Chip } from '@heroui/react';
 import { Page, Card, CardBody, Button } from '@/components';
@@ -147,7 +146,7 @@ const MCPPage = () => {
                     <CardBody>
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                <h3>
                                     JSON RPC Debug Tool
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400">
@@ -155,8 +154,7 @@ const MCPPage = () => {
                                 </p>
                             </div>
                             <Link to="/mcp/debug">
-                                <Button color="primary" size="lg">
-                                    <BugAntIcon className="w-5 h-5 mr-2" />
+                                <Button color="primary">
                                     Open Debug Tool
                                 </Button>
                             </Link>
@@ -179,7 +177,7 @@ const MCPPage = () => {
                                     <service.icon className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    <h3>
                                         {service.name}
                                     </h3>
                                     <Chip
@@ -213,7 +211,7 @@ const MCPPage = () => {
 
                         {/* Features */}
                         <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <h4>
                                 Features:
                             </h4>
                             <div className="flex flex-wrap gap-1">
@@ -242,7 +240,7 @@ const MCPPage = () => {
 
                         {/* Endpoints */}
                         <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <h4>
                                 Endpoints:
                             </h4>
                             <div className="space-y-1">

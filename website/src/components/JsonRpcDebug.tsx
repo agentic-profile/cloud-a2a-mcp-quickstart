@@ -133,7 +133,7 @@ export const JsonRpcDebug = ({
             {request && (
                 <Card>
                     <CardBody>
-                        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                        <h3>
                             JSON RPC Request
                         </h3>
                         
@@ -165,7 +165,7 @@ export const JsonRpcDebug = ({
                                 Request Body:
                             </div>
                             <pre className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm overflow-x-auto border border-blue-200 dark:border-blue-700">
-                                {requestInit?.body ?? ''}
+                                {typeof requestInit?.body === 'string' ? requestInit.body : ''}
                             </pre>
                         </div>
                     </CardBody>
@@ -190,7 +190,7 @@ export const JsonRpcDebug = ({
             {result && (
                 <Card>
                     <CardBody>
-                        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                        <h3>
                             JSON RPC Response
                         </h3>
 

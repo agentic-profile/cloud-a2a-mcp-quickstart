@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
 import { 
     Cog6ToothIcon,
-    ShieldCheckIcon,
     PencilIcon,
     CheckIcon,
-    XMarkIcon
+    XMarkIcon,
+    ArrowRightIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
 import { Switch, Button, Page } from '@/components';
 import { useSettingsStore } from '@/stores';
@@ -14,6 +16,7 @@ const SettingsPage = () => {
     const [isEditingServerUrl, setIsEditingServerUrl] = useState(false);
     const [tempServerUrl, setTempServerUrl] = useState('');
     const { theme, setTheme } = useTheme();
+    const navigate = useNavigate();
 
     const {
         serverUrl,
@@ -68,26 +71,14 @@ const SettingsPage = () => {
             ]
         },
         {
-            title: 'Security',
-            icon: ShieldCheckIcon,
+            title: 'Identity',
+            icon: UserIcon,
             items: [
                 {
-                    name: 'Two-Factor Authentication',
-                    value: false,
-                    type: 'toggle',
-                    onChange: () => {}
-                },
-                {
-                    name: 'Session Timeout',
-                    value: '30 minutes',
-                    type: 'select',
-                    options: [
-                        { value: '15', label: '15 minutes' },
-                        { value: '30', label: '30 minutes' },
-                        { value: '60', label: '1 hour' },
-                        { value: '1440', label: '24 hours' }
-                    ],
-                    onChange: () => {}
+                    name: 'Digital Identity',
+                    subtitle: 'Create and manage your digital identity profile',
+                    type: 'link',
+                    onClick: () => navigate('/identity')
                 }
             ]
         }
@@ -95,6 +86,29 @@ const SettingsPage = () => {
 
     const renderSettingItem = (item: any) => {
         switch (item.type) {
+            case 'link':
+                return (
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {item.name}
+                            </p>
+                            {item.subtitle && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {item.subtitle}
+                                </p>
+                            )}
+                        </div>
+                        <button
+                            onClick={item.onClick}
+                            className="flex items-center text-sm text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-md transition-colors"
+                        >
+                            <span>Manage</span>
+                            <ArrowRightIcon className="w-4 h-4 ml-1" />
+                        </button>
+                    </div>
+                );
+            
             case 'editable-text':
                 return (
                     <div className="flex items-center justify-between">
@@ -274,8 +288,8 @@ const SettingsPage = () => {
                     >
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                             <div className="flex items-center space-x-3">
-                                <section.icon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                <section.icon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue flex-shrink-0" />
+                                <h2 className="mb-0">
                                     {section.title}
                                 </h2>
                             </div>
