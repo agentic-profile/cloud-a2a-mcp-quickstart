@@ -22,3 +22,7 @@ export { Spinner } from './Spinner';
 
 // User Profile components
 export { UserProfileStatus } from './UserProfileStatus';
+
+// Identity components
+export { CreateIdentityForm } from './CreateIdentityForm';
+export { UserProfileDisplay } from './UserProfileDisplay';
