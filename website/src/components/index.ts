@@ -19,3 +19,6 @@ export { JsonRpcDebug } from './JsonRpcDebug';
 
 // Loading components
 export { Spinner } from './Spinner';
+
+// User Profile components
+export { UserProfileStatus } from './UserProfileStatus';

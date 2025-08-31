@@ -104,3 +104,34 @@ h3 {
 h4 {
   @apply text-base font-medium mb-2 text-gray-800 dark:text-gray-200;
 }
+
+/* Global form label styles */
+.form-label {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.form-label-required {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.form-label-required::after {
+  content: " *";
+  @apply text-red-500;
+}
+
+/* Global form input styles */
+.form-input {
+  @apply w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue transition-colors;
+}
+
+.form-input-small {
+  @apply w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-500 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+}
+
+.form-select {
+  @apply w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue transition-colors;
+}
+
+.form-select-small {
+  @apply w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-500 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+}

@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "@agentic-profile/auth": "^0.6.0",
     "@heroui/react": "^2.8.2",
     "@iconify-icons/lucide": "^1.2.135",
     "@iconify/react": "^6.0.0",
