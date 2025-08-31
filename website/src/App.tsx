@@ -8,6 +8,8 @@ import VenturePage from './pages/agents/VenturePage';
 import A2ADebugPage from './pages/agents/A2ADebugPage';
 import MCPPage from './pages/MCPPage';
 import McpDebugPage from './pages/mcp/McpDebugPage';
+import McpLocationPage from './pages/mcp/McpLocationPage';
+import McpMatchPage from './pages/mcp/McpMatchPage';
 import SettingsPage from './pages/SettingsPage';
 import IdentityPage from './pages/IdentityPage';
 
@@ -23,6 +25,8 @@ function App() {
                     <Route path="/a2a/debug" element={<A2ADebugPage />} />
                     <Route path="/mcp" element={<MCPPage />} />
                     <Route path="/mcp/debug" element={<McpDebugPage />} />
+                    <Route path="/mcp/location" element={<McpLocationPage />} />
+                    <Route path="/mcp/match" element={<McpMatchPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/identity" element={<IdentityPage />} />
                 </Routes>
