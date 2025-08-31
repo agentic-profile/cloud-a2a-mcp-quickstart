@@ -112,7 +112,7 @@ const VenturePage = () => {
                     </div>
                     
                     <JsonRpcDebug
-                        agentUrl={ventureAgent.agentUrl}
+                        url={ventureAgent.agentUrl}
                         request={request}
                         onResult={handleJsonRpcResult}
                     />

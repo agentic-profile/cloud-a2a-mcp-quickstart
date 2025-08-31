@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button } from '@/components';
 
-interface JsonRpcRequest {
+export interface McpRequest {
     jsonrpc: '2.0';
     id: string;
     method: string;
@@ -9,9 +9,9 @@ interface JsonRpcRequest {
 }
 
 const McpDebugPage = () => {
-    const [mcpUrl, setMcpUrl] = useState<string>('');
+    const [mcpUrl, setMcpUrl] = useState<string>('http://localhost:3000/mcp/location');
     const [customPayload, setCustomPayload] = useState<string>('{\n  "method": "tools/list",\n  "params": {\n    "name": "test"\n  }\n}');
-    const [request, setRequest] = useState<JsonRpcRequest | null>(null);
+    const [request, setRequest] = useState<RequestInit | null>(null);
 
     const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setCustomPayload(e.target.value);
@@ -65,15 +65,13 @@ const McpDebugPage = () => {
         }
 
         // Create the JSON RPC request
-        const jsonRpcRequest: JsonRpcRequest = {
-            jsonrpc: '2.0',
-            id: Date.now().toString(),
+        const body = JSON.stringify({
             method: getParsedPayload().method || 'call',
             params: getParsedPayload().params || getParsedPayload()
-        };
+        });
 
         // Set the request - this will automatically trigger JsonRpcDebug to send it
-        setRequest(jsonRpcRequest);
+        setRequest({body});
     };
 
     const presetPayloads = [
@@ -114,12 +112,32 @@ const McpDebugPage = () => {
             maxWidth="6xl"
         >
             <div className="space-y-6">
-                {/* Payload Configuration */}
                 <Card>
                     <CardBody>
-                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                            Payload
-                        </h3>
+                        {/* MCP URL Input */}
+                        <h3>MCP URL</h3>
+                        <div className="space-y-3">
+                            <div>
+                                <input
+                                    type="url"
+                                    value={mcpUrl}
+                                    onChange={handleUrlChange}
+                                    placeholder="https://your-mcp-endpoint.com/api"
+                                    className={`w-full p-3 border rounded-md text-sm ${
+                                        mcpUrl && !isValidUrl()
+                                            ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
+                                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                                    }`}
+                                />
+                                {mcpUrl && !isValidUrl() && (
+                                    <div className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                        Please enter a valid URL
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <h3>Payload</h3>
                         
                         {/* Preset Payloads */}
                         <div className="mb-4">
@@ -156,32 +174,7 @@ const McpDebugPage = () => {
                             )}
                         </div>
 
-                        {/* MCP URL Input */}
-                        <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                MCP URL
-                            </h4>
-                            <div className="space-y-3">
-                                <div>
-                                    <input
-                                        type="url"
-                                        value={mcpUrl}
-                                        onChange={handleUrlChange}
-                                        placeholder="https://your-mcp-endpoint.com/api"
-                                        className={`w-full p-3 border rounded-md text-sm ${
-                                            mcpUrl && !isValidUrl()
-                                                ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
-                                        }`}
-                                    />
-                                    {mcpUrl && !isValidUrl() && (
-                                        <div className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                            Please enter a valid URL
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+
                         
                         <Button
                             onClick={handleSendRequest}
@@ -196,16 +189,11 @@ const McpDebugPage = () => {
 
                 {/* JSON RPC Debug Component */}
                 {mcpUrl && isValidUrl() && (
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                            Request & Response
-                        </h3>
-                        <JsonRpcDebug
-                            agentUrl={mcpUrl}
-                            request={request}
-                            onResult={handleResult}
-                        />
-                    </div>
+                    <JsonRpcDebug
+                        url={mcpUrl}
+                        request={request}
+                        onResult={handleResult}
+                    />
                 )}
 
                 {(!mcpUrl || !isValidUrl()) && (
