@@ -198,6 +198,7 @@ const McpLocationPage = () => {
                         url={mcpEndpoint}
                         request={mcpRequest}
                         onResult={handleMcpResult}
+                        onClose={clearResults}
                     />
                 </div>
             )}

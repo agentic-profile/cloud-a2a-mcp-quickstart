@@ -8,6 +8,7 @@ import clsx from "clsx";
 import editIcon from "@iconify-icons/lucide/pencil";
 import deleteIcon from "@iconify-icons/lucide/trash";
 import refreshIcon from "@iconify-icons/lucide/rotate-cw";
+import closeIcon from "@iconify-icons/lucide/x";
 
 import Icon from "./Icon";
 
@@ -22,11 +23,12 @@ type CardHeaderProps = {
     onEdit?: () => void;
     onDelete?: () => void;
     onRefresh?: () => void;
+    onClose?: () => void;
     spinner?: boolean,
     children?: React.ReactNode;
 } & React.ComponentProps<typeof HeroCardHeader>;
 
-export function CardHeader({ className = "", onEdit, onDelete, onRefresh, spinner = false, children, ...props }: CardHeaderProps ) {
+export function CardHeader({ className = "", onEdit, onDelete, onRefresh, onClose, spinner = false, children, ...props }: CardHeaderProps ) {
     const refreshSpinner = spinner ? <Spinner size="sm" color="default" /> 
         : ( Boolean(onRefresh) ? <Icon src={refreshIcon} onClick={onRefresh} /> : null );
 
@@ -36,6 +38,7 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, spinne
                 { Boolean(onEdit) && <Icon src={editIcon} onClick={onEdit} /> }
                 { refreshSpinner }
                 { Boolean(onDelete) && <Icon src={deleteIcon} onClick={onDelete} /> }
+                { Boolean(onClose) && <Icon src={closeIcon} onClick={onClose} /> }
             </div>
             {children}
         </HeroCardHeader>
