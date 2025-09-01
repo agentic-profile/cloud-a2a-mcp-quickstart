@@ -34,6 +34,53 @@ export interface JsonRpcResponse {
     };
 }
 
+// Shared utility function to format headers
+const formatHeaders = (headers: HeadersInit): Record<string, string> => {
+    if (headers instanceof Headers) {
+        const result: Record<string, string> = {};
+        // Use entries() method to get all headers
+        try {
+            for (const [key, value] of headers.entries()) {
+                result[key] = value;
+            }
+        } catch (error) {
+            // Fallback: try to get headers one by one for CORS-restricted headers
+            // Note: Browsers restrict access to certain CORS headers for security reasons
+            const accessibleHeaders = [
+                'content-type', 
+                'content-length', 
+                'cache-control', 
+                'expires', 
+                'last-modified', 
+                'etag', 
+                'date', 
+                'server',
+                'www-authenticate' // This should be accessible if exposed
+            ];
+            
+            for (const headerName of accessibleHeaders) {
+                try {
+                    const value = headers.get(headerName);
+                    if (value !== null) {
+                        result[headerName] = value;
+                    }
+                } catch (e) {
+                    // Skip headers that can't be accessed due to CORS restrictions
+                    console.warn(`Cannot access header ${headerName} due to CORS restrictions`);
+                }
+            }
+            
+            // Add a note about CORS restrictions
+            result['_cors_note'] = 'Some CORS headers are restricted by browser security policy';
+        }
+        return result;
+    }
+    if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+    }
+    return headers as Record<string, string>;
+};
+
 export const JsonRpcDebug = ({ 
     url, 
     request, 
@@ -53,6 +100,9 @@ export const JsonRpcDebug = ({
     const handleSendRequest = async (request: RequestInit) => {
         setSpinner(true);
         setResult(null);
+        setRetryInit(null);
+        setRetrySpinner(false);
+        setRetryResult(null);
 
         let fetchResponse, text, data, error;
         try {
@@ -92,6 +142,7 @@ export const JsonRpcDebug = ({
             error = err;
         } finally {
             setSpinner(false);
+            setRetrySpinner(false);
         }
 
         const result: Result = { fetchResponse, text, data, error };
@@ -107,8 +158,8 @@ export const JsonRpcDebug = ({
     }, [request]);
 
     return (
-        <Card className={className} onClose={onClose}>
-            <CardHeader>
+        <Card className={className}>
+            <CardHeader onClose={onClose}>
                 <div>
                     <h2>JSON RPC Debug</h2>
                     <LabelValue label="HTTP Request" value={url} />
@@ -117,12 +168,12 @@ export const JsonRpcDebug = ({
             </CardHeader>
             <CardBody className="space-y-4">
                 {/* Initial Request */}
-                <RequestCard url={url} request={request} requestInit={requestInit} />
+                <RequestCard request={request} requestInit={requestInit} />
                 {spinner && <Spinner size="md" color="primary" />}                   
                 <ResponseCard result={result} />
 
                 {/* Retry Request with authentication */}
-                <RequestCard url={url} request={retryInit} requestInit={retryInit} />
+                <RequestCard request={retryInit} requestInit={retryInit} />
                 {retrySpinner && <Spinner size="md" color="primary" />}                   
                 <ResponseCard result={retryResult} />
             </CardBody>
@@ -132,27 +183,12 @@ export const JsonRpcDebug = ({
 
 // RequestCard component
 const RequestCard = ({ 
-    url, 
     request, 
     requestInit 
 }: { 
-    url: string; 
     request: RequestInit | null; 
     requestInit: RequestInit | null; 
 }) => {
-    const formatHeaders = (headers: HeadersInit): Record<string, string> => {
-        if (headers instanceof Headers) {
-            const result: Record<string, string> = {};
-            headers.forEach((value, key) => {
-                result[key] = value;
-            });
-            return result;
-        }
-        if (Array.isArray(headers)) {
-            return Object.fromEntries(headers);
-        }
-        return headers as Record<string, string>;
-    };
 
     if (!request) return null;
 
@@ -161,7 +197,7 @@ const RequestCard = ({
     return (
         <Card>
             <CardBody>
-                <LabelValue label="HTTP Request" value={url} />
+                <h4>HTTP Request</h4>
 
                 {/* Request Headers */}
                 {requestInit?.headers && (
@@ -185,26 +221,12 @@ const RequestCard = ({
 
 // ResponseCard component
 const ResponseCard = ({ result }: { result: Result | null }) => {
-    const formatHeaders = (headers: HeadersInit): Record<string, string> => {
-        if (headers instanceof Headers) {
-            const result: Record<string, string> = {};
-            headers.forEach((value, key) => {
-                result[key] = value;
-            });
-            return result;
-        }
-        if (Array.isArray(headers)) {
-            return Object.fromEntries(headers);
-        }
-        return headers as Record<string, string>;
-    };
 
     if (!result) return null;
 
     return (
         <Card>
             <CardBody>
-                {/* HTTP Status */}
                 {result.fetchResponse && (
                     <div className="mb-3 space-y-4">
                         <LabelValue label="HTTP Response" value={`${result.fetchResponse.status} ${result.fetchResponse.statusText}`} />
@@ -212,7 +234,6 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
                     </div>
                 )}
 
-                {/* Response Body */}
                 <div className="mb-3">
                     <LabelJson 
                         label="Response Body" 

@@ -1,20 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { handleToolsCall, handleToolsList } from './methods';
-import { handleMCPMethod } from '../utils';
-import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
+import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, processJsonRpcMethod } from '../../json-rpc';
+import { JSONRPCRequest } from '@modelcontextprotocol/sdk/types.js';
+import { ClientAgentSession } from '@agentic-profile/auth';
 
 const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
-    await handleMCPMethod( req, res, async ( rpcRequest: JSONRPCRequest ): Promise<JSONRPCResponse | JSONRPCError | null> => {
-        const { method } = rpcRequest;
-            switch( method ) {
-                case 'tools/list':
-                    return await handleToolsList( rpcRequest );
-                case 'tools/call':
-                    return await handleToolsCall( rpcRequest );
-                default:
-                    return null;
+    await processJsonRpcMethod( req, res, async ( jrpcRequest: JsonRpcRequest, session: ClientAgentSession | null ): Promise<JsonRpcResponse | null> => {
+        switch( jrpcRequest.method ) {
+            case 'tools/list':
+                return await handleToolsList( jrpcRequest as JSONRPCRequest );
+            case 'tools/call':
+                if( !session )
+                    return jrpcErrorAuthRequired( jrpcRequest.id! );
+                else
+                    return await handleToolsCall( jrpcRequest as JSONRPCRequest, session );
+            default:
+                return null;
         }
     });
 });

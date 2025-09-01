@@ -1,24 +1,4 @@
-/**
- * Both A2A and MCP have their own opinionated variations of the JSON RPC schema.
- * The generic JsonRpcRequest and JsonRpcResponse types are designed to be interchangable so
- * requests can be safely typed until they are handed off to the appropriate
- * MCP or A2A implementation handler.
- */
-
-export type JsonRpcRequest = {
-    jsonrpc: "2.0";
-    id: string | number | null;
-    method: string;
-    params: any;
-}
-
-export type JsonRpcResponse = {
-    jsonrpc: "2.0";
-    id: string | number;
-} & (
-    | { result: any; error?: never }
-    | { result?: never; error: { code: number; message: string } }
-)
+import { AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, JsonRpcResponse } from "./types";
 
 // Create RPC response with direct result
 export function jrpcResult(id: string | number, result: any): JsonRpcResponse {
@@ -30,15 +10,20 @@ export function jrpcResult(id: string | number, result: any): JsonRpcResponse {
 }
 
 // Create RPC response with error
-export function jrpcError(id: string | number, code: number, message: string): JsonRpcResponse {
+export function jrpcError(id: string | number, code: number, message: string, data?: any): JsonRpcResponse {
     return {
         jsonrpc: '2.0',
         id: id as string | number,
         error: {
             code,
-            message
+            message,
+            data
         }
     };
+}
+
+export function jrpcErrorAuthRequired(id: string | number): JsonRpcResponse {
+    return jrpcError(id, AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, 'Authentication required');
 }
 
 // Accept 'any' type to avoid type conflicts with MCP and A2A

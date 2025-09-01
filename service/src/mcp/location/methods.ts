@@ -3,13 +3,16 @@ import { storeValue, getValue } from '../../cache/redis';
 import { jrpcResult, jrpcError } from '../../json-rpc';
 import { mcpTextContentResponse } from '../utils';
 import { MCP_TOOLS } from './tools';
+import { ClientAgentSession } from '@agentic-profile/auth';
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
 }
 
-export async function handleToolsCall(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
+export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
+
+    console.log('🔍 handleToolsCall', name, session);
     
     switch (name) {
         case 'update':
@@ -49,7 +52,7 @@ export async function handleLocationUpdate(request: JSONRPCRequest): Promise<JSO
         return mcpTextContentResponse(request.id!, `Location updated successfully: ${longitude}, ${latitude}`);
     } catch (error) {
         console.log('🔍 storeValue failed for location:', error);
-                    return jrpcError(request.id!, -32603, 'Failed to store location data:' + (error as Error).message);
+        return jrpcError(request.id!, -32603, 'Failed to store location data:' + (error as Error).message);
     }
 }
 

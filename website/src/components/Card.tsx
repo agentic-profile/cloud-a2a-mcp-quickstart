@@ -33,7 +33,7 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, onClos
         : ( Boolean(onRefresh) ? <Icon src={refreshIcon} onClick={onRefresh} /> : null );
 
     return (
-        <HeroCardHeader className={clsx("relative p-2 font-bold rounded-xl",className)} {...props}>
+        <HeroCardHeader className={clsx("relative p-2 rounded-xl",className)} {...props}>
             <div className="absolute flex top-3 right-3 gap-3">
                 { Boolean(onEdit) && <Icon src={editIcon} onClick={onEdit} /> }
                 { refreshSpinner }

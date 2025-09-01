@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
 // A2A handlers and helpers
@@ -15,20 +16,29 @@ import matchRouter from "./mcp/match/router";
 const app = express();
 
 // Middleware
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'WWW-Authenticate',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Cache-Control',
+        'Pragma'
+    ],
+    exposedHeaders: [
+        'Access-Control-Allow-Headers',
+        'Access-Control-Allow-Methods',
+        'Access-Control-Allow-Origin',
+        'WWW-Authenticate'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// CORS middleware
-app.use((_req: Request, res: Response, next: NextFunction) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    next();
-});
-
-app.options(/^\/(.+)$/, (_req: Request, res: Response) => {
-    res.sendStatus(200);
-});
 
 // Health check endpoint
 const started = new Date().toISOString();

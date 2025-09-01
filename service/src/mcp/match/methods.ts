@@ -3,13 +3,16 @@ import { storeValue, getValue } from '../../cache/redis';
 import { jrpcResult, jrpcError } from '../../json-rpc';
 import { mcpTextContentResponse } from '../utils';
 import { MCP_TOOLS } from './tools';
+import { ClientAgentSession } from '@agentic-profile/auth';
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
 }
 
-export async function handleToolsCall(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
+export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     const { name, arguments: args } = request.params || {};
+
+    console.log('🔍 handleToolsCall', name, session);
     
     switch (name) {
         case 'add':
