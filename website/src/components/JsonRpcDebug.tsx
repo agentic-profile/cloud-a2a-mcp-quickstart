@@ -65,7 +65,7 @@ export const JsonRpcDebug = ({
         if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
             const { headers } = result.fetchResponse;
 
-            const challenge = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
+            const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
             //const authToken = await resolveAuthToken( challenge );
             const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
@@ -82,7 +82,8 @@ export const JsonRpcDebug = ({
                 request, 
                 setRequestInit: setRetryInit, 
                 setSpinner: setRetrySpinner,
-                setResult: setRetryResult
+                setResult: setRetryResult,
+                authToken
             });
             onFinalResult(retryResult);
         } else {
@@ -128,9 +129,10 @@ interface DoFetchProps {
     setRequestInit: (requestInit: RequestInit) => void;
     setSpinner: (spinner: boolean) => void;
     setResult: (result: Result) => void;
+    authToken?: string;
 }
 
-async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult }:DoFetchProps) {
+async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult, authToken }:DoFetchProps) {
     let fetchResponse, text, data, error;
     try {
         const { body, headers, ...etc } = request;
@@ -152,6 +154,7 @@ async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, se
             headers: {
                 'Content-Type': 'application/json',
                 ...headers,
+                ...(authToken ? { 'Authorization': 'Agentic ' + authToken } : {}),
             },
             body: jsonBody,
             ...etc

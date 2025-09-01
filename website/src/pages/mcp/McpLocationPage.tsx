@@ -29,8 +29,8 @@ const McpLocationPage = () => {
 
     const handleLocationUpdate = () => {
         const mcpRequest = {
-            jsonrpc: "2.0",
-            id: 1,
+            //jsonrpc: "2.0",
+            //id: 1,
             method: "tools/call",
             params: {
                 name: "update",
@@ -54,8 +54,8 @@ const McpLocationPage = () => {
 
     const handleLocationQuery = () => {
         const mcpRequest = {
-            jsonrpc: "2.0",
-            id: 1,
+            //jsonrpc: "2.0",
+            //id: 1,
             method: "tools/call",
             params: {
                 name: "query",
