@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Spinner, LabelValue, LabelJson } from './index';
+import { parseChallengeFromWwwAuthenticate, signChallenge } from '@agentic-profile/auth';
+import { useUserProfileStore, type UserProfile } from '@/stores';
 
 interface Result {
     fetchResponse: Response | undefined;
@@ -11,7 +13,7 @@ interface Result {
 interface JsonRpcDebugProps {
     url: string;
     request: RequestInit | null;
-    onResult: (result: Result) => void;
+    onFinalResult: (result: Result) => void;
     onClose?: () => void;
     className?: string;
 }
@@ -34,61 +36,15 @@ export interface JsonRpcResponse {
     };
 }
 
-// Shared utility function to format headers
-const formatHeaders = (headers: HeadersInit): Record<string, string> => {
-    if (headers instanceof Headers) {
-        const result: Record<string, string> = {};
-        // Use entries() method to get all headers
-        try {
-            for (const [key, value] of headers.entries()) {
-                result[key] = value;
-            }
-        } catch (error) {
-            // Fallback: try to get headers one by one for CORS-restricted headers
-            // Note: Browsers restrict access to certain CORS headers for security reasons
-            const accessibleHeaders = [
-                'content-type', 
-                'content-length', 
-                'cache-control', 
-                'expires', 
-                'last-modified', 
-                'etag', 
-                'date', 
-                'server',
-                'www-authenticate' // This should be accessible if exposed
-            ];
-            
-            for (const headerName of accessibleHeaders) {
-                try {
-                    const value = headers.get(headerName);
-                    if (value !== null) {
-                        result[headerName] = value;
-                    }
-                } catch (e) {
-                    // Skip headers that can't be accessed due to CORS restrictions
-                    console.warn(`Cannot access header ${headerName} due to CORS restrictions`);
-                }
-            }
-            
-            // Add a note about CORS restrictions
-            result['_cors_note'] = 'Some CORS headers are restricted by browser security policy';
-        }
-        return result;
-    }
-    if (Array.isArray(headers)) {
-        return Object.fromEntries(headers);
-    }
-    return headers as Record<string, string>;
-};
-
 export const JsonRpcDebug = ({ 
     url, 
     request, 
-    onResult,
+    onFinalResult,
     onClose,
     className = '' 
 }: JsonRpcDebugProps) => {
     const [spinner, setSpinner] = useState(false);
+    const { userProfile } = useUserProfileStore();
     const [requestInit, setRequestInit] = useState<RequestInit | null>(null);
     const [method, setMethod] = useState<string | null>(null);
     const [result, setResult] = useState<Result | null>(null);
@@ -98,56 +54,40 @@ export const JsonRpcDebug = ({
     const [retryResult, setRetryResult] = useState<Result | null>(null);
 
     const handleSendRequest = async (request: RequestInit) => {
-        setSpinner(true);
-        setResult(null);
+
         setRetryInit(null);
         setRetrySpinner(false);
         setRetryResult(null);
 
-        let fetchResponse, text, data, error;
-        try {
-            const { body, headers, ...etc } = request;
+        const result = await doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult });
 
-            if( typeof body !== 'string')
-                throw new Error('Body must be a string');
+        // Need to retry with auth?
+        if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
+            const { headers } = result.fetchResponse;
 
-            const bodyData = {
-                jsonrpc: '2.0',
-                id: Date.now().toString(),
-                ...JSON.parse(body)
-            }
-            setMethod(bodyData.method);
-
-            const jsonBody = JSON.stringify(bodyData,null,4);
-
-            const requestInit = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...headers,
-                },
-                body: jsonBody,
-                ...etc
-            };
-            setRequestInit(requestInit);
-
-            fetchResponse = await fetch(url, requestInit);
-
-            // Always try to get response text/data for success result or error details
-            text = await fetchResponse.text();
-            if (text) {
-                data = JSON.parse(text);
-            }
-        } catch (err) {
-            error = err;
-        } finally {
-            setSpinner(false);
-            setRetrySpinner(false);
+            const challenge = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
+            
+            //const authToken = await resolveAuthToken( challenge );
+            const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
+            const authToken = await signChallenge({
+                challenge,
+                attestation,
+                privateJwk
+            });
+            console.log('authToken', authToken);
+        
+            // 2nd try with auth new token - may throw an Error on response != ok
+            const retryResult = await doFetch({
+                url, 
+                request, 
+                setRequestInit: setRetryInit, 
+                setSpinner: setRetrySpinner,
+                setResult: setRetryResult
+            });
+            onFinalResult(retryResult);
+        } else {
+            onFinalResult(result);
         }
-
-        const result: Result = { fetchResponse, text, data, error };
-        setResult(result);
-        onResult(result);
     };
 
     // Automatically send request when request prop changes
@@ -180,6 +120,82 @@ export const JsonRpcDebug = ({
         </Card>
     );
 };
+
+interface DoFetchProps {
+    url: string;
+    request: RequestInit;
+    setMethod?: (method: string) => void;
+    setRequestInit: (requestInit: RequestInit) => void;
+    setSpinner: (spinner: boolean) => void;
+    setResult: (result: Result) => void;
+}
+
+async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult }:DoFetchProps) {
+    let fetchResponse, text, data, error;
+    try {
+        const { body, headers, ...etc } = request;
+
+        if( typeof body !== 'string')
+            throw new Error('Body must be a string');
+
+        const bodyData = {
+            jsonrpc: '2.0',
+            id: Date.now().toString(),
+            ...JSON.parse(body)
+        }
+        setMethod?.(bodyData.method);
+
+        const jsonBody = JSON.stringify(bodyData,null,4);
+
+        const requestInit = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+            body: jsonBody,
+            ...etc
+        };
+        setRequestInit(requestInit);
+        setSpinner(true);
+        fetchResponse = await fetch(url, requestInit);
+
+        // Always try to get response text/data for success result or error details
+        text = await fetchResponse.text();
+        if (text) {
+            data = JSON.parse(text);
+        }
+    } catch (err) {
+        error = err;
+    } finally {
+        setSpinner(false);
+    }
+
+    const result: Result = { fetchResponse, text, data, error };
+    setResult(result);
+
+    return result;
+}
+
+function resolveAttestationAndPrivateKey( userProfile: UserProfile ) {
+
+    const { profile, keyring } = userProfile;
+    const service = profile!.service![0];
+    const firstCap = service.capabilityInvocation[0];
+    const keyId = firstCap.id;
+
+    const attestation = {
+        agentDid: profile.id + service.id,
+        verificationId: profile.id + keyId
+    };
+
+    const privateJwk = keyring.find(keyset => keyset.id === keyId)?.privateJwk;
+
+    if( !privateJwk )
+        throw new Error('Private key not found for keyId: ' + keyId);
+
+    return { attestation, privateJwk };
+}
 
 // RequestCard component
 const RequestCard = ({ 
@@ -267,6 +283,10 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
     );
 };
 
+//
+// Utility functions
+//
+
 function parseJson(body: any) {
     if (typeof body === 'string') {
         try {
@@ -277,3 +297,50 @@ function parseJson(body: any) {
     }
     return body;
 }
+
+// Shared utility function to format headers
+const formatHeaders = (headers: HeadersInit): Record<string, string> => {
+    if (headers instanceof Headers) {
+        const result: Record<string, string> = {};
+        // Use entries() method to get all headers
+        try {
+            for (const [key, value] of headers.entries()) {
+                result[key] = value;
+            }
+        } catch (error) {
+            // Fallback: try to get headers one by one for CORS-restricted headers
+            // Note: Browsers restrict access to certain CORS headers for security reasons
+            const accessibleHeaders = [
+                'content-type', 
+                'content-length', 
+                'cache-control', 
+                'expires', 
+                'last-modified', 
+                'etag', 
+                'date', 
+                'server',
+                'www-authenticate' // This should be accessible if exposed
+            ];
+            
+            for (const headerName of accessibleHeaders) {
+                try {
+                    const value = headers.get(headerName);
+                    if (value !== null) {
+                        result[headerName] = value;
+                    }
+                } catch (e) {
+                    // Skip headers that can't be accessed due to CORS restrictions
+                    console.warn(`Cannot access header ${headerName} due to CORS restrictions`);
+                }
+            }
+            
+            // Add a note about CORS restrictions
+            result['_cors_note'] = 'Some CORS headers are restricted by browser security policy';
+        }
+        return result;
+    }
+    if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+    }
+    return headers as Record<string, string>;
+};

@@ -192,7 +192,7 @@ const McpDebugPage = () => {
                     <JsonRpcDebug
                         url={mcpUrl}
                         request={request}
-                        onResult={handleResult}
+                        onFinalResult={handleResult}
                     />
                 )}
 

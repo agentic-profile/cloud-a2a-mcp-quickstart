@@ -210,7 +210,7 @@ const A2ADebugPage = () => {
                     <JsonRpcDebug
                         url={a2aUrl}
                         request={request}
-                        onResult={handleResult}
+                        onFinalResult={handleResult}
                     />
                 )}
 

@@ -197,7 +197,7 @@ const McpLocationPage = () => {
                     <JsonRpcDebug
                         url={mcpEndpoint}
                         request={mcpRequest}
-                        onResult={handleMcpResult}
+                        onFinalResult={handleMcpResult}
                         onClose={clearResults}
                     />
                 </div>
