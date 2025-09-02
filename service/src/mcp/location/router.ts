@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { handleToolsCall, handleToolsList } from './methods';
-import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, processJsonRpcMethod } from '../../json-rpc';
+import { handleToolsCall, handleToolsList } from './methods.js';
+import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, processJsonRpcMethod } from '../../json-rpc/index.js';
 import { JSONRPCRequest } from '@modelcontextprotocol/sdk/types.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 

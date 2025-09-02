@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Agentic Profile MCP Lambda Function'
+Description: 'Universal Auth A2A MCP Lambda Function'
 
 Conditions:
   HasVersion: !Not [!Equals [!Ref FunctionZipVersion, ""]]
@@ -21,10 +21,10 @@ Parameters:
 
 Resources:
   # Lambda Function
-  AgenticProfileMCPFunction:
+  A2aMcpFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub 'agentic-profile-mcp-${Environment}'
+      FunctionName: !Sub 'universal-auth-a2a-mcp-${Environment}'
       Runtime: nodejs18.x
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -36,6 +36,7 @@ Resources:
         Variables:
           ENVIRONMENT: !Ref Environment
           NODE_ENV: !Ref Environment
+          NODE_OPTIONS: "--enable-source-maps"
           VALKEY_ENDPOINT: !ImportValue 
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyCacheEndpoint'
           VALKEY_PORT: !ImportValue 
@@ -56,13 +57,13 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
         - Key: Service
-          Value: agentic-profile-mcp
+          Value: universal-auth-a2a-mcp
 
   # Lambda Execution Role
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'agentic-profile-mcp-lambda-role-${Environment}'
+      RoleName: !Sub 'universal-auth-a2a-mcp-lambda-role-${Environment}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -139,8 +140,8 @@ Resources:
   ApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: !Sub 'agentic-profile-mcp-api-${Environment}'
-      Description: 'API Gateway for Agentic Profile MCP Lambda Function'
+      Name: !Sub 'universal-auth-a2a-mcp-api-${Environment}'
+      Description: 'API Gateway for Universal Auth A2A MCP Lambda Function'
       EndpointConfiguration:
         Types:
           - REGIONAL
@@ -164,7 +165,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AgenticProfileMCPFunction.Arn}/invocations'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${A2aMcpFunction.Arn}/invocations'
       RequestParameters:
         method.request.path.proxy: true
 
@@ -179,7 +180,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AgenticProfileMCPFunction.Arn}/invocations'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${A2aMcpFunction.Arn}/invocations'
 
   # API Gateway Deployment
   ApiDeployment:
@@ -222,7 +223,7 @@ Resources:
           Description: Allow Lambda to access AWS services (HTTP)
       Tags:
         - Key: Name
-          Value: !Sub 'agentic-profile-mcp-lambda-sg-${Environment}'
+          Value: !Sub 'universal-auth-a2a-mcp-lambda-sg-${Environment}'
         - Key: Environment
           Value: !Ref Environment
 
@@ -230,7 +231,7 @@ Resources:
   LambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref AgenticProfileMCPFunction
+      FunctionName: !Ref A2aMcpFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
@@ -239,7 +240,7 @@ Resources:
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/agentic-profile-mcp-${Environment}'
+      LogGroupName: !Sub '/aws/lambda/universal-auth-a2a-mcp-${Environment}'
       RetentionInDays: 14
 
 Outputs:
@@ -251,13 +252,13 @@ Outputs:
 
   LambdaFunctionArn:
     Description: 'Lambda Function ARN'
-    Value: !GetAtt AgenticProfileMCPFunction.Arn
+    Value: !GetAtt A2aMcpFunction.Arn
     Export:
       Name: !Sub '${AWS::StackName}-LambdaFunctionArn'
 
   LambdaFunctionName:
     Description: 'Lambda Function Name'
-    Value: !Ref AgenticProfileMCPFunction
+    Value: !Ref A2aMcpFunction
     Export:
       Name: !Sub '${AWS::StackName}-LambdaFunctionName'
 

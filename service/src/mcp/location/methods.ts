@@ -1,8 +1,8 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
-import { storeValue, getValue } from '../../cache/redis';
-import { jrpcResult, jrpcError } from '../../json-rpc';
-import { mcpTextContentResponse } from '../utils';
-import { MCP_TOOLS } from './tools';
+import { storeValue, getValue } from '../../cache/redis.js';
+import { jrpcResult, jrpcError } from '../../json-rpc/index.js';
+import { mcpTextContentResponse } from '../utils.js';
+import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {

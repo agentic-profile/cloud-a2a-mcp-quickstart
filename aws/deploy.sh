@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Agentic Profile MCP Lambda Deployment Script
+cd "$(dirname "$0")"
+
+# Universal Auth A2A MCP Lambda Deployment Script for AWS
 
 set -e
 
@@ -11,12 +13,12 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-STACK_NAME="agentic-profile-mcp"
+STACK_NAME="universal-auth-a2a-mcp"
 ENVIRONMENT=${1:-dev}
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
 
-echo -e "${GREEN}🚀 Deploying Agentic Profile MCP Lambda Function${NC}"
+echo -e "${GREEN}🚀 Deploying Universal Auth A2A and MCP Lambda Function${NC}"
 echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${YELLOW}Region: ${REGION}${NC}"
 echo -e "${YELLOW}Stack Name: ${STACK_NAME}${NC}"
@@ -36,23 +38,11 @@ fi
 
 echo -e "${GREEN}✅ AWS CLI and credentials verified${NC}"
 
-# Build the project
-echo -e "${YELLOW}📦 Building TypeScript project...${NC}"
-npm run build
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Build failed${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✅ Build completed successfully${NC}"
-
-# Package the project
-echo -e "${YELLOW}📦 Packaging project into function.zip...${NC}"
+# Build the function.zip
+echo -e "${YELLOW}📦 Creating function.zip...${NC}"
 npm run package
-
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Package failed${NC}"
+    echo -e "${RED}❌ Generating function.zip failed${NC}"
     exit 1
 fi
 
@@ -120,7 +110,7 @@ echo -e "${YELLOW}🚀 Deploying to AWS CloudFormation...${NC}"
 
 # Deploy the stack with foundation bucket parameter and function version
 aws cloudformation deploy \
-    --template-file mcp-service.yaml \
+    --template-file agentic-service.yaml \
     --stack-name ${STACK_NAME} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --parameter-overrides Environment=${ENVIRONMENT} FoundationDeploymentBucket=${BUCKET_NAME} FunctionZipVersion=${VERSION_ID} \

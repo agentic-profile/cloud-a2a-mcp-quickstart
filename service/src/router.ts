@@ -3,14 +3,14 @@ import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
 // A2A handlers and helpers
-import { VentureExecutor } from './a2a/venture/handler';
-import { VCExecutor } from './a2a/vc/handler';
-import { HireMeExecutor } from './a2a/hireme/handler';
-import { handleA2ARequest } from './a2a/utils';
+import { VentureExecutor } from './a2a/venture/handler.js';
+import { VCExecutor } from './a2a/vc/handler.js';
+import { HireMeExecutor } from './a2a/hireme/handler.js';
+import { handleA2ARequest } from './a2a/utils.js';
 
 // MCP handlers
-import locationRouter from "./mcp/location/router";
-import matchRouter from "./mcp/match/router";
+import locationRouter from "./mcp/location/router.js";
+import matchRouter from "./mcp/match/router.js";
 
 // Create Express app
 const app = express();

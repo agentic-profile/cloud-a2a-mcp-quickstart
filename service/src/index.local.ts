@@ -1,4 +1,4 @@
-import { app } from './router';
+import { app } from './router.js';
 
 const PORT = process.env.PORT || 3000;
 

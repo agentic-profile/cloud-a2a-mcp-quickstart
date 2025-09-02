@@ -1,4 +1,4 @@
-import { AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, JsonRpcResponse } from "./types";
+import { AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, JsonRpcResponse } from "./types.js";
 
 // Create RPC response with direct result
 export function jrpcResult(id: string | number, result: any): JsonRpcResponse {
