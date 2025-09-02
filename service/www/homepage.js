@@ -24,7 +24,7 @@ async function checkServiceStatus() {
     const serviceStatusDiv = document.getElementById('serviceStatus');
     
     try {
-        const response = await fetch('/status');
+        const response = await fetch('status');
         if (response.ok) {
             const data = await response.json();
             serviceStatusDiv.innerHTML = `<span style="color: #28a745;">✅ Online</span><br><small>Started: ${new Date(data.started).toLocaleString()}</small>`;

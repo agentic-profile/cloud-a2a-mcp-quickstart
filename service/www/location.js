@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateDebugging.displaySentRequest(mcpRequest);
             
             // Send the request
-            const response = await fetch('/mcp/location', {
+            const response = await fetch('mcp/location', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             queryDebugging.displaySentRequest(mcpRequest);
             
             // Send the request
-            const response = await fetch('/mcp/location', {
+            const response = await fetch('mcp/location', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
