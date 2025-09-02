@@ -6,8 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:staging": "tsc -b && cross-env VITE_BASE_URL=/staging/ vite build",
-    "build:prod": "tsc -b && cross-env VITE_BASE_URL=/prod/ vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",

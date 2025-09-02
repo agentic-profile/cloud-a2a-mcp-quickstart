@@ -1,31 +1,36 @@
 {
-  "name": "universal-auth-a2a-mcp-lambda",
+  "name": "universal-auth-a2a-mcp-aws",
   "version": "1.0.0",
-  "description": "Universal auth A2A and MCP Lambda",
+  "description": "Universal auth A2A and MCP for AWS",
   "scripts": {
-    "foundation:up": "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-staging --parameter-overrides Environment=staging --capabilities CAPABILITY_IAM",
+    "foundation:up":      "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-staging --parameter-overrides Environment=staging --capabilities CAPABILITY_IAM",
     "foundation:up:prod": "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-prod --parameter-overrides Environment=prod --capabilities CAPABILITY_IAM",
-    "foundation:down": "aws cloudformation delete-stack --stack-name agentic-foundation-staging",
+    "foundation:down":      "aws cloudformation delete-stack --stack-name agentic-foundation-staging",
     "foundation:down:prod": "aws cloudformation delete-stack --stack-name agentic-foundation-prod",
     
-    "foundation:status": "aws cloudformation describe-stacks --stack-name agentic-foundation-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "foundation:status":      "aws cloudformation describe-stacks --stack-name agentic-foundation-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
     "foundation:status:prod": "aws cloudformation describe-stacks --stack-name agentic-foundation-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "foundation:events": "aws cloudformation describe-stack-events --stack-name agentic-foundation-staging --query 'StackEvents[0:5]' --output table",
+    "foundation:events":      "aws cloudformation describe-stack-events --stack-name agentic-foundation-staging --query 'StackEvents[0:5]' --output table",
     "foundation:events:prod": "aws cloudformation describe-stack-events --stack-name agentic-foundation-prod --query 'StackEvents[0:5]' --output table",
+
+    "service:build": "cd ../service && npm run build",
+    "service:package": "npm run service:build && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist www node_modules package.json",
     
-    "build:web:staging": "cd ../website && npm run build:staging",
-    "build:web:prod": "cd ../website && npm run build:prod",
-    "build:service": "cd ../service && npm run build",
-    "package:staging": "npm run build:web:staging && npm run build:service && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist node_modules package.json && cd ../website && zip -r ../aws/function.zip www",
-    "package:prod": "npm run build:web:prod && npm run build:service && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist node_modules package.json && cd ../website && zip -r ../aws/function.zip www",
+    "service:deploy": "./deploy-service.sh staging demo",
+    "service:status": "aws cloudformation describe-stacks --stack-name universal-auth-a2a-mcp-demo-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "service:undeploy": "aws cloudformation delete-stack --stack-name universal-auth-a2a-mcp-demo-staging",
 
-    "deploy": "./deploy.sh staging",
-    "status": "aws cloudformation describe-stacks --stack-name universal-auth-a2a-mcp-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "undeploy": "aws cloudformation delete-stack --stack-name universal-auth-a2a-mcp-staging",
+    "service:deploy:prod": "./deploy-service.sh prod demo",
+    "service:status:prod": "aws cloudformation describe-stacks --stack-name universal-auth-a2a-mcp-demo-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "service:undeploy:prod": "aws cloudformation delete-stack --stack-name universal-auth-a2a-mcp-demo-prod",
 
-    "deploy:prod": "./deploy.sh prod",
-    "status:prod": "aws cloudformation describe-stacks --stack-name universal-auth-a2a-mcp-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "undeploy:prod": "aws cloudformation delete-stack --stack-name universal-auth-a2a-mcp-prod",
+    "service:deploy:venture": "./deploy-service.sh staging venture",
+    "service:deploy:venture:prod": "./deploy-service.sh prod venture",
+    "service:deploy:volunteer": "./deploy-service.sh staging volunteer",
+    "service:deploy:volunteer:prod": "./deploy-service.sh prod volunteer",
+
+    "website:build": "cd ../website && npm run build",
+
 
 
     "events": "aws cloudformation describe-stack-events --stack-name agentic-profile-mcp-dev --query 'StackEvents[0:5]' --output table",

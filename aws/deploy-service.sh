@@ -14,13 +14,15 @@ NC='\033[0m' # No Color
 
 # Configuration
 ENVIRONMENT=${1}
-STACK_NAME="universal-auth-a2a-mcp-${ENVIRONMENT}"
+PROJECT=${2:-demo}  # Default to 'demo' if not provided
+STACK_NAME="universal-auth-a2a-mcp-${PROJECT}-${ENVIRONMENT}"
 
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
 
 echo -e "${GREEN}🚀 Deploying Universal Auth A2A and MCP Lambda Function${NC}"
 echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
+echo -e "${YELLOW}Project: ${PROJECT}${NC}"
 echo -e "${YELLOW}Region: ${REGION}${NC}"
 echo -e "${YELLOW}Stack Name: ${STACK_NAME}${NC}"
 echo ""
@@ -41,7 +43,7 @@ echo -e "${GREEN}✅ AWS CLI and credentials verified${NC}"
 
 # Build the function.zip
 echo -e "${YELLOW}📦 Creating function.zip...${NC}"
-npm run "package:${ENVIRONMENT}"
+npm run service:package
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Generating function.zip failed${NC}"
     exit 1
@@ -114,7 +116,7 @@ aws cloudformation deploy \
     --template-file agentic-service.yaml \
     --stack-name ${STACK_NAME} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-    --parameter-overrides Environment=${ENVIRONMENT} FoundationDeploymentBucket=${BUCKET_NAME} FunctionZipVersion=${VERSION_ID} \
+    --parameter-overrides Environment=${ENVIRONMENT} Project=${PROJECT} FoundationDeploymentBucket=${BUCKET_NAME} FunctionZipVersion=${VERSION_ID} \
     --region ${REGION}
 
 if [ $? -ne 0 ]; then

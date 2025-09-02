@@ -10,6 +10,10 @@ Parameters:
     Default: staging
     Description: Environment name (staging, prod)
     AllowedValues: [staging, prod]
+  Project:
+    Type: String
+    Default: demo
+    Description: Project name (demo, venture, volunteer)
   FunctionZipVersion:
     Type: String
     Description: S3 object version for the function zip file
@@ -24,7 +28,7 @@ Resources:
   A2aMcpFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub 'universal-auth-a2a-mcp-${Environment}'
+      FunctionName: !Sub 'universal-auth-a2a-mcp-${Project}-${Environment}'
       Runtime: nodejs18.x
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -63,7 +67,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'universal-auth-a2a-mcp-lambda-role-${Environment}'
+      RoleName: !Sub 'universal-auth-a2a-mcp-lambda-${Project}-${Environment}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -140,7 +144,7 @@ Resources:
   ApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: !Sub 'universal-auth-a2a-mcp-api-${Environment}'
+      Name: !Sub 'universal-auth-a2a-mcp-api-${Project}-${Environment}'
       Description: 'API Gateway for Universal Auth A2A MCP Lambda Function'
       EndpointConfiguration:
         Types:
@@ -223,7 +227,7 @@ Resources:
           Description: Allow Lambda to access AWS services (HTTP)
       Tags:
         - Key: Name
-          Value: !Sub 'universal-auth-a2a-mcp-lambda-sg-${Environment}'
+          Value: !Sub 'universal-auth-a2a-mcp-lambda-sg-${Project}-${Environment}'
         - Key: Environment
           Value: !Ref Environment
 
@@ -240,7 +244,7 @@ Resources:
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/universal-auth-a2a-mcp-${Environment}'
+      LogGroupName: !Sub '/aws/lambda/universal-auth-a2a-mcp-${Project}-${Environment}'
       RetentionInDays: 14
 
 Outputs:
