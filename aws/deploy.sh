@@ -13,8 +13,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-STACK_NAME="universal-auth-a2a-mcp"
-ENVIRONMENT=${1:-dev}
+ENVIRONMENT=${1}
+STACK_NAME="universal-auth-a2a-mcp-${ENVIRONMENT}"
+
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
 
@@ -40,7 +41,7 @@ echo -e "${GREEN}✅ AWS CLI and credentials verified${NC}"
 
 # Build the function.zip
 echo -e "${YELLOW}📦 Creating function.zip...${NC}"
-npm run package
+npm run "package:${ENVIRONMENT}"
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Generating function.zip failed${NC}"
     exit 1

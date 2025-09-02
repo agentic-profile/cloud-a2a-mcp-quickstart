@@ -4,9 +4,9 @@ Description: 'Foundation Infrastructure for Agentic Lambda Functions'
 Parameters:
   Environment:
     Type: String
-    Default: dev
-    Description: Environment name (dev, staging, prod)
-    AllowedValues: [dev, staging, prod]
+    Default: staging
+    Description: Environment name (staging, prod)
+    AllowedValues: [staging, prod]
 
 Resources:
   # S3 Bucket for Lambda Deployment

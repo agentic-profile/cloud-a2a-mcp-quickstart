@@ -7,9 +7,9 @@ Conditions:
 Parameters:
   Environment:
     Type: String
-    Default: dev
-    Description: Environment name (dev, staging, prod)
-    AllowedValues: [dev, staging, prod]
+    Default: staging
+    Description: Environment name (staging, prod)
+    AllowedValues: [staging, prod]
   FunctionZipVersion:
     Type: String
     Description: S3 object version for the function zip file
