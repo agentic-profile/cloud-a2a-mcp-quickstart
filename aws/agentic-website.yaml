@@ -7,7 +7,10 @@ Parameters:
     Default: staging
     Description: Environment name (staging, prod)
     AllowedValues: [staging, prod]
-  
+  Project:
+    Type: String
+    Default: demo
+    Description: Project name (demo, venture, volunteer)
   DomainName:
     Type: String
     Default: ''
@@ -23,7 +26,7 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'agentic-website-${AWS::AccountId}-${Environment}'
+      BucketName: !Sub 'agentic-website-${Project}-${AWS::AccountId}-${Environment}'
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -65,7 +68,7 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Name: !Sub 'agentic-website-oac-${Environment}'
+        Name: !Sub 'agentic-website-oac-${Project}-${Environment}'
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -111,7 +114,10 @@ Resources:
             QueryString: false
             Cookies:
               Forward: none
-        ErrorPages:
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt SPAFunction.FunctionARN
+        CustomErrorResponses:
           - ErrorCode: 403
             ResponseCode: 200
             ResponsePagePath: /index.html
@@ -121,17 +127,17 @@ Resources:
         PriceClass: PriceClass_100
         HttpVersion: http2
         IPV6Enabled: true
-        Tags:
-          - Key: Environment
-            Value: !Ref Environment
-          - Key: Service
-            Value: agentic-website
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-website
 
   # CloudFront Function for SPA Routing
   SPAFunction:
     Type: AWS::CloudFront::Function
     Properties:
-      Name: !Sub 'agentic-website-spa-function-${Environment}'
+      Name: !Sub 'agentic-website-spa-function-${Project}-${Environment}'
       FunctionConfig:
         Comment: 'SPA routing function for agentic website'
         Runtime: cloudfront-js-2.0
@@ -151,19 +157,11 @@ Resources:
           return request;
         }
 
-  # CloudFront Function Association
-  FunctionAssociation:
-    Type: AWS::CloudFront::FunctionAssociation
-    Properties:
-      FunctionARN: !GetAtt SPAFunction.FunctionARN
-      EventType: viewer-request
-      DistributionId: !Ref CloudFrontDistribution
-
   # IAM Role for Lambda@Edge (if needed for more complex routing)
   LambdaEdgeRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'agentic-website-lambda-edge-${Environment}'
+      RoleName: !Sub 'agentic-website-lambda-edge-${Project}-${Environment}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -183,7 +181,7 @@ Resources:
   CloudFrontLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/cloudfront/agentic-website-${Environment}'
+      LogGroupName: !Sub '/aws/cloudfront/agentic-website-${Project}-${Environment}'
       RetentionInDays: 30
       Tags:
         - Key: Environment

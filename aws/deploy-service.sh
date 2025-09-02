@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Configuration
 ENVIRONMENT=${1}
 PROJECT=${2:-demo}  # Default to 'demo' if not provided
-STACK_NAME="universal-auth-a2a-mcp-${PROJECT}-${ENVIRONMENT}"
+STACK_NAME="agentic-service-a2a-mcp-${PROJECT}-${ENVIRONMENT}"
 
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
@@ -88,8 +88,8 @@ echo -e "${YELLOW}📦 Using S3 bucket from foundation: ${BUCKET_NAME}${NC}"
 # Upload function.zip to S3 first
 echo -e "${YELLOW}📦 Uploading function.zip to S3 bucket: ${BUCKET_NAME}${NC}"
 
-# Upload the zip file to S3
-aws s3 cp function.zip s3://${BUCKET_NAME}/function.zip
+# Upload the zip file to S3 with project scoping
+aws s3 cp function.zip s3://${BUCKET_NAME}/${PROJECT}/function.zip
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to upload function.zip to S3${NC}"
@@ -102,7 +102,7 @@ echo -e "${GREEN}✅ Function uploaded to S3 successfully${NC}"
 echo -e "${YELLOW}📋 Getting S3 object version...${NC}"
 VERSION_ID=$(aws s3api head-object \
     --bucket ${BUCKET_NAME} \
-    --key function.zip \
+    --key ${PROJECT}/function.zip \
     --query 'VersionId' \
     --output text)
 

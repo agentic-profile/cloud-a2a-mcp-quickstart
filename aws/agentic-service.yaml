@@ -28,13 +28,13 @@ Resources:
   A2aMcpFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub 'universal-auth-a2a-mcp-${Project}-${Environment}'
+      FunctionName: !Sub 'agentic-service-a2a-mcp-${Project}-${Environment}'
       Runtime: nodejs18.x
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: !Ref FoundationDeploymentBucket
-        S3Key: function.zip
+        S3Key: !Sub '${Project}/function.zip'
         S3ObjectVersion: !If [HasVersion, !Ref FunctionZipVersion, !Ref AWS::NoValue]
       Environment:
         Variables:
@@ -61,13 +61,13 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
         - Key: Service
-          Value: universal-auth-a2a-mcp
+          Value: agentic-service-a2a-mcp
 
   # Lambda Execution Role
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'universal-auth-a2a-mcp-lambda-${Project}-${Environment}'
+      RoleName: !Sub 'agentic-service-a2a-mcp-lambda-${Project}-${Environment}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -96,9 +96,10 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:GetObjectVersion
-                Resource: !Sub 
-                  - 'arn:aws:s3:::${BucketName}/*'
+                Resource: !Sub
+                  - 'arn:aws:s3:::${BucketName}/${Project}/*'
                   - BucketName: !Ref FoundationDeploymentBucket
+                    Project: !Ref Project
         - PolicyName: OutboundHttpAccess
           PolicyDocument:
             Version: '2012-10-17'
@@ -144,7 +145,7 @@ Resources:
   ApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: !Sub 'universal-auth-a2a-mcp-api-${Project}-${Environment}'
+      Name: !Sub 'agentic-service-a2a-mcp-api-${Project}-${Environment}'
       Description: 'API Gateway for Universal Auth A2A MCP Lambda Function'
       EndpointConfiguration:
         Types:
@@ -227,7 +228,7 @@ Resources:
           Description: Allow Lambda to access AWS services (HTTP)
       Tags:
         - Key: Name
-          Value: !Sub 'universal-auth-a2a-mcp-lambda-sg-${Project}-${Environment}'
+          Value: !Sub 'agentic-service-a2a-mcp-lambda-sg-${Project}-${Environment}'
         - Key: Environment
           Value: !Ref Environment
 
@@ -244,7 +245,7 @@ Resources:
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/universal-auth-a2a-mcp-${Project}-${Environment}'
+      LogGroupName: !Sub '/aws/lambda/agentic-service-a2a-mcp-${Project}-${Environment}'
       RetentionInDays: 14
 
 Outputs:
