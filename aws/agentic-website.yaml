@@ -26,14 +26,18 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'agentic-website-${Project}-${AWS::AccountId}-${Environment}'
+      # BucketName: !Sub 'agentic-website-${Project}-${AWS::AccountId}-${Environment}-${AWS::StackId}'
+      # Let AWS generate a unique bucket name to avoid conflicts
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders: ['*']
@@ -45,33 +49,6 @@ Resources:
           Value: !Ref Environment
         - Key: Service
           Value: agentic-website
-
-  # S3 Bucket Policy for CloudFront Access
-  WebsiteBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WebsiteBucket
-      PolicyDocument:
-        Statement:
-          - Sid: AllowCloudFrontServicePrincipal
-            Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub '${WebsiteBucket}/*'
-            Condition:
-              StringEquals:
-                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
-
-  # Origin Access Control for CloudFront
-  OriginAccessControl:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties:
-      OriginAccessControlConfig:
-        Name: !Sub 'agentic-website-oac-${Project}-${Environment}'
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
 
   # CloudFront Distribution
   CloudFrontDistribution:
@@ -92,10 +69,13 @@ Resources:
           - CloudFrontDefaultCertificate: true
         Origins:
           - Id: S3Origin
-            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
-            S3OriginConfig:
-              OriginAccessIdentity: ''
-            OriginAccessControlId: !Ref OriginAccessControl
+            DomainName: !Sub '${WebsiteBucket}.s3-website-${AWS::Region}.amazonaws.com'
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+              OriginReadTimeout: 30
+              OriginKeepaliveTimeout: 5
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https
@@ -107,16 +87,7 @@ Resources:
             - GET
             - HEAD
           Compress: true
-          DefaultTTL: 86400
-          MaxTTL: 31536000
-          MinTTL: 0
-          ForwardedValues:
-            QueryString: false
-            Cookies:
-              Forward: none
-          FunctionAssociations:
-            - EventType: viewer-request
-              FunctionARN: !GetAtt SPAFunction.FunctionARN
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimized
         CustomErrorResponses:
           - ErrorCode: 403
             ResponseCode: 200
@@ -133,49 +104,20 @@ Resources:
         - Key: Service
           Value: agentic-website
 
-  # CloudFront Function for SPA Routing
-  SPAFunction:
-    Type: AWS::CloudFront::Function
+  # S3 Bucket Policy for Static Website Hosting
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: WebsiteBucket
     Properties:
-      Name: !Sub 'agentic-website-spa-function-${Project}-${Environment}'
-      FunctionConfig:
-        Comment: 'SPA routing function for agentic website'
-        Runtime: cloudfront-js-2.0
-      AutoPublish: true
-      FunctionCode: |
-        function handler(event) {
-          var request = event.request;
-          var uri = request.uri;
-          
-          // Check if the request is for a file with an extension
-          if (uri.includes('.')) {
-            return request;
-          }
-          
-          // For all other requests, serve index.html
-          request.uri = '/index.html';
-          return request;
-        }
-
-  # IAM Role for Lambda@Edge (if needed for more complex routing)
-  LambdaEdgeRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub 'agentic-website-lambda-edge-${Project}-${Environment}'
-      AssumeRolePolicyDocument:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Service
-          Value: agentic-website
+          - Sid: AllowPublicReadAccess
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub '${WebsiteBucket.Arn}/*'
 
   # CloudWatch Log Group for CloudFront
   CloudFrontLogGroup:
@@ -205,6 +147,12 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-WebsiteBucketArn'
 
+  WebsiteBucketUrl:
+    Description: 'S3 Static Website URL'
+    Value: !GetAtt WebsiteBucket.WebsiteURL
+    Export:
+      Name: !Sub '${AWS::StackName}-WebsiteBucketUrl'
+
   CloudFrontDistributionId:
     Description: 'CloudFront Distribution ID'
     Value: !Ref CloudFrontDistribution
@@ -225,21 +173,3 @@ Outputs:
       - !Sub 'https://${CloudFrontDistribution.DomainName}'
     Export:
       Name: !Sub '${AWS::StackName}-WebsiteUrl'
-
-  OriginAccessControlId:
-    Description: 'Origin Access Control ID'
-    Value: !Ref OriginAccessControl
-    Export:
-      Name: !Sub '${AWS::StackName}-OriginAccessControlId'
-
-  SPAFunctionName:
-    Description: 'SPA Routing Function Name'
-    Value: !Ref SPAFunction
-    Export:
-      Name: !Sub '${AWS::StackName}-SPAFunctionName'
-
-  LambdaEdgeRoleArn:
-    Description: 'Lambda@Edge Role ARN'
-    Value: !GetAtt LambdaEdgeRole.Arn
-    Export:
-      Name: !Sub '${AWS::StackName}-LambdaEdgeRoleArn'
