@@ -3,95 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agentic Profile MCP Service</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Universal Authentication Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            text-align2: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .status-section {
+            margin-top: 2rem;
+        }
+        
+        .status-section h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-container {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            border: 1px solid #f5c6cb;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+        
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 1rem auto 0;
+            display: block;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        .refresh-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Agentic Profile A2A<br/> and MCP Server</h1>
-        </header>
-
-        <main>
-            <section class="welcome">
-                <p>A scalable A2A/MCP service using AWS Lambda, Bedrock, Redis, DynamoDB, and S3.</p>
-                <p>
-                    This server demonstrates managing agentic profiles, business matching, and
-                    location services through MCP (Model Context Protocol) and A2A
-                    (Agent-to-Agent) endpoints.
-                </p>
-            </section>
-
-            <section class="navigation">
-                <div class="nav-grid">
-                    <a href="endpoints.html" class="nav-card">
-                        <div class="nav-icon">📡</div>
-                        <h3>Available Endpoints</h3>
-                        <p>View all available API endpoints and their descriptions</p>
-                    </a>
-                    
-                    <a href="api-testing.html" class="nav-card">
-                        <div class="nav-icon">🧪</div>
-                        <h3>Basic API Testing</h3>
-                        <p>Test core API functionality including health checks and A2A endpoints</p>
-                    </a>
-                    
-                    <a href="location.html" class="nav-card">
-                        <div class="nav-icon">📍</div>
-                        <h3>Location</h3>
-                        <p>Test location management and geolocation services</p>
-                    </a>
-                    
-                    <a href="match.html" class="nav-card">
-                        <div class="nav-icon">🏢</div>
-                        <h3>Business Matching</h3>
-                        <p>Test business matching and management services</p>
-                    </a>
-                    
-                    <a href="chat.html?agentUrl=/a2a/venture&title=Venture" class="nav-card">
-                        <div class="nav-icon">🚀</div>
-                        <h3>Venture</h3>
-                        <p>Test venture management A2A endpoint</p>
-                    </a>
-                    
-                    <a href="chat.html?agentUrl=/a2a/vc&title=VC" class="nav-card">
-                        <div class="nav-icon">💼</div>
-                        <h3>VC Chat</h3>
-                        <p>Test VC management A2A endpoint</p>
-                    </a>
-                    
-                    <a href="chat.html?agentUrl=/a2a/hireme&title=Hire%20Me" class="nav-card">
-                        <div class="nav-icon">👔</div>
-                        <h3>Hire Me Chat</h3>
-                        <p>Test hire me A2A endpoint</p>
-                    </a>
-                </div>
-            </section>
-
-            <section class="quick-info">
-                <h2>Quick Information</h2>
-                <div class="info-grid">
-                    <div class="info-card">
-                        <h4>Service Status</h4>
-                        <div id="serviceStatus">Checking...</div>
-                    </div>
-                    <div class="info-card">
-                        <h4>Total Endpoints</h4>
-                        <div>8+ Available</div>
-                    </div>
-                    <div class="info-card">
-                        <h4>Protocols</h4>
-                        <div>MCP + A2A</div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p>Built with Express.js and TypeScript</p>
-        </footer>
+        <h1>Cloud Ready A2A and MCP Quickstart</h1>
+        
+        <p>
+            This server provides example <a href="https://a2a-protocol.org/">Agent-to-Agent (A2A)</a>
+            and <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a> 
+            services that support <a href="https://universalauth.org">Universal Authentication</a>
+            and can be easily deployed to AWS for massive scalability, reliability, and availability.
+        </p>
+        <p>
+            Universal Authentication is a lightweight combination of
+            <a href="https://www.w3.org/TR/did-1.1/">Decentralized Identifiers (DID)</a> and
+            <a href="https://www.rfc-editor.org/rfc/rfc7519">JSON Web Tokens (JWT)</a>, riding over HTTPS.  It enables
+            discovery, authentication, and secure communication between any two agentic systems on the Internet
+            and does not require centralized Authentication Services.
+        </p>
+        
+        <div class="status-section">
+            <h2>Server Status</h2>
+            <div class="status-container">
+                <div id="status-content" class="loading">Loading server status...</div>
+            </div>
+            <button class="refresh-btn" onclick="fetchStatus()">Refresh Status</button>
+        </div>
     </div>
 
-    <script src="homepage.js"></script>
+    <script>
+        async function fetchStatus() {
+            const statusContent = document.getElementById('status-content');
+            const refreshBtn = document.querySelector('.refresh-btn');
+            
+            // Disable button and show loading
+            refreshBtn.disabled = true;
+            statusContent.innerHTML = '<div class="loading">Loading server status...</div>';
+            
+            try {
+                // Get current path and add slash if necessary, then append "status"
+                const currentPath = window.location.pathname;
+                const statusUrl = (currentPath.endsWith('/') ? currentPath : currentPath + '/') + 'status';
+                const response = await fetch(statusUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display the JSON response in a formatted way
+                statusContent.innerHTML = `<pre>${JSON.stringify(data, null, 4)}</pre>`;
+                
+            } catch (error) {
+                statusContent.innerHTML = `
+                    <div class="error">
+                        <strong>Error fetching status:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        // Fetch status when page loads
+        document.addEventListener('DOMContentLoaded', fetchStatus);
+        
+        // Auto-refresh every 30 seconds
+        setInterval(fetchStatus, 30000);
+    </script>
 </body>
 </html>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Page, Card, CardBody, Button, JsonRpcDebug, LabelValue } from '@/components';
 import { MapPinIcon, MagnifyingGlassIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
+import { buildEndpoint } from '@/utils';
 
 interface LocationData {
     latitude: number;
@@ -25,7 +26,7 @@ const McpLocationPage = () => {
     const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
 
     // Construct the MCP endpoint URL
-    const mcpEndpoint = new URL('/mcp/location', serverUrl).toString();
+    const mcpEndpoint = buildEndpoint(serverUrl, 'mcp/location');
 
     const handleLocationUpdate = () => {
         const mcpRequest = {
