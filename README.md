@@ -1,60 +1,87 @@
-# Agentic Profile A2A/MCP service running on AWS
+# Cloud A2A and MCP Quickstart
 
-Leverages CloudFormation to create a scalable A2A/MCP service with Lambda, Redis, DynamoDB, and S3. Uses
-NAT to fetch external Agentic Profiles for authentication.
+Leverages cloud formation scripts and templates to create a scalable server with example A2A and MCP services.
 
 ## Features
 
-- A2A and MCP compliant API endpoints
-- Support for profile retrieval and updates
-- CloudFormation deployment
-- A2A TaskHandler endpoints for HireMe, Venture, and VC operations
+For each cloud infrastructure, scripts can optimize with VPCs, NATs, caches, scalable databases, scalable
+compute, native security, and different AI model providers.
+
+Demonstrates [Universal Authentication](https://universalauth.org) using DIDs, JWT, and standard HTTPS headers.  
+
+The A2A and MCP services are written in Javascript/Typescript using Node.js and have abstracted
+storage to map to the cloud native data stores.
+
+Example A2A agents include:
+- Venture: an agent that learns about a startup and helps that startup find the right technology providers, capital partners, teamates, and co-founders.
+- Business Match: an MCP that learns about all the ventures and the people that might want to work with them and suggests connections.
+- Volunteer: an agent that learns about a volunteer and helps them find volunteering opportunities
+- Charity: an agent that learns about a charity and helps them find volunteers
+- Reputation: an MCP that learns about peoples and business reputations
+- Volunteer Match: an MCP that learns about volunteers and charities and suggests matches
+
+The demo website is written using React and converted to a static website which can be deployed
+to an edge caching service.
+
+### Cloud Providers
+
+Support for various cloud providers:
+  - AWS: [simple deployment on AWS](./service/README.md) using CloudFormation
 
 ## Development
 
-### Prerequisites
+Suports local development with these dependencies:
 
+- git
 - Node.js 22+
-- AWS CLI configured with `agentic` profile
-- AWS SAM CLI
+- Redis
 
-### Installation
+### Quickstart
+
+1. Make sure Redis is installed and running
+
+- Install Redis
+- Start Redis locally
+
+  ```bash
+  redis-server
+  ```
+
+2. Clone the repo and change dir into it
 
 ```bash
+git clone git@github.com:agentic-profile/cloud-a2a-mcp-quickstart.git
+cd cloud-a2a-mcp-quickstart
+```
+
+3. Start the website service locally
+
+```bash
+cd website
 npm install
+npm run dev
 ```
 
-### Building
+4. Start the A2A and MCP server locally
 
 ```bash
-npm run build
+cd service
+npm install
+npm run dev
 ```
 
-### Local Testing
+5. Open the website with your browser, visit http://localhost:5173
 
-The project includes several test events for different MCP methods and A2A endpoints:
+- Create an Agentic Profile so your agents can authenticate
+    - Click "Settings", then "Manage" on the Digital Identity row
+    - Enter your name, then click "Create Digital Identity"
+- Click MCP in the navigation bar
+    - Click the "Test" button under Location
+    - Click "Update Location"
 
-```bash
-# Test initialize method
-npm run test:local
 
-# Test tools/list method
-npm run test:tools-list
 
-# Test get_profile tool
-npm run test:get-profile
 
-# Test A2A endpoints
-npm run test:venture
-npm run test:venture-create
-npm run test:vc
-npm run test:vc-task-send
-npm run test:hireme
-npm run test:hireme-taskhandler
-
-# Test all methods
-npm run test:all
-```
 
 ### Local Development with Redis
 

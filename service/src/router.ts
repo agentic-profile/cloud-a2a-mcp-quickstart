@@ -51,6 +51,67 @@ app.get('/status', (_req: Request, res: Response) => {
     });
 });
 
+// Verify we can access the Internet via NAT gateway
+app.get('/internet', async (req: Request, res: Response) => {
+    // Allow custom URL via query parameter, default to httpbin.org
+    const testUrl = (req.query.url as string) || 'https://httpbin.org/json';
+    
+    try {
+        
+        // Basic URL validation
+        try {
+            new URL(testUrl);
+        } catch (urlError) {
+            return res.status(400).json({
+                status: 'failed',
+                nat_working: false,
+                error: 'Invalid URL provided',
+                timestamp: new Date().toISOString(),
+                service: 'agentic-profile-mcp'
+            });
+        }
+        
+        const startTime = Date.now();
+        
+        const response = await fetch(testUrl, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'agentic-profile-mcp-nat-test/1.0'
+            },
+            signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
+        
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        return res.json({
+            status: 'success',
+            nat_working: true,
+            test_url: testUrl,
+            response_time_ms: responseTime,
+            response_status: response.status,
+            response_data: data,
+            timestamp: new Date().toISOString(),
+            service: 'agentic-profile-mcp'
+        });
+    } catch (error) {
+        console.error('Internet connectivity test failed:', error);
+        return res.status(503).json({
+            status: 'failed',
+            nat_working: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString(),
+            service: 'agentic-profile-mcp'
+        });
+    }
+});
+
 // A2A HireMe TaskHandler endpoint
 app.post('/a2a/hireme', async (req: Request, res: Response) => {
     await handleA2ARequest( req, res, new HireMeExecutor() );

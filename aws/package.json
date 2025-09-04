@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Universal auth A2A and MCP for AWS",
   "scripts": {
-    "foundation:up":      "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-staging --parameter-overrides Environment=staging --capabilities CAPABILITY_IAM",
-    "foundation:up:prod": "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-prod --parameter-overrides Environment=prod --capabilities CAPABILITY_IAM",
+    "foundation:up":      "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-staging --parameter-overrides Environment=staging KeyPairName=aws-us-west-2-local --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM",
+    "foundation:up:prod": "aws cloudformation deploy --template-file agentic-foundation.yaml --stack-name agentic-foundation-prod --parameter-overrides Environment=prod KeyPairName=aws-us-west-2-local --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM",
     "foundation:down":      "aws cloudformation delete-stack --stack-name agentic-foundation-staging",
     "foundation:down:prod": "aws cloudformation delete-stack --stack-name agentic-foundation-prod",
     
@@ -39,22 +39,6 @@
 
     "website:undeploy": "aws cloudformation delete-stack --stack-name agentic-website-demo-staging",
     "website:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-website-demo-prod",
-
-
-    "events": "aws cloudformation describe-stack-events --stack-name agentic-profile-mcp-dev --query 'StackEvents[0:5]' --output table",
-    "events:prod": "aws cloudformation describe-stack-events --stack-name agentic-profile-mcp-prod --query 'StackEvents[0:5]' --output table",
-    
-    "test:local": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-event.json --template mcp-service.yaml",
-    "test:tools-list": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-tools-list.json --template mcp-service.yaml",
-    "test:get-profile": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-get-profile.json --template mcp-service.yaml",
-    "test:venture": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-venture.json --template mcp-service.yaml",
-    "test:venture-create": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-venture-create.json --template mcp-service.yaml",
-    "test:vc": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-vc-initialize.json --template mcp-service.yaml",
-    "test:vc-task-send": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-vc-task-send.json --template mcp-service.yaml",
-    "test:hireme": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-hireme-task-send.json --template mcp-service.yaml",
-    "test:hireme-taskhandler": "npm run build && sam local invoke AgenticProfileMCPFunction --event events/test-hireme-taskhandler.json --template mcp-service.yaml",
-    "test:all": "npm run test:local && npm run test:tools-list && npm run test:get-profile && npm run test:venture && npm run test:venture-create && npm run test:vc && npm run test:vc-task-send && npm run test:hireme && npm run test:hireme-taskhandler",
-    
    
     "test:redis": "node scripts/test-redis-connection.js",
     "test:local-redis": "npm run build && node scripts/test-local-redis.js"

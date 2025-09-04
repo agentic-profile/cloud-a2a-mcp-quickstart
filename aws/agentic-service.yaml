@@ -29,7 +29,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub 'agentic-service-a2a-mcp-${Project}-${Environment}'
-      Runtime: nodejs18.x
+      Runtime: nodejs22.x
       Handler: dist/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
@@ -52,9 +52,9 @@ Resources:
       VpcConfig:
         SubnetIds:
           - !ImportValue 
-            Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet1'
+            Fn::Sub: 'agentic-foundation-${Environment}-PrivateSubnet1'
           - !ImportValue 
-            Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet2'
+            Fn::Sub: 'agentic-foundation-${Environment}-PrivateSubnet2'
         SecurityGroupIds:
           - !Ref LambdaSecurityGroup
       Tags:

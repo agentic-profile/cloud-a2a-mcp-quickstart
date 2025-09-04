@@ -8,10 +8,16 @@ Parameters:
     Description: Environment name (staging, prod)
     AllowedValues: [staging, prod]
 
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 Key Pair for SSH access to NAT instance
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair
+
 Resources:
   # S3 Bucket for Lambda Deployment
   DeploymentBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
     Properties:
       BucketName: !Sub 'agentic-foundation-deployment-${AWS::AccountId}-${Environment}'
       VersioningConfiguration:
@@ -27,6 +33,104 @@ Resources:
         - Key: Service
           Value: agentic-foundation
 
+  # Custom resource to empty S3 bucket on stack deletion
+  EmptyBucketOnDelete:
+    Type: Custom::EmptyBucket
+    Properties:
+      ServiceToken: !GetAtt EmptyBucketFunction.Arn
+      BucketName: !Ref DeploymentBucket
+
+  # Lambda function to empty S3 bucket
+  EmptyBucketFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'agentic-foundation-empty-bucket-${Environment}'
+      Runtime: python3.9
+      Handler: index.lambda_handler
+      Role: !GetAtt EmptyBucketRole.Arn
+      Timeout: 300
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          import cfnresponse
+          
+          def lambda_handler(event, context):
+              s3 = boto3.client('s3')
+              
+              try:
+                  bucket_name = event['ResourceProperties']['BucketName']
+                  
+                  if event['RequestType'] == 'Delete':
+                      # Empty the bucket
+                      print(f"Emptying bucket: {bucket_name}")
+                      
+                      # Delete all object versions
+                      paginator = s3.get_paginator('list_object_versions')
+                      pages = paginator.paginate(Bucket=bucket_name)
+                      
+                      delete_keys = []
+                      for page in pages:
+                          if 'Versions' in page:
+                              for version in page['Versions']:
+                                  delete_keys.append({
+                                      'Key': version['Key'],
+                                      'VersionId': version['VersionId']
+                                  })
+                          if 'DeleteMarkers' in page:
+                              for marker in page['DeleteMarkers']:
+                                  delete_keys.append({
+                                      'Key': marker['Key'],
+                                      'VersionId': marker['VersionId']
+                                  })
+                      
+                      # Delete in batches of 1000 (S3 limit)
+                      for i in range(0, len(delete_keys), 1000):
+                          batch = delete_keys[i:i+1000]
+                          if batch:
+                              s3.delete_objects(
+                                  Bucket=bucket_name,
+                                  Delete={'Objects': batch}
+                              )
+                      
+                      print(f"Successfully emptied bucket: {bucket_name}")
+                  
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+  # IAM Role for EmptyBucket Lambda
+  EmptyBucketRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'agentic-foundation-empty-bucket-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3EmptyBucketPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource:
+                  - !GetAtt DeploymentBucket.Arn
+                  - !Sub '${DeploymentBucket.Arn}/*'
+
+
   # Valkey Cache Serverless (Redis-compatible)
   ValkeyCacheServerless:
     Type: AWS::ElastiCache::ServerlessCache
@@ -35,8 +139,8 @@ Resources:
       Engine: redis
       UserGroupId: !Ref ValkeyUserGroup
       SubnetIds:
-        - !Ref DefaultSubnet1
-        - !Ref DefaultSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref ValkeySecurityGroup
       Description: Serverless Redis cache for agentic foundation
@@ -187,6 +291,334 @@ Resources:
       SubnetId: !Ref DefaultSubnet2
       RouteTableId: !Ref RouteTable
 
+  # Private Subnet 1 for Lambda functions
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVpc
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-private-subnet-1-${Environment}'
+
+  # Private Subnet 2 for Lambda functions
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVpc
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-private-subnet-2-${Environment}'
+
+  # Elastic IP for NAT Instance
+  NatInstanceEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-nat-eip-${Environment}'
+
+  # Attach EIP to NAT Instance
+  NatInstanceEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref NatInstance
+      EIP: !Ref NatInstanceEIP
+
+  # Security Group for NAT Instance
+  NatInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for NAT instance
+      VpcId: !Ref DefaultVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.0.0.0/16
+          Description: Allow HTTP from VPC
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+          Description: Allow HTTPS from VPC
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: Allow SSH for management
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-nat-instance-sg-${Environment}'
+
+  # NAT Instance (EC2-based)
+  NatInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}'
+      InstanceType: t3.micro
+      KeyName: !Ref KeyPairName
+      SubnetId: !Ref DefaultSubnet1
+      SecurityGroupIds:
+        - !Ref NatInstanceSecurityGroup
+      SourceDestCheck: false
+      IamInstanceProfile: !Ref NatInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euo pipefail  # Exit on error, undefined vars, pipe failures
+          
+          # Logging function
+          log() {
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a /var/log/nat-setup.log
+          }
+          
+          log "Starting NAT instance configuration..."
+          
+          # Update system packages
+          yum update -y
+          
+          # Install nftables if not present
+          yum install -y nftables
+          
+          # Enable IP forwarding permanently
+          log "Configuring IP forwarding..."
+          if ! grep -q "net.ipv4.ip_forward = 1" /etc/sysctl.conf; then
+              echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
+          fi
+          sysctl -w net.ipv4.ip_forward=1
+          
+          # Configure DNS (preserve existing and add fallbacks)
+          log "Configuring DNS resolution..."
+          if ! grep -q "169.254.169.253" /etc/resolv.conf; then
+              # Backup original resolv.conf
+              cp /etc/resolv.conf /etc/resolv.conf.backup
+              # Add AWS DNS resolver and Google DNS as fallback
+              {
+                  echo "nameserver 169.254.169.253"
+                  echo "nameserver 8.8.8.8"
+                  echo "nameserver 8.8.4.4"
+              } >> /etc/resolv.conf
+          fi
+          
+          # Create nftables directory if it doesn't exist
+          mkdir -p /etc/nftables
+          
+          # Get the primary network interface name dynamically
+          log "Detecting primary network interface..."
+          PRIMARY_INTERFACE=$(ip route show default | awk '/default/ { print $5 }' | head -1)
+          log "Primary interface detected: $PRIMARY_INTERFACE"
+          
+          # Configure NAT using nftables with improved security
+          log "Creating nftables configuration..."
+          cat > /etc/nftables/nat-instance.nft << EOF
+          #!/usr/sbin/nft -f
+          
+          # Clear existing rules
+          flush ruleset
+          
+          # Define NAT table for masquerading
+          table inet nat {
+              # Chain for postrouting (MASQUERADE)
+              chain postrouting {
+                  type nat hook postrouting priority srcnat; policy accept;
+                  # MASQUERADE traffic from VPC going out through primary interface
+                  ip saddr 10.0.0.0/16 oifname "$PRIMARY_INTERFACE" masquerade
+              }
+          }
+          
+          # Define filter table for packet filtering
+          table inet filter {
+              # Input chain - secure but functional
+              chain input {
+                  type filter hook input priority filter; policy drop;
+                  
+                  # Allow loopback traffic
+                  iifname "lo" accept
+                  
+                  # Allow established and related connections
+                  ct state established,related accept
+                  
+                  # Allow SSH for management
+                  tcp dport 22 accept
+                  
+                  # Allow ICMP for diagnostics
+                  icmp type { echo-request, destination-unreachable, time-exceeded } accept
+                  icmpv6 type { echo-request, destination-unreachable, time-exceeded, nd-neighbor-solicit, nd-neighbor-advert } accept
+              }
+              
+              # Forward chain - controlled forwarding
+              chain forward {
+                  type filter hook forward priority filter; policy drop;
+                  
+                  # Allow loopback
+                  iifname "lo" accept
+                  
+                  # Allow established and related connections
+                  ct state established,related accept
+                  
+                  # Allow forwarding from VPC private subnets to internet
+                  ip saddr 10.0.3.0/24 oifname "$PRIMARY_INTERFACE" accept
+                  ip saddr 10.0.4.0/24 oifname "$PRIMARY_INTERFACE" accept
+                  
+                  # Allow other VPC traffic to internet (broader fallback)
+                  ip saddr 10.0.0.0/16 oifname "$PRIMARY_INTERFACE" accept
+                  
+                  # Log dropped packets for debugging (optional)
+                  limit rate 10/minute log prefix "NAT-DROP: "
+              }
+              
+              # Output chain - allow all outbound
+              chain output {
+                  type filter hook output priority filter; policy accept;
+              }
+          }
+          EOF
+          
+          # Validate nftables configuration syntax
+          log "Validating nftables configuration..."
+          if ! nft -c -f /etc/nftables/nat-instance.nft; then
+              log "ERROR: nftables configuration syntax is invalid!"
+              exit 1
+          fi
+          
+          # Apply nftables configuration
+          log "Applying nftables configuration..."
+          nft -f /etc/nftables/nat-instance.nft
+          
+          # Enable nftables service
+          systemctl enable nftables
+          systemctl start nftables
+          
+          # Create systemd service to ensure rules persist on reboot
+          log "Creating systemd service for NAT rules persistence..."
+          cat > /etc/systemd/system/nat-instance.service << 'EOF'
+          [Unit]
+          Description=NAT Instance nftables rules
+          After=network-online.target nftables.service
+          Wants=network-online.target
+          Requires=nftables.service
+          
+          [Service]
+          Type=oneshot
+          ExecStartPre=/usr/bin/sleep 5
+          ExecStart=/usr/sbin/nft -f /etc/nftables/nat-instance.nft
+          ExecReload=/usr/sbin/nft -f /etc/nftables/nat-instance.nft
+          RemainAfterExit=true
+          TimeoutSec=30
+          
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+          
+          # Reload systemd and enable the custom service
+          systemctl daemon-reload
+          systemctl enable nat-instance.service
+          systemctl start nat-instance.service
+          
+          # Verify the service started successfully
+          if systemctl is-active --quiet nat-instance.service; then
+              log "NAT instance service started successfully"
+          else
+              log "WARNING: NAT instance service failed to start"
+              systemctl status nat-instance.service >> /var/log/nat-setup.log
+          fi
+          
+          # Verify IP forwarding is enabled
+          if [ "$(cat /proc/sys/net/ipv4/ip_forward)" = "1" ]; then
+              log "IP forwarding is enabled"
+          else
+              log "ERROR: IP forwarding is not enabled"
+              exit 1
+          fi
+          
+          # Test basic connectivity
+          log "Testing basic connectivity..."
+          if ping -c 1 8.8.8.8 > /dev/null 2>&1; then
+              log "Internet connectivity test passed"
+          else
+              log "WARNING: Internet connectivity test failed"
+          fi
+          
+          # Display current nftables rules for verification
+          log "Current nftables ruleset:"
+          nft list ruleset >> /var/log/nat-setup.log
+          
+          log "NAT instance configuration completed successfully at $(date)"
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-nat-instance-${Environment}'
+        - Key: ConfigVersion
+          Value: "v4-nftables-inet-permissive"
+
+  # IAM Role for NAT Instance
+  NatInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'agentic-foundation-nat-instance-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-nat-instance-role-${Environment}'
+
+  # Instance Profile for NAT Instance
+  NatInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub 'agentic-foundation-nat-instance-profile-${Environment}'
+      Roles:
+        - !Ref NatInstanceRole
+
+  # Private Route Table for Lambda subnets
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref DefaultVpc
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-foundation-private-rt-${Environment}'
+
+  # Private Route to NAT Instance
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      InstanceId: !Ref NatInstance
+
+  # Associate Private Subnet 1 with Private Route Table
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  # Associate Private Subnet 2 with Private Route Table
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
   # Security Group for VPC Endpoints
   VpcEndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -212,11 +644,49 @@ Resources:
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.secretsmanager'
       VpcEndpointType: Interface
       SubnetIds:
-        - !Ref DefaultSubnet1
-        - !Ref DefaultSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref VpcEndpointSecurityGroup
       PrivateDnsEnabled: true
+
+  # VPC Endpoint for Lambda (for Lambda-to-Lambda calls)
+  LambdaVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref DefaultVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.lambda'
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !Ref VpcEndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # VPC Endpoint for CloudWatch Logs
+  CloudWatchLogsVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref DefaultVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !Ref VpcEndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # VPC Endpoint for S3 (Gateway endpoint - no hourly cost)
+  S3VpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref DefaultVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref PrivateRouteTable
 
 Outputs:
   DeploymentBucketName:
@@ -277,4 +747,34 @@ Outputs:
     Description: 'Default Subnet 2 ID'
     Value: !Ref DefaultSubnet2
     Export:
-      Name: !Sub '${AWS::StackName}-DefaultSubnet2' 
+      Name: !Sub '${AWS::StackName}-DefaultSubnet2'
+
+  PrivateSubnet1:
+    Description: 'Private Subnet 1 ID'
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet1'
+
+  PrivateSubnet2:
+    Description: 'Private Subnet 2 ID'
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet2'
+
+  NatInstanceId:
+    Description: 'NAT Instance ID'
+    Value: !Ref NatInstance
+    Export:
+      Name: !Sub '${AWS::StackName}-NatInstanceId'
+
+  NatInstanceEIP:
+    Description: 'NAT Instance Elastic IP'
+    Value: !Ref NatInstanceEIP
+    Export:
+      Name: !Sub '${AWS::StackName}-NatInstanceEIP'
+
+  NatInstancePublicIp:
+    Description: 'NAT Instance Public IP'
+    Value: !GetAtt NatInstance.PublicIp
+    Export:
+      Name: !Sub '${AWS::StackName}-NatInstancePublicIp' 
