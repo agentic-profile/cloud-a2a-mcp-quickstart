@@ -46,6 +46,7 @@ export async function processJsonRpcMethod(req: Request, res: Response, methodHa
 
                     res.status(401)
                         .set('WWW-Authenticate', `Agentic ${b64u.objectToBase64Url(challenge)}`)
+                        .set('Access-Control-Expose-Headers', 'WWW-Authenticate')
                         .json(result);
                     return;
                 }

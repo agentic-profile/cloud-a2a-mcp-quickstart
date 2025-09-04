@@ -65,6 +65,10 @@ export const JsonRpcDebug = ({
         if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
             const { headers } = result.fetchResponse;
 
+            console.log('401 Response headers object:', headers);
+            console.log('WWW-Authenticate header (title case):', headers?.get('WWW-Authenticate'));
+            console.log('www-authenticate header (lowercase):', headers?.get('www-authenticate'));
+
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
             //const authToken = await resolveAuthToken( challenge );
@@ -249,7 +253,13 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
                 {result.fetchResponse && (
                     <div className="mb-3 space-y-4">
                         <LabelValue label="HTTP Response" value={`${result.fetchResponse.status} ${result.fetchResponse.statusText}`} />
-                        <LabelJson label="Response Headers" data={formatHeaders(result.fetchResponse.headers)} />
+                        <LabelJson label="Response Headers" data={(() => {
+                            console.log('About to format headers for display. Response headers:', result.fetchResponse.headers);
+                            console.log('Response status:', result.fetchResponse.status);
+                            console.log('Direct access to WWW-Authenticate:', result.fetchResponse.headers.get('WWW-Authenticate'));
+                            console.log('Direct access to www-authenticate:', result.fetchResponse.headers.get('www-authenticate'));
+                            return formatHeaders(result.fetchResponse.headers);
+                        })()} />
                     </div>
                 )}
 
@@ -303,14 +313,35 @@ function parseJson(body: any) {
 
 // Shared utility function to format headers
 const formatHeaders = (headers: HeadersInit): Record<string, string> => {
+
+    console.log('formatHeaders input:', headers);
+    console.log('formatHeaders type:', typeof headers, headers instanceof Headers);
+
     if (headers instanceof Headers) {
+        // Direct test for www-authenticate header with all possible variations
+        const authHeaderVariations = [
+            'WWW-Authenticate',
+            'www-authenticate', 
+            'Www-Authenticate',
+            'www-Authenticate',
+            'WWW-AUTHENTICATE'
+        ];
+        
+        console.log('Testing all www-authenticate header variations:');
+        authHeaderVariations.forEach(variation => {
+            const value = headers.get(variation);
+            console.log(`  ${variation}: ${value}`);
+        });
         const result: Record<string, string> = {};
         // Use entries() method to get all headers
         try {
             for (const [key, value] of headers.entries()) {
+                console.log(`Header from entries(): "${key}" = "${value}"`);
                 result[key] = value;
             }
+            console.log('formatHeaders entries() success:', result);
         } catch (error) {
+            console.log('formatHeaders entries() failed, using fallback:', error);
             // Fallback: try to get headers one by one for CORS-restricted headers
             // Note: Browsers restrict access to certain CORS headers for security reasons
             const accessibleHeaders = [
@@ -322,24 +353,27 @@ const formatHeaders = (headers: HeadersInit): Record<string, string> => {
                 'etag', 
                 'date', 
                 'server',
-                'www-authenticate' // This should be accessible if exposed
+                'www-authenticate', // This should be accessible if exposed
+                'WWW-Authenticate'  // Try both cases due to potential server/browser differences
             ];
             
             for (const headerName of accessibleHeaders) {
                 try {
                     const value = headers.get(headerName);
+                    console.log(`Header ${headerName}:`, value);
                     if (value !== null) {
                         result[headerName] = value;
                     }
                 } catch (e) {
                     // Skip headers that can't be accessed due to CORS restrictions
-                    console.warn(`Cannot access header ${headerName} due to CORS restrictions`);
+                    console.warn(`Cannot access header ${headerName} due to CORS restrictions:`, e);
                 }
             }
             
             // Add a note about CORS restrictions
             result['_cors_note'] = 'Some CORS headers are restricted by browser security policy';
         }
+        console.log('formatHeaders final result:', result);
         return result;
     }
     if (Array.isArray(headers)) {

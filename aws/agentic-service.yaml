@@ -141,61 +141,56 @@ Resources:
                   - ec2:UnassignPrivateIpAddresses
                 Resource: '*'
 
-  # API Gateway
-  ApiGateway:
-    Type: AWS::ApiGateway::RestApi
+  # HTTP API Gateway
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
     Properties:
       Name: !Sub 'agentic-service-a2a-mcp-api-${Project}-${Environment}'
-      Description: 'API Gateway for Universal Auth A2A MCP Lambda Function'
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
+      Description: 'HTTP API Gateway for Universal Auth A2A MCP Lambda Function'
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowHeaders:
+          - '*'
+        AllowMethods:
+          - '*'
+        AllowOrigins:
+          - '*'
+        ExposeHeaders:
+          - 'www-authenticate'
+        MaxAge: 86400
 
-  # API Gateway Resource
-  ApiResource:
-    Type: AWS::ApiGateway::Resource
+  # HTTP API Integration
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
     Properties:
-      RestApiId: !Ref ApiGateway
-      ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: '{proxy+}'
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${A2aMcpFunction.Arn}/invocations'
+      PayloadFormatVersion: '1.0'
 
-  # API Gateway Method
-  ApiMethod:
-    Type: AWS::ApiGateway::Method
+  # HTTP API Route for all paths
+  HttpApiRoute:
+    Type: AWS::ApiGatewayV2::Route
     Properties:
-      RestApiId: !Ref ApiGateway
-      ResourceId: !Ref ApiResource
-      HttpMethod: ANY
-      AuthorizationType: NONE
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${A2aMcpFunction.Arn}/invocations'
-      RequestParameters:
-        method.request.path.proxy: true
+      ApiId: !Ref HttpApi
+      RouteKey: 'ANY /{proxy+}'
+      Target: !Sub 'integrations/${HttpApiIntegration}'
 
-  # API Gateway Root Method
-  ApiRootMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGateway
-      ResourceId: !GetAtt ApiGateway.RootResourceId
-      HttpMethod: ANY
-      AuthorizationType: NONE
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${A2aMcpFunction.Arn}/invocations'
+  # HTTP API Route for root path
+  # HttpApiRootRoute:
+  #  Type: AWS::ApiGatewayV2::Route
+  #  Properties:
+  #    ApiId: !Ref HttpApi
+  #    RouteKey: 'ANY /'
+  #    Target: !Sub 'integrations/${HttpApiIntegration}'
 
-  # API Gateway Deployment
-  ApiDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - ApiMethod
-      - ApiRootMethod
+  # HTTP API Stage
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
     Properties:
-      RestApiId: !Ref ApiGateway
+      ApiId: !Ref HttpApi
       StageName: !Ref Environment
+      AutoDeploy: true
 
   # Lambda Security Group
   LambdaSecurityGroup:
@@ -232,14 +227,14 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  # Lambda Permission for API Gateway
+  # Lambda Permission for HTTP API Gateway
   LambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref A2aMcpFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
 
   # CloudWatch Log Group
   LambdaLogGroup:
@@ -249,11 +244,11 @@ Resources:
       RetentionInDays: 14
 
 Outputs:
-  ApiGatewayUrl:
-    Description: 'API Gateway URL'
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+  HttpApiUrl:
+    Description: 'HTTP API Gateway URL'
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
     Export:
-      Name: !Sub '${AWS::StackName}-ApiGatewayUrl'
+      Name: !Sub '${AWS::StackName}-HttpApiUrl'
 
   LambdaFunctionArn:
     Description: 'Lambda Function ARN'

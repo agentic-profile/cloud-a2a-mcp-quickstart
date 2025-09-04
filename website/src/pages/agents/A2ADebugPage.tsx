@@ -9,7 +9,7 @@ export interface A2ARequest {
 }
 
 const A2ADebugPage = () => {
-    const [a2aUrl, setA2aUrl] = useState<string>('http://localhost:3000/a2a/venture');
+    const [a2aUrl, setA2aUrl] = useState<string>('https://api.matchwise.ai/agents/connect');
     const [customPayload, setCustomPayload] = useState<string>('');
     const [request, setRequest] = useState<RequestInit | null>(null);
     const sendButtonRef = useRef<HTMLButtonElement>(null);
@@ -129,7 +129,7 @@ const A2ADebugPage = () => {
                                     type="url"
                                     value={a2aUrl}
                                     onChange={handleUrlChange}
-                                    placeholder="http://localhost:3000/a2a/venture"
+                                    placeholder="https://api.matchwise.ai/agents/connect"
                                     className={`w-full p-3 border rounded-md text-sm ${
                                         a2aUrl && !isValidUrl()
                                             ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
