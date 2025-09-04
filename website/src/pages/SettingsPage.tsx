@@ -12,301 +12,186 @@ import {
 import { Switch, Button, Page } from '@/components';
 import { useSettingsStore } from '@/stores';
 
-const SettingsPage = () => {
-    const [isEditingServerUrl, setIsEditingServerUrl] = useState(false);
-    const [tempServerUrl, setTempServerUrl] = useState('');
-    const { theme, setTheme } = useTheme();
-    const navigate = useNavigate();
+const DEFAULT_SERVER_URLS = [
+    'https://demo-api.universalauth.org',
+    'https://gal3i40cfb.execute-api.us-west-2.amazonaws.com/staging',
+    'http://localhost:3000'
+];
 
-    const {
-        serverUrl,
-        setServerUrl
-    } = useSettingsStore();
+const ServerUrlSetting = () => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempValue, setTempValue] = useState('');
+    
+    const { serverUrl, setServerUrl } = useSettingsStore();
 
-    const handleEditServerUrl = () => {
-        setTempServerUrl(serverUrl);
-        setIsEditingServerUrl(true);
+    const handleEdit = () => {
+        setTempValue(serverUrl);
+        setIsEditing(true);
     };
 
-    const handleSaveServerUrl = () => {
-        setServerUrl(tempServerUrl);
-        setIsEditingServerUrl(false);
+    const handleSave = () => {
+        setServerUrl(tempValue);
+        setIsEditing(false);
     };
 
-    const handleCancelServerUrl = () => {
-        setTempServerUrl(serverUrl);
-        setIsEditingServerUrl(false);
+    const handleCancel = () => {
+        setTempValue(serverUrl);
+        setIsEditing(false);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            handleSaveServerUrl();
+            handleSave();
         } else if (e.key === 'Escape') {
-            handleCancelServerUrl();
+            handleCancel();
         }
     };
 
-    const settingsSections = [
-        {
-            title: 'Preferences',
-            icon: Cog6ToothIcon,
-            items: [
-                {
-                    name: 'Server URL',
-                    value: isEditingServerUrl ? tempServerUrl : serverUrl,
-                    isEditing: isEditingServerUrl,
-                    type: 'editable-text',
-                    onEdit: handleEditServerUrl,
-                    onSave: handleSaveServerUrl,
-                    onCancel: handleCancelServerUrl,
-                    onChange: setTempServerUrl,
-                    placeholder: 'http://localhost:3000'
-                },
-                {
-                    name: 'Dark Mode',
-                    value: theme === 'dark',
-                    type: 'toggle',
-                    onChange: (enabled: boolean) => setTheme(enabled ? 'dark' : 'light')
-                }
-            ]
-        },
-        {
-            title: 'Identity',
-            icon: UserIcon,
-            items: [
-                {
-                    name: 'Digital Identity',
-                    subtitle: 'Create and manage your digital identity profile',
-                    type: 'link',
-                    onClick: () => navigate('/identity')
-                }
-            ]
-        }
-    ];
+    return (
+        <div className="py-3 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+                <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Server URL
+                    </p>
+                    {isEditing ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="text"
+                                    value={tempValue}
+                                    onChange={(e) => setTempValue(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="http://localhost:3000"
+                                    className="flex-1 px-3 py-2 border-2 border-dodgerblue rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue"
+                                    autoFocus
+                                />
+                                <Button
+                                    onClick={handleSave}
+                                    variant="primary"
+                                >
+                                    <CheckIcon className="w-4 h-4" />
+                                    <span>Save</span>
+                                </Button>
+                                <Button
+                                    onClick={handleCancel}
+                                    variant="secondary"
+                                >
+                                    <XMarkIcon className="w-4 h-4" />
+                                    <span>Cancel</span>
+                                </Button>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Quick options:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {DEFAULT_SERVER_URLS.map((url, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setTempValue(url)}
+                                            className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                        >
+                                            {url}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                {serverUrl}
+                            </span>
+                            <Button
+                                onClick={handleEdit}
+                                variant="ghost"
+                                size="sm"
+                                className="px-2 py-1 text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            >
+                                <PencilIcon className="w-4 h-4" />
+                                <span className="text-xs">Edit</span>
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
-    const renderSettingItem = (item: any) => {
-        switch (item.type) {
-            case 'link':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <button
-                            onClick={item.onClick}
-                            className="flex items-center text-sm text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-md transition-colors"
-                        >
-                            <span>Manage</span>
-                            <ArrowRightIcon className="w-4 h-4 ml-1" />
-                        </button>
-                    </div>
-                );
-            
-            case 'editable-text':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {item.name}
-                            </p>
-                            {item.isEditing ? (
-                                <div className="flex items-center space-x-2">
-                                    <input
-                                        type="text"
-                                        value={item.value}
-                                        onChange={(e) => item.onChange(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        placeholder={item.placeholder}
-                                        className="flex-1 px-3 py-2 border-2 border-dodgerblue rounded-md bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-dodgerblue focus:border-dodgerblue"
-                                        autoFocus
-                                    />
-                                    <Button
-                                        onClick={item.onSave}
-                                        variant="primary"
-                                    >
-                                        <CheckIcon className="w-4 h-4" />
-                                        <span>Save</span>
-                                    </Button>
-                                    <Button
-                                        onClick={item.onCancel}
-                                        variant="secondary"
-                                    >
-                                        <XMarkIcon className="w-4 h-4" />
-                                        <span>Cancel</span>
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                                        {item.value}
-                                    </span>
-                                    <Button
-                                        onClick={item.onEdit}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="px-2 py-1 text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                        <span className="text-xs">Edit</span>
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-            
-            case 'text':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <input
-                            type="text"
-                            value={item.value}
-                            onChange={(e) => item.onChange(e.target.value)}
-                            placeholder={item.placeholder}
-                            className="block w-64 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:border-dodgerblue focus:ring-dodgerblue"
-                        />
-                    </div>
-                );
-            
-            case 'toggle':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <Switch
-                            isSelected={item.value}
-                            onValueChange={item.onChange}
-                            size="sm"
-                            color="primary"
-                        />
-                    </div>
-                );
-            
-            case 'select':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <select
-                            value={item.value}
-                            onChange={(e) => item.onChange(e.target.value)}
-                            className="block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 focus:border-dodgerblue focus:ring-dodgerblue"
-                        >
-                            {item.options.map((option: any) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                );
-            
-            case 'info':
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {item.value}
-                        </span>
-                    </div>
-                );
-            
-            default:
-                return (
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {item.name}
-                            </p>
-                            {item.subtitle && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {item.subtitle}
-                                </p>
-                            )}
-                        </div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {item.value}
-                        </span>
-                    </div>
-                );
-        }
-    };
+const SettingsPage = () => {
+    const { theme, setTheme } = useTheme();
+    const navigate = useNavigate();
 
     return (
         <Page
             title="Settings"
             subtitle="Manage your account preferences and application settings"
         >
-
             <div className="space-y-6">
-                {settingsSections.map((section) => (
-                    <div
-                        key={section.title}
-                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
-                    >
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                            <div className="flex items-center space-x-3">
-                                <section.icon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue flex-shrink-0" />
-                                <h2 className="mb-0">
-                                    {section.title}
-                                </h2>
-                            </div>
-                        </div>
-                        
-                        <div className="px-6 py-4 space-y-4">
-                            {section.items.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-                                >
-                                    {renderSettingItem(item)}
-                                </div>
-                            ))}
+                {/* Preferences Section */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center space-x-3">
+                            <Cog6ToothIcon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue flex-shrink-0" />
+                            <h2 className="mb-0">Preferences</h2>
                         </div>
                     </div>
-                ))}
+                    
+                    <div className="px-6 py-4 space-y-4">
+                        {/* Server URL Setting */}
+                        <ServerUrlSetting />
+
+                        {/* Dark Mode Setting */}
+                        <div className="py-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Dark Mode
+                                    </p>
+                                </div>
+                                <Switch
+                                    isSelected={theme === 'dark'}
+                                    onValueChange={(enabled) => setTheme(enabled ? 'dark' : 'light')}
+                                    size="sm"
+                                    color="primary"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Identity Section */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center space-x-3">
+                            <UserIcon className="w-5 h-5 text-dodgerblue dark:text-dodgerblue flex-shrink-0" />
+                            <h2 className="mb-0">Identity</h2>
+                        </div>
+                    </div>
+                    
+                    <div className="px-6 py-4 space-y-4">
+                        {/* Digital Identity Setting */}
+                        <div className="py-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Digital Identity
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        Create and manage your digital identity profile
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => navigate('/identity')}
+                                    className="flex items-center text-sm text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-md transition-colors"
+                                >
+                                    <span>Manage</span>
+                                    <ArrowRightIcon className="w-4 h-4 ml-1" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </Page>
     );

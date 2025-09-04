@@ -12,18 +12,18 @@ const HomePage = () => {
         {
             icon: ChatBubbleLeftRightIcon,
             title: 'Trust and Accountability',
-            description: 'Any agent must be able to prove its identity to any other agent in the Agentic Economy. ' +
+            description: 'Every agent must be able to prove who it represents to any other agent in the Agentic Economy. ' +
             'With identity verification, agents can be held accountable for their actions and develop reputation.'
         },
         {
             icon: ShieldCheckIcon,
             title: 'Reliability, Availability, and Scalability',
-            description: 'Agents must be able to operate in a decentralized and fault-tolerant manner.'
+            description: 'Agents must be able to leverage best in class cloud services to seamlessly scale to millions of transactions per second, while maintaining high security.'
         },
         {
             icon: GlobeAltIcon,
             title: 'Standards and Interoperability',
-            description: 'Agents must be able to communicate with each other.'
+            description: 'Agents must be able to communicate with each other, and to discovery and use tools available across the Internet.'
         }
     ];
 
@@ -58,12 +58,12 @@ const HomePage = () => {
                                         </span>
                                     </h1>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
-                                        This open-source quickstart makes it easy to deploy scalable A2A and MCP services
-                                        on popular cloud providers.
+                                        This open-source quickstart makes it easy to deploy scalable and secure A2A and MCP services
+                                        on popular cloud providers such as AWS.
                                     </p>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
-                                        Quickstart examples support global discovery, decentralized
-                                        authentication, and transactions in the Agentic Economy.
+                                        Quickstart examples support global creation and discovery of entities (e.g. people, businesses, governments), decentralized
+                                        authentication of their AI agents, and secure transactions in the Agentic Economy.
                                     </p>
                                     <div className="mt-5 sm:mt-8 flex justify-center">
                                         <div className="mt-3 sm:mt-0">
@@ -85,17 +85,10 @@ const HomePage = () => {
 
                 {/* Features Section */}
                 <div id="features" className="py-12 bg-white dark:bg-gray-800 w-full max-w-full">
-                    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
-                        <div className="lg:text-center">
-                            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                                Key Ingredients of the Agentic Economy
-                            </p>
-                            <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-300 lg:mx-auto">
-                                There are many great agent orchestration frameworks like LangChain and CrewAI.  These frameworks
-                                enable the composition of cooperative agents with established authentication systems.
-                            </p>
-                            <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-300 lg:mx-auto">
-                                <b>The Agentic Economy will flourish</b> when an agent built in one orchestration framework can discover,
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="text-center">
+                            <p className="mt-4 max-w-4xl text-xl text-gray-500 dark:text-gray-300 mx-auto">
+                                <b className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">The Agentic Economy will flourish</b> when an agent built in one orchestration framework can discover,
                                 authenticate, and transact with agents built in other frameworks and representing other
                                 entities such as people, businesses, and governments.
                             </p>
@@ -123,7 +116,7 @@ const HomePage = () => {
 
                 {/* CTA Section */}
                 <div className="bg-gradient-to-r from-purple-600 to-pink-600 w-full max-w-full">
-                    <div className="w-full max-w-full mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
                         <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
                             <span className="block">Ready to get started?</span>
                             <span className="block">Interact with our example agents and MCP services.</span>
@@ -134,14 +127,12 @@ const HomePage = () => {
                                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200"
                             >
                                 Agent Demos
-                                <ArrowRightIcon className="ml-2 h-5 w-5" />
                             </Link>
                             <Link
                                 to="/mcp"
                                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200"
                             >
                                 MCP Demos
-                                <ArrowRightIcon className="ml-2 h-5 w-5" />
                             </Link>
                         </div>
                     </div>
@@ -149,7 +140,7 @@ const HomePage = () => {
 
                 {/* Footer Section */}
                 <footer className="bg-gray-900 dark:bg-black w-full max-w-full pb-20 lg:pb-12">
-                    <div className="w-full max-w-full mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                             {/* Company Info */}
                             <div className="col-span-1 md:col-span-2">
@@ -159,7 +150,7 @@ const HomePage = () => {
                                     </span>
                                 </div>
                                 <p className="text-gray-300 text-sm leading-6 max-w-md">
-                                    Connecting agent builders with technology providers, cloud services,
+                                    Connecting agent builders with technology providers, cloud services, talent,
                                     and capital partners to create the next 80 billion agents in 18 months.
                                 </p>
                             </div>
@@ -171,23 +162,18 @@ const HomePage = () => {
                                 </h3>
                                 <ul className="space-y-3">
                                     <li>
-                                        <Link to="/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
-                                            Home
+                                        <Link to="https://agentworldcongress.org/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
+                                            Agent World Congress
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/agents" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
-                                            Agents
+                                        <Link to="https://universalauth.org/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
+                                            Universal Authentication
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/mcp" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
-                                            MCP Services
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link to="/chat" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
-                                            Chat
+                                        <Link to="https://agenticprofile.ai/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
+                                            Agentic Profile Blog
                                         </Link>
                                     </li>
                                 </ul>
@@ -200,7 +186,7 @@ const HomePage = () => {
                                 </h3>
                                 <ul className="space-y-3">
                                     <li>
-                                        <Link to="/about" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
+                                        <Link to="https://agentworldcongress.org/about/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
                                             About Us
                                         </Link>
                                     </li>
@@ -215,7 +201,7 @@ const HomePage = () => {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/contact" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
+                                        <Link to="https://agentworldcongress.org/contact/" className="text-gray-300 hover:text-white text-sm transition-colors duration-200">
                                             Contact
                                         </Link>
                                     </li>

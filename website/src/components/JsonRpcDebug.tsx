@@ -64,14 +64,8 @@ export const JsonRpcDebug = ({
         // Need to retry with auth?
         if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
             const { headers } = result.fetchResponse;
-
-            console.log('401 Response headers object:', headers);
-            console.log('WWW-Authenticate header (title case):', headers?.get('WWW-Authenticate'));
-            console.log('www-authenticate header (lowercase):', headers?.get('www-authenticate'));
-
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
-            //const authToken = await resolveAuthToken( challenge );
             const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
             const authToken = await signChallenge({
                 challenge,
@@ -113,12 +107,12 @@ export const JsonRpcDebug = ({
             </CardHeader>
             <CardBody className="space-y-4">
                 {/* Initial Request */}
-                <RequestCard request={request} requestInit={requestInit} />
+                <RequestCard title="First HTTP Request" request={request} requestInit={requestInit} />
                 {spinner && <Spinner size="md" color="primary" />}                   
                 <ResponseCard result={result} />
 
                 {/* Retry Request with authentication */}
-                <RequestCard request={retryInit} requestInit={retryInit} />
+                <RequestCard title="Second HTTP Request with auth" request={retryInit} requestInit={retryInit} />
                 {retrySpinner && <Spinner size="md" color="primary" />}                   
                 <ResponseCard result={retryResult} />
             </CardBody>
@@ -205,10 +199,12 @@ function resolveAttestationAndPrivateKey( userProfile: UserProfile ) {
 }
 
 // RequestCard component
-const RequestCard = ({ 
+const RequestCard = ({
+    title,
     request, 
     requestInit 
 }: { 
+    title: string;
     request: RequestInit | null; 
     requestInit: RequestInit | null; 
 }) => {
@@ -220,7 +216,7 @@ const RequestCard = ({
     return (
         <Card>
             <CardBody>
-                <h4>HTTP Request</h4>
+                <strong className="mb-2">{title}</strong>
 
                 {/* Request Headers */}
                 {requestInit?.headers && (
@@ -254,10 +250,6 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
                     <div className="mb-3 space-y-4">
                         <LabelValue label="HTTP Response" value={`${result.fetchResponse.status} ${result.fetchResponse.statusText}`} />
                         <LabelJson label="Response Headers" data={(() => {
-                            console.log('About to format headers for display. Response headers:', result.fetchResponse.headers);
-                            console.log('Response status:', result.fetchResponse.status);
-                            console.log('Direct access to WWW-Authenticate:', result.fetchResponse.headers.get('WWW-Authenticate'));
-                            console.log('Direct access to www-authenticate:', result.fetchResponse.headers.get('www-authenticate'));
                             return formatHeaders(result.fetchResponse.headers);
                         })()} />
                     </div>
@@ -313,33 +305,13 @@ function parseJson(body: any) {
 
 // Shared utility function to format headers
 const formatHeaders = (headers: HeadersInit): Record<string, string> => {
-
-    console.log('formatHeaders input:', headers);
-    console.log('formatHeaders type:', typeof headers, headers instanceof Headers);
-
     if (headers instanceof Headers) {
-        // Direct test for www-authenticate header with all possible variations
-        const authHeaderVariations = [
-            'WWW-Authenticate',
-            'www-authenticate', 
-            'Www-Authenticate',
-            'www-Authenticate',
-            'WWW-AUTHENTICATE'
-        ];
-        
-        console.log('Testing all www-authenticate header variations:');
-        authHeaderVariations.forEach(variation => {
-            const value = headers.get(variation);
-            console.log(`  ${variation}: ${value}`);
-        });
         const result: Record<string, string> = {};
         // Use entries() method to get all headers
         try {
             for (const [key, value] of headers.entries()) {
-                console.log(`Header from entries(): "${key}" = "${value}"`);
                 result[key] = value;
             }
-            console.log('formatHeaders entries() success:', result);
         } catch (error) {
             console.log('formatHeaders entries() failed, using fallback:', error);
             // Fallback: try to get headers one by one for CORS-restricted headers
@@ -360,7 +332,6 @@ const formatHeaders = (headers: HeadersInit): Record<string, string> => {
             for (const headerName of accessibleHeaders) {
                 try {
                     const value = headers.get(headerName);
-                    console.log(`Header ${headerName}:`, value);
                     if (value !== null) {
                         result[headerName] = value;
                     }
@@ -373,7 +344,6 @@ const formatHeaders = (headers: HeadersInit): Record<string, string> => {
             // Add a note about CORS restrictions
             result['_cors_note'] = 'Some CORS headers are restricted by browser security policy';
         }
-        console.log('formatHeaders final result:', result);
         return result;
     }
     if (Array.isArray(headers)) {

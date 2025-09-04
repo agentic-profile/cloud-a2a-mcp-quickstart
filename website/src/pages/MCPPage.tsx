@@ -27,13 +27,13 @@ const MCPPage = () => {
             icon: CloudIcon,
             route: '/mcp/location'
         },
-        {
+        /*{
             id: '2',
             name: 'Match',
             description: 'Connect with similar people',
             icon: CircleStackIcon,
             route: '/mcp/match'
-        }
+        }*/
     ];
 
     const handleTestService = (route: string) => {
