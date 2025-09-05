@@ -212,6 +212,11 @@ const RequestCard = ({
     if (!request) return null;
 
     const body = parseJson(requestInit?.body);
+    const headers = formatHeaders(requestInit?.headers || {});
+    
+    // Check for JWT in Authorization header
+    const authHeader = (headers['Authorization'] || headers['authorization'])?.split(/\s+/)?.[1];
+    const jwtData = authHeader && isJWT(authHeader) ? decodeJWT(authHeader) : null;
 
     return (
         <Card>
@@ -222,9 +227,18 @@ const RequestCard = ({
                 {requestInit?.headers && (
                     <LabelJson
                         label="Request Headers"
-                        data={formatHeaders(requestInit?.headers)}
+                        data={headers}
                         className="mb-3"
                         preClassName="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm overflow-x-auto border border-blue-200 dark:border-blue-700"
+                    />
+                )}
+
+                {jwtData && (
+                    <LabelJson
+                        label="Authorization Payload"
+                        data={jwtData.payload}
+                        className="mb-3"
+                        preClassName="bg-green-50 dark:bg-green-900/20 p-3 rounded-md text-sm overflow-x-auto border border-green-200 dark:border-green-700"
                     />
                 )}
 
@@ -301,6 +315,54 @@ function parseJson(body: any) {
         }
     }
     return body;
+}
+
+// JWT decoding utility function
+function decodeJWT(token: string): { header: any; payload: any; signature: string } | null {
+    try {
+        // Remove Bearer prefix if present
+        const cleanToken = token.replace(/^Bearer\s+/i, '');
+        
+        // Split JWT into parts
+        const parts = cleanToken.split('.');
+        if (parts.length !== 3) {
+            return null;
+        }
+        
+        // Decode header and payload (base64url decode)
+        const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const signature = parts[2];
+        
+        return { header, payload, signature };
+    } catch (error) {
+        return null;
+    }
+}
+
+// Check if a string appears to be a JWT token
+function isJWT(token: string): boolean {
+    try {
+        // Remove Bearer prefix if present
+        const cleanToken = token.replace(/^Bearer\s+/i, '');
+        
+        // Check if it has 3 parts separated by dots
+        const parts = cleanToken.split('.');
+        if (parts.length !== 3) {
+            return false;
+        }
+        
+        // Try to decode the header to see if it's valid base64url
+        try {
+            const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+            // Check if header has typical JWT fields
+            return header && (header.typ === 'JWT' || header.alg);
+        } catch {
+            return false;
+        }
+    } catch {
+        return false;
+    }
 }
 
 // Shared utility function to format headers
