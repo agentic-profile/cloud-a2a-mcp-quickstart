@@ -12,7 +12,7 @@ import { jrpcError, describeJsonRpcRequestError } from './utils.js';
 import {
     clientAgentSessionStore,
     agenticProfileStore
-} from '../stores/memory-store.js';
+} from '../stores/redis-store.js';
 import { AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, JsonRpcMethodHandler, JsonRpcRequest, JsonRpcResponse } from "./types.js";
 
 const didResolver = createDidResolver({ store: agenticProfileStore });
