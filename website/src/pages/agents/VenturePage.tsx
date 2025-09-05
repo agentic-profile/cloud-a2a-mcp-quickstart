@@ -1,16 +1,12 @@
 import { 
     ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
-import { Button, Card, CardBody, Page, JsonRpcDebug } from '@/components';
+import { Button, Card, CardBody, Page } from '@/components';
 import agentsData from '@/data/agents.json';
-import { useState } from 'react';
 
 const VenturePage = () => {
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture');
-    
-    // State for JSON RPC debugging
-    const [request, setRequest] = useState<any>(null);
     
     const handleChatClick = () => {
         if (ventureAgent?.agentUrl) {
@@ -20,27 +16,6 @@ const VenturePage = () => {
             // Fallback to regular chat page
             window.location.href = '/chat';
         }
-    };
-
-    const handleJsonRpcResult = (result: any) => {
-        console.log('JSON RPC Result:', result);
-    };
-
-    const handleSendRequest = () => {
-        if (!ventureAgent?.agentUrl) {
-            return;
-        }
-
-        // Sample JSON RPC payload for testing
-        const jsonRpcRequest = {
-            jsonrpc: '2.0',
-            id: Date.now().toString(),
-            method: 'tools/list',
-            params: { name: 'venture' }
-        };
-
-        // Set the request - this will automatically trigger JsonRpcDebug to send it
-        setRequest(jsonRpcRequest);
     };
 
     if (!ventureAgent) {
@@ -89,35 +64,6 @@ const VenturePage = () => {
                     Start Chat
                 </Button>
             </div>
-
-            {/* JSON RPC Debug Section */}
-            {ventureAgent.agentUrl && (
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">
-                        JSON RPC Debug
-                    </h2>
-                    <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-                        Test JSON RPC requests to the Venture Agent
-                    </p>
-                    
-                    {/* Send Request Button */}
-                    <div className="text-center mb-6">
-                        <Button
-                            onClick={handleSendRequest}
-                            color="primary"
-                            size="lg"
-                        >
-                            Test Tools List Request
-                        </Button>
-                    </div>
-                    
-                    <JsonRpcDebug
-                        url={ventureAgent.agentUrl}
-                        request={request}
-                        onFinalResult={handleJsonRpcResult}
-                    />
-                </div>
-            )}
         </Page>
     );
 };

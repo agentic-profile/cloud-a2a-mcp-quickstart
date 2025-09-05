@@ -128,15 +128,25 @@ export const ChatPage = () => {
     };
 
     const handleJsonRpcResult = (result: any) => {
-        if (result.data && result.data.result) {
-            // Handle successful JSON-RPC response
-            const agentResponse: Message = {
+        const { kind, parts} = result.data.result;
+        if ( parts ) {
+            if( kind !== "message" ) {
+                setErrorMessage(`Unknown A2A response kind: ${kind}`);
+                return
+            }
+
+            const text = parts
+                .filter((part: any) => part.kind === "text")
+                .map((part: any) => part.text)
+                .join('\n\n');
+
+            const message: Message = {
                 id: Date.now().toString(),
-                text: result.data.result.message || 'Agent response received',
+                text,
                 sender: 'agent',
                 timestamp: new Date()
             };
-            setMessages(prev => [...prev, agentResponse]);
+            setMessages(prev => [...prev, message]);
         } else if (result.data && result.data.error) {
             // Handle JSON-RPC error
             setErrorMessage(`JSON-RPC Error: ${result.data.error.message || 'Unknown error occurred'}`);
