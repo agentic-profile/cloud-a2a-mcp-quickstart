@@ -114,7 +114,7 @@ app.get('/internet', async (req: Request, res: Response) => {
 
 // A2A HireMe TaskHandler endpoint
 app.post('/a2a/hireme', async (req: Request, res: Response) => {
-    await handleA2ARequest( req, res, new HireMeExecutor() );
+    await handleA2ARequest( req, res, new HireMeExecutor(), false );
 });
 
 // A2A Venture TaskHandler endpoint
@@ -124,7 +124,7 @@ app.post('/a2a/venture', async (req: Request, res: Response) => {
 
 // A2A VC TaskHandler endpoint
 app.post('/a2a/vc', async (req: Request, res: Response) => {
-    await handleA2ARequest(req, res, new VCExecutor() );
+    await handleA2ARequest(req, res, new VCExecutor(), false );
 });
 
 // MCP handlers

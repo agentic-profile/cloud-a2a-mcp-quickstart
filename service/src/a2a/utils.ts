@@ -4,19 +4,25 @@ import {
     ExecutionEventBus,
     AgentExecutionEvent
 } from '@a2a-js/sdk/server';
-import { JSONRPCRequest, MessageSendParams, TaskStatus } from '@a2a-js/sdk';
+import { MessageSendParams, TaskStatus } from '@a2a-js/sdk';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, processJsonRpcMethod } from '../json-rpc/index.js';
+import { ClientAgentSession } from '@agentic-profile/auth';
 
-export async function handleA2ARequest( req: Request, res: Response, executor: AgentExecutor ) {
-    try {
+export async function handleA2ARequest( req: Request, res: Response, executor: AgentExecutor, requireAuth: boolean = true ) {
+
+    processJsonRpcMethod( req, res, async ( jrpcRequest: JsonRpcRequest, session: ClientAgentSession | null ): Promise<JsonRpcResponse | null> => {
         console.log('💼 Handling A2A request with executor...');
-        const rpcReq = req.body as JSONRPCRequest;
-        const { contextId = uuidv4(), includeAllUpdates = false } = req.body
-        console.log('💼 Request body:', JSON.stringify(rpcReq, null, 4));
+        console.log('💼 Request body:', JSON.stringify(jrpcRequest, null, 4));
+
+        // Required authentication
+        if( requireAuth && !session )
+            return jrpcErrorAuthRequired( jrpcRequest.id! );
         
         // Create request context from request body
-        const { params, id } = rpcReq;
+        const { params, id } = jrpcRequest;
+        const { contextId = uuidv4(), includeAllUpdates = false } = req.body
         const sendParams = params as unknown as MessageSendParams;
         const requestContext: RequestContext = {
             taskId: id ? `${id}` : '', // RequestContext doesn't support null/undefined, even though A2A allows it
@@ -73,13 +79,15 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
             };
         }
 
-        res.json({
+        return {
             jsonrpc: '2.0',
-            id,
+            id: id ?? '',
             result
-        });
-        
-    } catch (error) {
+        };
+    });
+}
+
+/*    } catch (error) {
         console.error(`Error processing A2A request:`, error);
         res.status(500).json({
             jsonrpc: '2.0',
@@ -91,4 +99,4 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
             }
         });
     }
-}
+}*/

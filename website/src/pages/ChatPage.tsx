@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Page, Button, EditableUrl, JsonRpcDebug } from '@/components';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -25,6 +25,7 @@ export const ChatPage = () => {
     const [showJsonRpcDebug, setShowJsonRpcDebug] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const { serverUrl } = useSettingsStore();
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const updateAgentUrl = () => {
@@ -59,6 +60,13 @@ export const ChatPage = () => {
             window.removeEventListener('popstate', updateAgentUrl);
         };
     }, [serverUrl]);
+
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     const handleUrlUpdate = (newUrl: string) => {
         if (newUrl.trim()) {
@@ -179,7 +187,10 @@ export const ChatPage = () => {
             />
 
             {/* Messages Container */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 h-96 sm:h-[500px] overflow-y-auto p-4 sm:p-6 mb-6">
+            <div 
+                ref={messagesContainerRef}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 h-96 sm:h-[500px] overflow-y-auto p-4 sm:p-6 mb-6"
+            >
                 <div className="space-y-4">
                     {messages.map((message) => (
                         <div
