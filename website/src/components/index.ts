@@ -30,3 +30,4 @@ export { UserProfileDisplay } from './UserProfileDisplay';
 // Utility components
 export { LabelValue } from './LabelValue';
 export { LabelJson } from './LabelJson';
+export { EditableUrl } from './EditableUrl';

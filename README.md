@@ -86,26 +86,7 @@ Example usage:
 
 The /website and /service projects are designed to be generic and easy to deploy on cloud infrastructure.
 
-Currently AWS CloudFormation scripts are available, and other cloud providers such as Google Cloud and Azure should be easy to implement.
-
-### Deploy to AWS using CloudFormation
-
-1. Create the foundation services that one or more agentic projects may need.  Includes the VPC, subnets, Internet Gateways, NAT, Valkey(Redis), deployment S3 buckets, and server-to-server secret support.
-
-```bash
-cd aws
-npm run foundation:up
-```
-
-2. Start the A2A and MCP service, and the demo website service
-
-```bash
-cd aws
-npm run service:deploy
-npm run website:deploy
-```
-
-3. View the Cloudformation logs to determine the URLs for both the A2A/MCP service, and the website service
+Currently [AWS CloudFormation scripts](./aws/README.md) are available, and other cloud providers such as Google Cloud and Azure should be easy to implement.
 
 
 ## Project Structure
@@ -199,29 +180,8 @@ curl -X POST http://localhost:3000/mcp/location \
 
 ### A2A Endpoints
 ```bash
-# HireMe TaskHandler
-curl -X POST http://localhost:3000/a2a/hireme \
-  -H 'Content-Type: application/json' \
-  -d '{"id":"1","method":"tasks/send","params":{"position":"Senior Engineer"},"includeAllUpdates":true}'
-
 # Venture TaskHandler
 curl -X POST http://localhost:3000/a2a/venture \
   -H 'Content-Type: application/json' \
   -d '{"id":"1","method":"venture/create","params":{"name":"Test Venture","type":"startup"}}'
-
-# VC TaskHandler
-curl -X POST http://localhost:3000/a2a/vc \
-  -H 'Content-Type: application/json' \
-  -d '{"id":"1","method":"task/send","params":{"investment":"1000000"}}'
 ```
-
-### Production Environment
-For production deployment, ensure Lambda endpoint is known:
-
-```bash
-export AGENTIC_HOST=https://ierurztomh.execute-api.us-west-2.amazonaws.com/dev
-```
-
-Then use the same endpoints with the production host.
-
-
