@@ -23,6 +23,7 @@
   "dependencies": {
     "@a2a-js/sdk": "^0.3.2",
     "@agentic-profile/auth": "^0.6.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@aws-sdk/client-cloudformation": "^3.0.0",
     "@aws-sdk/client-lambda": "^3.0.0",
     "@aws-sdk/client-secrets-manager": "^3.859.0",

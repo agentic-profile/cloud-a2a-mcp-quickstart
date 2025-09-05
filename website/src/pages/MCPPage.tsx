@@ -1,8 +1,7 @@
 import React from 'react';
 import { 
     ServerIcon, 
-    CloudIcon,
-    CircleStackIcon
+    CloudIcon
 } from '@heroicons/react/24/outline';
 import { Page, Card, CardBody, Button } from '@/components';
 import { Link, useNavigate } from 'react-router-dom';
