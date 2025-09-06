@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Spinner, LabelValue, LabelJson } from './index';
 import { parseChallengeFromWwwAuthenticate, signChallenge } from '@agentic-profile/auth';
 import { useUserProfileStore, type UserProfile } from '@/stores';
+import { deleteAuthToken, getAuthToken, setAuthToken } from '@/tools/AuthTokenManager';
 
 interface Result {
     fetchResponse: Response | undefined;
@@ -59,20 +60,23 @@ export const JsonRpcDebug = ({
         setRetrySpinner(false);
         setRetryResult(null);
 
-        const result = await doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult });
+        let authToken = await getAuthToken(url);
+        const result = await doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult, authToken });
 
         // Need to retry with auth?
         if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
+            if( authToken )
+                deleteAuthToken(url); // authToken failed, so forget it
+
             const { headers } = result.fetchResponse;
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
             const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
-            const authToken = await signChallenge({
+            authToken = await signChallenge({
                 challenge,
                 attestation,
                 privateJwk
             });
-            console.log('authToken', authToken);
         
             // 2nd try with auth new token - may throw an Error on response != ok
             const retryResult = await doFetch({
@@ -83,6 +87,10 @@ export const JsonRpcDebug = ({
                 setResult: setRetryResult,
                 authToken
             });
+            
+            if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
+                setAuthToken(url, authToken);
+
             onFinalResult(retryResult);
         } else {
             onFinalResult(result);
@@ -127,7 +135,7 @@ interface DoFetchProps {
     setRequestInit: (requestInit: RequestInit) => void;
     setSpinner: (spinner: boolean) => void;
     setResult: (result: Result) => void;
-    authToken?: string;
+    authToken?: string | null;
 }
 
 async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult, authToken }:DoFetchProps) {

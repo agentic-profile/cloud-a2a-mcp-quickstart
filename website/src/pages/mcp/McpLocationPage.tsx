@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Page, Card, CardBody, Button, JsonRpcDebug, LabelValue } from '@/components';
 import { MapPinIcon, MagnifyingGlassIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
-import { buildEndpoint } from '@/utils';
+import { buildEndpoint } from '@/tools/misc';
 
 interface LocationData {
     latitude: number;

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Page, Button, EditableUrl, JsonRpcDebug } from '@/components';
-import { useSettingsStore } from '@/stores/settingsStore';
+//import { useSettingsStore } from '@/stores/settingsStore';
+import { resolveRpcUrlFromWindow, updateWindowRpcUrl } from '@/tools/misc';
 
 interface Message {
     id: string;
@@ -20,46 +21,14 @@ export const ChatPage = () => {
         }
     ]);
     const [inputText, setInputText] = useState('');
-    const [agentUrl, setAgentUrl] = useState<string | null>(null);
+    //const [agentUrl, setAgentUrl] = useState<string | null>(null);
     const [currentRequest, setCurrentRequest] = useState<RequestInit | null>(null);
     const [showJsonRpcDebug, setShowJsonRpcDebug] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const { serverUrl } = useSettingsStore();
+    //const { serverUrl } = useSettingsStore();
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const updateAgentUrl = () => {
-            // Extract agentUrl from URL query parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const agentUrlParam = urlParams.get('agentUrl');
-            
-            // Create full URL by combining serverUrl with agentUrl
-            if (agentUrlParam && serverUrl) {
-                try {
-                    // Remove trailing slash from serverUrl if present
-                    const baseUrl = serverUrl.replace(/\/$/, '');
-                    // Ensure agentUrl starts with a slash
-                    const path = agentUrlParam.startsWith('/') ? agentUrlParam : `/${agentUrlParam}`;
-                    const fullUrl = `${baseUrl}${path}`;
-                    setAgentUrl(fullUrl);
-                } catch (error) {
-                    console.error('Error creating full agent URL:', error);
-                    setAgentUrl(null);
-                }
-            } else {
-                setAgentUrl(null);
-            }
-        };
-
-        updateAgentUrl();
-        
-        // Listen for popstate events to update when URL changes
-        window.addEventListener('popstate', updateAgentUrl);
-        
-        return () => {
-            window.removeEventListener('popstate', updateAgentUrl);
-        };
-    }, [serverUrl]);
+    const rpcUrl = resolveRpcUrlFromWindow();
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -69,35 +38,11 @@ export const ChatPage = () => {
     }, [messages]);
 
     const handleUrlUpdate = (newUrl: string) => {
-        if (newUrl.trim()) {
-            // Update the URL in browser history without page reload
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Extract just the path part if it's a full URL
-            let pathToSave = newUrl.trim();
-            try {
-                const url = new URL(newUrl);
-                pathToSave = url.pathname + url.search + url.hash;
-            } catch {
-                // If it's not a full URL, treat it as a path
-                if (!pathToSave.startsWith('/')) {
-                    pathToSave = `/${pathToSave}`;
-                }
-            }
-            
-            urlParams.set('agentUrl', pathToSave);
-            const newUrlString = `${window.location.pathname}?${urlParams.toString()}`;
-            window.history.replaceState({}, '', newUrlString);
-            
-            // Trigger the useEffect to update agentUrl
-            const event = new PopStateEvent('popstate');
-            window.dispatchEvent(event);
-        }
+        updateWindowRpcUrl(newUrl);
     };
 
-
     const handleSendMessage = () => {
-        if (inputText.trim() && agentUrl) {
+        if (inputText.trim() && rpcUrl) {
             const newMessage: Message = {
                 id: Date.now().toString(),
                 text: inputText,
@@ -181,7 +126,7 @@ export const ChatPage = () => {
             {/* Agent URL Display */}
             <EditableUrl
                 label="Agent URL"
-                value={agentUrl}
+                value={rpcUrl}
                 placeholder="Enter agent URL (e.g., /api/agents/venture or full URL)"
                 onUpdate={handleUrlUpdate}
             />
@@ -231,9 +176,9 @@ export const ChatPage = () => {
                     />
                     <Button
                         onClick={handleSendMessage}
-                        disabled={!inputText.trim() || !agentUrl}
+                        disabled={!inputText.trim() || !rpcUrl}
                         variant="primary"
-                        title={!agentUrl ? "Please set an agent URL first" : ""}
+                        title={!rpcUrl ? "Please set an agent URL first" : ""}
                     >
                         <PaperAirplaneIcon className="h-4 w-4" />
                         <span className="hidden sm:inline">Send</span>
@@ -267,10 +212,10 @@ export const ChatPage = () => {
             )}
 
             {/* JSON-RPC Debug Card */}
-            {showJsonRpcDebug && currentRequest && agentUrl && (
+            {showJsonRpcDebug && currentRequest && rpcUrl && (
                 <div className="mt-6">
                     <JsonRpcDebug
-                        url={agentUrl}
+                        url={rpcUrl}
                         request={currentRequest}
                         onFinalResult={handleJsonRpcResult}
                         onClose={() => {

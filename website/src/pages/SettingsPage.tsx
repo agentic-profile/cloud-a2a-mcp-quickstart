@@ -11,12 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Switch, Button, Page } from '@/components';
 import { useSettingsStore } from '@/stores';
-
-const DEFAULT_SERVER_URLS = [
-    'https://demo-api.universalauth.org',
-    'https://gal3i40cfb.execute-api.us-west-2.amazonaws.com/staging',
-    'http://localhost:3000'
-];
+import { DEFAULT_SERVER_URLS } from '@/tools/misc';
 
 const ServerUrlSetting = () => {
     const [isEditing, setIsEditing] = useState(false);

@@ -13,9 +13,28 @@ import closeIcon from "@iconify-icons/lucide/x";
 import Icon from "./Icon";
 
 
-export function Card({ className = "", ...props }: React.ComponentProps<typeof HeroCard> ) {
-    const baseClasses = "p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow duration-200";
-    return <HeroCard className={clsx(baseClasses,className)} {...props} />
+type CardVariant = "default" | "success" | "error";
+
+type CardProps = React.ComponentProps<typeof HeroCard> & {
+    variant?: CardVariant;
+};
+
+export function Card({ className = "", variant = "default", ...props }: CardProps ) {
+    const getVariantClasses = (variant: CardVariant) => {
+        switch (variant) {
+            case "success":
+                return "border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20";
+            case "error":
+                return "border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20";
+            default:
+                return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800";
+        }
+    };
+
+    const baseClasses = "p-2 rounded-xl border shadow-sm hover:shadow-lg transition-shadow duration-200";
+    const variantClasses = getVariantClasses(variant);
+    
+    return <HeroCard className={clsx(baseClasses, variantClasses, className)} {...props} />
 }
 
 type CardHeaderProps = {

@@ -1,5 +1,8 @@
 import { useState, useRef } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl } from '@/components';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/tools/misc';
+
+const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
 
 export interface A2ARequest {
     jsonrpc: '2.0';
@@ -9,17 +12,13 @@ export interface A2ARequest {
 }
 
 const A2ADebugPage = () => {
-    const [a2aUrl, setA2aUrl] = useState<string>('https://api.matchwise.ai/agents/connect');
     const [customPayload, setCustomPayload] = useState<string>('');
     const [request, setRequest] = useState<RequestInit | null>(null);
+    const rpcUrl = useRpcUrlFromWindow();
     const sendButtonRef = useRef<HTMLButtonElement>(null);
 
     const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setCustomPayload(e.target.value);
-    };
-
-    const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setA2aUrl(e.target.value);
     };
 
     const handleResult = (result: any) => {
@@ -48,8 +47,11 @@ const A2ADebugPage = () => {
     };
 
     const isValidUrl = () => {
+        if (!rpcUrl)
+            return false;
+
         try {
-            new URL(a2aUrl);
+            new URL(rpcUrl);
             return true;
         } catch {
             return false;
@@ -57,7 +59,7 @@ const A2ADebugPage = () => {
     };
 
     const handleSendRequest = () => {
-        if (!a2aUrl.trim()) {
+        if (!rpcUrl?.trim()) {
             return;
         }
 
@@ -120,29 +122,13 @@ const A2ADebugPage = () => {
                 <Card>
                     <CardBody>
                         {/* A2A URL Input */}
-                        <h3>
-                            A2A Endpoint URL
-                        </h3>
-                        <div className="space-y-3">
-                            <div>
-                                <input
-                                    type="url"
-                                    value={a2aUrl}
-                                    onChange={handleUrlChange}
-                                    placeholder="https://api.matchwise.ai/agents/connect"
-                                    className={`w-full p-3 border rounded-md text-sm ${
-                                        a2aUrl && !isValidUrl()
-                                            ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
-                                    }`}
-                                />
-                                {a2aUrl && !isValidUrl() && (
-                                    <div className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        Please enter a valid URL
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <EditableUrl
+                            label="A2A Endpoint URL"
+                            value={rpcUrl}
+                            placeholder="https://api.matchwise.ai/agents/connect"
+                            options={URL_OPTIONS}
+                            onUpdate={updateWindowRpcUrl}
+                        />
 
                         <h3>
                             Request Payload
@@ -188,7 +174,7 @@ const A2ADebugPage = () => {
                             <Button
                                 ref={sendButtonRef}
                                 onClick={handleSendRequest}
-                                disabled={!a2aUrl.trim() || !isValidUrl() || !isValidJson()}
+                                disabled={!isValidUrl() || !isValidJson()}
                                 color="primary"
                                 size="md"
                             >
@@ -206,24 +192,12 @@ const A2ADebugPage = () => {
                 </Card>
 
                 {/* JSON RPC Debug Component */}
-                {a2aUrl && isValidUrl() && (
+                {rpcUrl && isValidUrl() && (
                     <JsonRpcDebug
-                        url={a2aUrl}
+                        url={rpcUrl}
                         request={request}
                         onFinalResult={handleResult}
                     />
-                )}
-
-                {(!a2aUrl || !isValidUrl()) && (
-                    <Card>
-                        <CardBody>
-                            <div className="text-center py-8">
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    Enter a valid A2A endpoint URL above to start testing agent-to-agent requests
-                                </p>
-                            </div>
-                        </CardBody>
-                    </Card>
                 )}
             </div>
         </Page>
