@@ -37,8 +37,8 @@ export const LabelJson: React.FC<LabelJsonProps> = ({
 
     return (
         <div className={className}>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                {label}:
+            <div className="mb-1">
+                <strong>{label}:</strong>
             </div>
             <pre className={preClassName}>
                 {formatJson(data)}

@@ -32,10 +32,8 @@ export const EditableUrl = ({ label, value, placeholder, options, onUpdate }: Ed
     };
 
     const handleSave = () => {
-        if (editableValue.trim() ) {
-            onUpdate(editableValue.trim());
-            setIsEditing(false);
-        }
+        onUpdate(editableValue.trim());
+        setIsEditing(false);
     };
 
     const handleCancel = () => {

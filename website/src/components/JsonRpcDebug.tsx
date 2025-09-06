@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Spinner, LabelValue, LabelJson } from './index';
 import { parseChallengeFromWwwAuthenticate, signChallenge } from '@agentic-profile/auth';
 import { useUserProfileStore, type UserProfile } from '@/stores';
-import { deleteAuthToken, getAuthToken, setAuthToken } from '@/tools/AuthTokenManager';
+import { deleteAuthToken, useAuthToken } from '@/tools/AuthTokenManager';
+import { JwtDetails } from './JwtDetails';
 
 interface Result {
     fetchResponse: Response | undefined;
@@ -16,6 +17,7 @@ interface JsonRpcDebugProps {
     request: RequestInit | null;
     onFinalResult: (result: Result) => void;
     onClose?: () => void;
+    onClear?: () => void;
     className?: string;
 }
 
@@ -42,6 +44,7 @@ export const JsonRpcDebug = ({
     request, 
     onFinalResult,
     onClose,
+    onClear,
     className = '' 
 }: JsonRpcDebugProps) => {
     const [spinner, setSpinner] = useState(false);
@@ -53,6 +56,21 @@ export const JsonRpcDebug = ({
     const [retrySpinner, setRetrySpinner] = useState(false);
     const [retryInit, setRetryInit] = useState<RequestInit | null>(null);
     const [retryResult, setRetryResult] = useState<Result | null>(null);
+    const { authToken, setAuthToken, clearAuthToken } = useAuthToken(url);
+
+    // Clear all internal state
+    const clearAllState = () => {
+        setRequestInit(null);
+        setMethod(null);
+        setResult(null);
+        setRetryInit(null);
+        setRetryResult(null);
+        setRetrySpinner(false);
+        setSpinner(false);
+        if (onClear) {
+            onClear();
+        }
+    };
 
     const handleSendRequest = async (request: RequestInit) => {
 
@@ -60,7 +78,7 @@ export const JsonRpcDebug = ({
         setRetrySpinner(false);
         setRetryResult(null);
 
-        let authToken = await getAuthToken(url);
+        //let authToken = await getAuthToken(url);
         const result = await doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult, authToken });
 
         // Need to retry with auth?
@@ -72,7 +90,7 @@ export const JsonRpcDebug = ({
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
             const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
-            authToken = await signChallenge({
+            const newAuthToken = await signChallenge({
                 challenge,
                 attestation,
                 privateJwk
@@ -85,11 +103,11 @@ export const JsonRpcDebug = ({
                 setRequestInit: setRetryInit, 
                 setSpinner: setRetrySpinner,
                 setResult: setRetryResult,
-                authToken
+                authToken: newAuthToken
             });
             
             if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
-                setAuthToken(url, authToken);
+                setAuthToken(newAuthToken);
 
             onFinalResult(retryResult);
         } else {
@@ -106,14 +124,16 @@ export const JsonRpcDebug = ({
 
     return (
         <Card className={className}>
-            <CardHeader onClose={onClose}>
-                <div>
-                    <h2>JSON RPC Debug</h2>
-                    <LabelValue label="HTTP Request" value={url} />
-                    <LabelValue label="RPC Method" value={method ?? 'unknown'} />
-                </div>
+            <CardHeader onClose={onClose} onClear={clearAllState}>
+                <h2>JSON RPC Debug</h2>
             </CardHeader>
             <CardBody className="space-y-4">
+                <div>
+                    <LabelValue label="URL" value={url} />
+                    <LabelValue label="RPC Method" value={method ?? 'unknown'} />
+                    <JwtDetails jwt={authToken} onClear={() => clearAuthToken()} />
+                </div>
+
                 {/* Initial Request */}
                 <RequestCard title="First HTTP Request" request={request} requestInit={requestInit} />
                 {spinner && <Spinner size="md" color="primary" />}                   

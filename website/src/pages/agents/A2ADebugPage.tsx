@@ -196,6 +196,7 @@ const A2ADebugPage = () => {
                     <JsonRpcDebug
                         url={rpcUrl}
                         request={request}
+                        onClear={() => setRequest(null)}
                         onFinalResult={handleResult}
                     />
                 )}

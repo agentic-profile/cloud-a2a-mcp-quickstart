@@ -60,6 +60,9 @@ export const updateWindowRpcUrl = (rpcUrl: string) => {
         urlParams.delete('rpcUrl');
     const newUrlString = `${window.location.pathname}?${urlParams.toString()}`;
     window.history.replaceState({}, '', newUrlString);
+    
+    // Dispatch custom event to notify components of URL change
+    window.dispatchEvent(new CustomEvent('urlchange'));
 };
 
 export function resolveRpcUrlFromWindow() {
