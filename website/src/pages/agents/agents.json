@@ -8,7 +8,7 @@
         "agentUrl": "/a2a/venture"
     },
     {
-        "id": "capital",
+        "id": "_capital",
         "name": "Capital Agent",
         "description": "For VCs and other capital partners, helps identify ventures worth looking into",
         "avatar": "CA",
@@ -16,7 +16,7 @@
         "agentUrl": "/a2a/capital"
     },    
     {
-        "id": "volunteer",
+        "id": "_volunteer",
         "name": "Volunteer Agent",
         "description": "For volunteers, helps find volunteering opportunities",
         "avatar": "VA",
@@ -24,7 +24,7 @@
         "agentUrl": "/a2a/volunteer"
     },    
     {
-        "id": "charity",
+        "id": "_charity",
         "name": "Charity Agent",
         "description": "For charities, helps find volunteers",
         "avatar": "CA",

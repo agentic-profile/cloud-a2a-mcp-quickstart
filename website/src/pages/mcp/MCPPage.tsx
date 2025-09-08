@@ -2,9 +2,9 @@ import React from 'react';
 import { 
     ServerIcon, 
     MapPinIcon,
-    CurrencyDollarIcon,
-    UserGroupIcon,
-    ShieldCheckIcon
+    //CurrencyDollarIcon,
+    //UserGroupIcon,
+    //ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { Page, Card, CardBody, Button } from '@/components';
 import { Link, useNavigate } from 'react-router-dom';
@@ -28,7 +28,7 @@ const MCPPage = () => {
             description: 'Find other people or businesses near you',
             icon: MapPinIcon,
             route: '/mcp/location'
-        },
+        } /*,
         {
             id: '2',
             name: 'VC Match',
@@ -49,7 +49,7 @@ const MCPPage = () => {
             description: 'Check on the reputation of people and businesses',
             icon: ShieldCheckIcon,
             route: '/mcp/reputation'
-        }
+        }*/
     ];
 
     const handleTestService = (route: string) => {

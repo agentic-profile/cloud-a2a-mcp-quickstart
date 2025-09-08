@@ -2,7 +2,7 @@ import {
     ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, Page } from '@/components';
-import agentsData from '@/data/agents.json';
+import agentsData from './agents.json';
 import { buildEndpoint } from '@/tools/misc';
 import { useSettingsStore } from '@/stores';
 

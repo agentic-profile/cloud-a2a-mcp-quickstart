@@ -1,14 +1,14 @@
 import { Avatar } from '@heroui/react';
 import { Button, Card, CardBody, Page } from '@/components';
 import { Link } from 'react-router-dom';
-import agentsData from '@/data/agents.json';
+import agentsData from './agents.json';
 import { buildEndpoint } from '@/tools/misc';
 import { useSettingsStore } from '@/stores';
-import type { Agent } from '@/data/models';
+import type { Agent } from './types';
 
 const AgentsPage = () => {
     const { serverUrl } = useSettingsStore();
-    const agents: Agent[] = agentsData;
+    const agents: Agent[] = agentsData.filter(agent => !agent.id.startsWith('_'));
 
     const handleAgentAction = (agent: Agent) => {
         if (agent.route) {

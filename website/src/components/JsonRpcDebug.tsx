@@ -247,7 +247,7 @@ const RequestCard = ({
     const jwtData = authHeader && isJWT(authHeader) ? decodeJWT(authHeader) : null;
 
     return (
-        <Card>
+        <Card variant="primary">
             <CardBody>
                 <strong className="mb-2">{title}</strong>
 
@@ -286,7 +286,9 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
     if (!result) return null;
 
     return (
-        <Card>
+        <Card
+            variant={result.error || (result.fetchResponse && !result.fetchResponse.ok) ? 'error' : 'success'}
+        >
             <CardBody>
                 {result.fetchResponse && (
                     <div className="mb-3 space-y-4">
@@ -301,7 +303,6 @@ const ResponseCard = ({ result }: { result: Result | null }) => {
                     <LabelJson 
                         label="Response Body" 
                         data={result.data ? result.data : (result.text || 'No response body')}
-                        variant={result.error || (result.fetchResponse && !result.fetchResponse.ok) ? 'failure' : 'success'}
                     />
                 </div>
 

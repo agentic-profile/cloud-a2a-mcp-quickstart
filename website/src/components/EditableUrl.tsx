@@ -55,7 +55,7 @@ export const EditableUrl = ({ label, value, placeholder, options, onUpdate }: Ed
 
     return (
         <Card 
-            variant={shouldShowError ? "error" : "success"}
+            variant={shouldShowError ? "error" : "primary"}
             className="mb-4"
         >
             <CardBody>

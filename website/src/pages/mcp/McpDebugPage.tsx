@@ -4,6 +4,38 @@ import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/mcp/location');
 
+const EXAMPLE_PAYLOADS = [
+    {
+        name: 'Tools List',
+        payload: {
+            method: 'tools/list',
+            params: {}
+        }
+    },
+    {
+        name: 'Update Location',
+        payload: {
+            "method": "tools/call",
+            "params": {
+                "name": "update",
+                "coords": {
+                    "latitude": 40.7128,
+                    "longitude": -74.006
+                }
+            }
+        }
+    },
+    {
+        name: 'Query Location',
+        payload: {
+            method: 'tools/call',
+            params: {
+                name: 'query'
+            }
+        }
+    }
+];
+
 export interface McpRequest {
     jsonrpc: '2.0';
     id: string;
@@ -77,32 +109,7 @@ const McpDebugPage = () => {
         setRequest({body});
     };
 
-    const presetPayloads = [
-        {
-            name: 'Tools List',
-            payload: {
-                method: 'tools/list',
-                params: { name: 'venture' }
-            }
-        },
-        {
-            name: 'Tools Call',
-            payload: {
-                method: 'tools/call',
-                params: {
-                    name: 'venture',
-                    arguments: { query: 'Hello, how can you help me?' }
-                }
-            }
-        },
-        {
-            name: 'Simple Call',
-            payload: {
-                method: 'call',
-                params: { message: 'What services do you offer?' }
-            }
-        }
-    ];
+
 
     const loadPresetPayload = (payload: any) => {
         setCustomPayload(JSON.stringify(payload, null, 2));
@@ -131,7 +138,7 @@ const McpDebugPage = () => {
                         {/* Preset Payloads */}
                         <div className="mb-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                {presetPayloads.map((preset, index) => (
+                                {EXAMPLE_PAYLOADS.map((preset, index) => (
                                     <Button
                                         key={index}
                                         variant="secondary"
