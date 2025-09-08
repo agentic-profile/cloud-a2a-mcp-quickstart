@@ -29,9 +29,40 @@ export const ChatPage = () => {
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
-        if (messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-        }
+        const scrollToBottom = () => {
+            if (messagesContainerRef.current) {
+                // Try multiple approaches to find and scroll the right element
+                const element = messagesContainerRef.current;
+                
+                // Method 1: Try scrolling the ref element directly
+                element.scrollTop = element.scrollHeight;
+                
+                // Method 2: Try finding a child element with overflow
+                const scrollableChild = element.querySelector('[class*="overflow"]') as HTMLElement;
+                if (scrollableChild) {
+                    scrollableChild.scrollTop = scrollableChild.scrollHeight;
+                }
+                
+                // Method 3: Try scrolling the first child div
+                const firstChild = element.firstElementChild as HTMLElement;
+                if (firstChild && firstChild.scrollHeight > firstChild.clientHeight) {
+                    firstChild.scrollTop = firstChild.scrollHeight;
+                }
+            }
+        };
+        
+        // Immediate scroll
+        requestAnimationFrame(scrollToBottom);
+        
+        // Additional scroll after CSS transitions complete
+        setTimeout(() => {
+            requestAnimationFrame(scrollToBottom);
+        }, 350);
+        
+        // Final scroll after a longer delay
+        setTimeout(() => {
+            requestAnimationFrame(scrollToBottom);
+        }, 500);
     }, [messages]);
 
     const handleUrlUpdate = (newUrl: string) => {
@@ -129,7 +160,16 @@ export const ChatPage = () => {
             />
 
             {/* Messages Container */}
-            <Card ref={messagesContainerRef} className="h-96 sm:h-[500px] overflow-y-auto mb-6">
+            <Card 
+                ref={messagesContainerRef} 
+                className={`overflow-y-auto mb-6 transition-all duration-300 ease-in-out ${
+                    messages.length <= 1 
+                        ? 'h-32' // Collapsed height for 1 or fewer messages
+                        : messages.length <= 3 
+                            ? 'h-64' // Medium height for 2-3 messages
+                            : 'h-96 sm:h-[500px]' // Full height for 4+ messages
+                }`}
+            >
                 <CardBody>
                     <div className="space-y-4">
                         {messages.map((message) => (
