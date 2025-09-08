@@ -7,7 +7,7 @@ export function A2AServiceRouter( executor: AgentExecutor, cardBuilder: AgentCar
     const router = Router();
 
     router.get('/agent-card.json', async (req: Request, res: Response) => {
-        const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+        const url = req.protocol + '://' + req.get('host') + req.originalUrl.replace(/\/agent-card\.json$/, '');
         const agentCard = cardBuilder({url});
 
         res.json(agentCard);
