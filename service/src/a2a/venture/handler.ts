@@ -26,8 +26,9 @@ export class VentureExecutor implements AgentExecutor {
         if( !textPart)
             throw new Error("No text part found in user message");
 
-        const prompt = textPart.text;
-        const text = await completion(prompt);
+        //const prompt = textPart.text;
+        //const text = await completion(prompt);
+        const text = "Hello, how can I help you?";
         
         const message: Message = {
             kind: "message",
