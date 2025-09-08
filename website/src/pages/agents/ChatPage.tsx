@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Page, Button, EditableUrl, JsonRpcDebug } from '@/components';
+import { Page, Button, EditableUrl, JsonRpcDebug, Switch } from '@/components';
 //import { useSettingsStore } from '@/stores/settingsStore';
 import { resolveRpcUrlFromWindow, updateWindowRpcUrl } from '@/tools/misc';
 
@@ -184,6 +184,17 @@ export const ChatPage = () => {
                         <span className="hidden sm:inline">Send</span>
                     </Button>
                 </div>
+                
+                {/* Debug Toggle */}
+                <div className="flex items-center space-x-3 mt-4">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Show JSON RPC Debug</span>
+                    <Switch
+                        isSelected={showJsonRpcDebug}
+                        onValueChange={setShowJsonRpcDebug}
+                        color="primary"
+                        size="md"
+                    />
+                </div>
             </div>
 
             {/* Error Message Card */}
@@ -212,7 +223,7 @@ export const ChatPage = () => {
             )}
 
             {/* JSON-RPC Debug Card */}
-            {showJsonRpcDebug && currentRequest && rpcUrl && (
+            {showJsonRpcDebug && rpcUrl && (
                 <div className="mt-6">
                     <JsonRpcDebug
                         url={rpcUrl}

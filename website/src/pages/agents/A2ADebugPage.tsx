@@ -16,6 +16,7 @@ const A2ADebugPage = () => {
     const [request, setRequest] = useState<RequestInit | null>(null);
     const rpcUrl = useRpcUrlFromWindow();
     const sendButtonRef = useRef<HTMLButtonElement>(null);
+    const jsonRpcDebugRef = useRef<HTMLDivElement>(null);
 
     const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setCustomPayload(e.target.value);
@@ -84,6 +85,16 @@ const A2ADebugPage = () => {
         if (sendButtonRef.current) {
             sendButtonRef.current.blur();
         }
+
+        // Scroll to the JSON RPC Debug card after a short delay to ensure it's rendered
+        setTimeout(() => {
+            if (jsonRpcDebugRef.current) {
+                jsonRpcDebugRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 100);
     };
 
     const presetPayloads = [
@@ -193,12 +204,14 @@ const A2ADebugPage = () => {
 
                 {/* JSON RPC Debug Component */}
                 {rpcUrl && isValidUrl() && (
-                    <JsonRpcDebug
-                        url={rpcUrl}
-                        request={request}
-                        onClear={() => setRequest(null)}
-                        onFinalResult={handleResult}
-                    />
+                    <div ref={jsonRpcDebugRef}>
+                        <JsonRpcDebug
+                            url={rpcUrl}
+                            request={request}
+                            onClear={() => setRequest(null)}
+                            onFinalResult={handleResult}
+                        />
+                    </div>
                 )}
             </div>
         </Page>

@@ -100,3 +100,9 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
         });
     }
 }*/
+
+export interface AgentCardProps {
+    url: string;
+}
+
+export type AgentCardBuilder = (props: AgentCardProps) => any;

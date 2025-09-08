@@ -7,12 +7,12 @@ import {
 import { Message } from '@a2a-js/sdk';
 
 
-export class HireMeExecutor implements AgentExecutor {  
+export class CapitalExecutor implements AgentExecutor {  
     public cancelTask = async (
         taskId: string,
         _eventBus: ExecutionEventBus
     ): Promise<void> => {
-        console.log(`HireMeExecutor:cancelTask is not supported: ${taskId}`);
+        console.log(`CapitalExecutor:cancelTask is not supported: ${taskId}`);
     };
   
     async execute(
@@ -29,7 +29,7 @@ export class HireMeExecutor implements AgentExecutor {
             parts: [
                 {
                     kind: "text",
-                    text: "Hello, world!"
+                    text: "Looking for cash?!"
                 }
             ],
             metadata: {}

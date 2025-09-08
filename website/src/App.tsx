@@ -1,12 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
 import { HeroUIProvider } from '@heroui/react';
 import Layout from './components/Layout';
-import { ChatPage } from './pages/ChatPage';
+import { ChatPage } from './pages/agents/ChatPage';
 import HomePage from './pages/HomePage';
-import AgentsPage from './pages/AgentsPage';
+import AgentsPage from './pages/agents/AgentsPage';
 import VenturePage from './pages/agents/VenturePage';
 import A2ADebugPage from './pages/agents/A2ADebugPage';
-import MCPPage from './pages/MCPPage';
+import MCPPage from './pages/mcp/MCPPage';
 import McpDebugPage from './pages/mcp/McpDebugPage';
 import McpLocationPage from './pages/mcp/McpLocationPage';
 import McpMatchPage from './pages/mcp/McpMatchPage';

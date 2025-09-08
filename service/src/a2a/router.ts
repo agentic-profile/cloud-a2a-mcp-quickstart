@@ -1,0 +1,21 @@
+import { Router, Request, Response } from 'express';
+import { AgentExecutor } from '@a2a-js/sdk/server';
+import { AgentCardBuilder, handleA2ARequest } from './utils.js';
+
+
+export function A2AServiceRouter( executor: AgentExecutor, cardBuilder: AgentCardBuilder ) {
+    const router = Router();
+
+    router.get('/agent-card.json', async (req: Request, res: Response) => {
+        const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+        const agentCard = cardBuilder({url});
+
+        res.json(agentCard);
+    });
+
+    router.post('/', async (req: Request, res: Response) => {
+        await handleA2ARequest(req, res, executor, true );
+    });
+
+    return router;
+}

@@ -3,14 +3,18 @@ import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
 // A2A handlers and helpers
-import { VentureExecutor } from './a2a/venture/handler.js';
-import { VCExecutor } from './a2a/vc/handler.js';
-import { HireMeExecutor } from './a2a/hireme/handler.js';
-import { handleA2ARequest } from './a2a/utils.js';
+import { VentureExecutor, agentCard as ventureCard } from './a2a/venture/index.js';
+import { CapitalExecutor, agentCard as capitalCard } from './a2a/capital/index.js';
+import { VolunteerExecutor, agentCard as volunteerCard } from './a2a/volunteer/index.js';
+import { CharityExecutor, agentCard as charityCard } from './a2a/charity/index.js';
+
 
 // MCP handlers
 import locationRouter from "./mcp/location/router.js";
-import matchRouter from "./mcp/match/router.js";
+import reputationRouter from "./mcp/reputation/router.js";
+import vcMatchRouter from "./mcp/vc-match/router.js";
+import volunteerMatchRouter from "./mcp/volunteer-match/router.js";
+import { A2AServiceRouter } from './a2a/router.js';
 
 // Create Express app
 const app = express();
@@ -112,7 +116,7 @@ app.get('/internet', async (req: Request, res: Response) => {
     }
 });
 
-// A2A HireMe TaskHandler endpoint
+/* A2A HireMe TaskHandler endpoint
 app.post('/a2a/hireme', async (req: Request, res: Response) => {
     await handleA2ARequest( req, res, new HireMeExecutor(), false );
 });
@@ -122,14 +126,23 @@ app.post('/a2a/venture', async (req: Request, res: Response) => {
     await handleA2ARequest(req, res, new VentureExecutor() );
 });
 
-// A2A VC TaskHandler endpoint
-app.post('/a2a/vc', async (req: Request, res: Response) => {
-    await handleA2ARequest(req, res, new VCExecutor(), false );
+// A2A Capital TaskHandler endpoint
+app.post('/a2a/capital', async (req: Request, res: Response) => {
+    await handleA2ARequest(req, res, new CapitalExecutor(), false );
 });
+*/
+
+// A2A handlers
+app.use('/a2a/venture', A2AServiceRouter( new VentureExecutor(), ventureCard ));
+app.use('/a2a/capital', A2AServiceRouter( new CapitalExecutor(), capitalCard ));
+app.use('/a2a/volunteer', A2AServiceRouter( new VolunteerExecutor(), volunteerCard ));
+app.use('/a2a/charity', A2AServiceRouter( new CharityExecutor(), charityCard ));
 
 // MCP handlers
 app.use('/mcp/location', locationRouter);
-app.use('/mcp/match', matchRouter);
+app.use('/mcp/vc-match', vcMatchRouter);
+app.use('/mcp/volunteer-match', volunteerMatchRouter);
+app.use('/mcp/reputation', reputationRouter);
 
 // Serve the web interface for non-API routes
 app.get('/', (_req: Request, res: Response) => {

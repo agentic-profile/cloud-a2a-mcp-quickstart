@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl } from '@/components';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/tools/misc';
+
+const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/mcp/location');
 
 export interface McpRequest {
     jsonrpc: '2.0';
@@ -9,7 +12,7 @@ export interface McpRequest {
 }
 
 const McpDebugPage = () => {
-    const [mcpUrl, setMcpUrl] = useState<string>('http://localhost:3000/mcp/location');
+    const rpcUrl = useRpcUrlFromWindow();
     const [customPayload, setCustomPayload] = useState<string>('{\n  "method": "tools/list",\n  "params": {\n    "name": "test"\n  }\n}');
     const [request, setRequest] = useState<RequestInit | null>(null);
 
@@ -17,9 +20,6 @@ const McpDebugPage = () => {
         setCustomPayload(e.target.value);
     };
 
-    const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMcpUrl(e.target.value);
-    };
 
     const handleResult = (result: any) => {
         console.log('JSON RPC Result:', result);
@@ -43,8 +43,11 @@ const McpDebugPage = () => {
     };
 
     const isValidUrl = () => {
+        if (!rpcUrl)
+            return false;
+
         try {
-            new URL(mcpUrl);
+            new URL(rpcUrl);
             return true;
         } catch {
             return false;
@@ -52,7 +55,7 @@ const McpDebugPage = () => {
     };
 
     const handleSendRequest = () => {
-        if (!mcpUrl.trim()) {
+        if (!rpcUrl?.trim()) {
             return;
         }
 
@@ -115,27 +118,13 @@ const McpDebugPage = () => {
                 <Card>
                     <CardBody>
                         {/* MCP URL Input */}
-                        <h3>MCP URL</h3>
-                        <div className="space-y-3">
-                            <div>
-                                <input
-                                    type="url"
-                                    value={mcpUrl}
-                                    onChange={handleUrlChange}
-                                    placeholder="https://your-mcp-endpoint.com/api"
-                                    className={`w-full p-3 border rounded-md text-sm ${
-                                        mcpUrl && !isValidUrl()
-                                            ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
-                                    }`}
-                                />
-                                {mcpUrl && !isValidUrl() && (
-                                    <div className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        Please enter a valid URL
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <EditableUrl
+                            label="MCP Endpoint URL"
+                            value={rpcUrl}
+                            placeholder="https://api.matchwise.ai/mcp/location"
+                            options={URL_OPTIONS}
+                            onUpdate={updateWindowRpcUrl}
+                        />
 
                         <h3>Payload</h3>
                         
@@ -178,7 +167,7 @@ const McpDebugPage = () => {
                         
                         <Button
                             onClick={handleSendRequest}
-                            disabled={!mcpUrl.trim() || !isValidUrl() || !isValidJson()}
+                            disabled={!isValidUrl() || !isValidJson()}
                             color="primary"
                             size="md"
                         >
@@ -188,15 +177,15 @@ const McpDebugPage = () => {
                 </Card>
 
                 {/* JSON RPC Debug Component */}
-                {mcpUrl && isValidUrl() && (
+                {rpcUrl && isValidUrl() && (
                     <JsonRpcDebug
-                        url={mcpUrl}
+                        url={rpcUrl}
                         request={request}
                         onFinalResult={handleResult}
                     />
                 )}
 
-                {(!mcpUrl || !isValidUrl()) && (
+                {(!rpcUrl || !isValidUrl()) && (
                     <Card>
                         <CardBody>
                             <div className="text-center py-8">

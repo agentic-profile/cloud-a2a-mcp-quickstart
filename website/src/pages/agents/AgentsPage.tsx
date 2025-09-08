@@ -2,18 +2,12 @@ import { Avatar } from '@heroui/react';
 import { Button, Card, CardBody, Page } from '@/components';
 import { Link } from 'react-router-dom';
 import agentsData from '@/data/agents.json';
-
-interface Agent {
-    id: string;
-    name: string;
-    description: string;
-    avatar: string;
-    route: string;
-    agentUrl: string;
-}
+import { buildEndpoint } from '@/tools/misc';
+import { useSettingsStore } from '@/stores';
+import type { Agent } from '@/data/models';
 
 const AgentsPage = () => {
-    // Import agents data from the JSON file
+    const { serverUrl } = useSettingsStore();
     const agents: Agent[] = agentsData;
 
     const handleAgentAction = (agent: Agent) => {
@@ -27,13 +21,9 @@ const AgentsPage = () => {
     };
 
     const handleChatClick = (agent: Agent) => {
-        // Navigate to ChatPage with agentUrl parameter
-        if (agent.agentUrl) {
-            window.location.href = `/chat?agentUrl=${encodeURIComponent(agent.agentUrl)}`;
-        } else {
-            // Fallback to regular chat page
-            window.location.href = '/chat';
-        }
+        const rpcUrl = serverUrl ? buildEndpoint(serverUrl, agent.agentUrl ) : null;
+        if( rpcUrl )
+            window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
     };
     
     return (
@@ -45,7 +35,7 @@ const AgentsPage = () => {
             <div className="mb-6">
                 <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
                     <CardBody>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between space-x-2">
                             <div>
                                 <h3>
                                     A2A Debug Tool
@@ -91,13 +81,13 @@ const AgentsPage = () => {
                                 >
                                     Details
                                 </Button>
-                                <Button
+                                {serverUrl && <Button
                                     color="secondary"
                                     size="sm"
                                     onClick={() => handleChatClick(agent)}
                                 >
                                     Chat
-                                </Button>
+                                </Button>}
                             </div>
                         </CardBody>
                     </Card>

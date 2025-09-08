@@ -3,19 +3,18 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, Page } from '@/components';
 import agentsData from '@/data/agents.json';
+import { buildEndpoint } from '@/tools/misc';
+import { useSettingsStore } from '@/stores';
 
 const VenturePage = () => {
+    const { serverUrl } = useSettingsStore();
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture');
+    const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
     
     const handleChatClick = () => {
-        if (ventureAgent?.agentUrl) {
-            // Navigate to ChatPage with the venture agent's agentUrl parameter
-            window.location.href = `/chat?agentUrl=${encodeURIComponent(ventureAgent.agentUrl)}`;
-        } else {
-            // Fallback to regular chat page
-            window.location.href = '/chat';
-        }
+        if( rpcUrl )
+            window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
     };
 
     if (!ventureAgent) {
@@ -54,7 +53,7 @@ const VenturePage = () => {
             </div>
 
             {/* Chat Button */}
-            <div className="mt-8 text-center">
+            {rpcUrl && <div className="mt-8 text-center">
                 <Button
                     color="success"
                     size="lg"
@@ -63,7 +62,7 @@ const VenturePage = () => {
                     <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
                     Start Chat
                 </Button>
-            </div>
+            </div>}
         </Page>
     );
 };

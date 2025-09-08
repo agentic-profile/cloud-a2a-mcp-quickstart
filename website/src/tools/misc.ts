@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const DEFAULT_SERVER_URLS = [
-    'https://demo-api.universalauth.org',
+    'https://demo-api.agenticprofile.ai',
     'https://gal3i40cfb.execute-api.us-west-2.amazonaws.com/staging',
     'http://localhost:3000'
 ];

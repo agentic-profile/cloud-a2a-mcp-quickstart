@@ -7,12 +7,12 @@ import {
 import { Message } from '@a2a-js/sdk';
 
 
-export class VCExecutor implements AgentExecutor {  
+export class CharityExecutor implements AgentExecutor {  
     public cancelTask = async (
         taskId: string,
         _eventBus: ExecutionEventBus
     ): Promise<void> => {
-        console.log(`VCExecutor:cancelTask is not supported: ${taskId}`);
+        console.log(`CharityExecutor:cancelTask is not supported: ${taskId}`);
     };
   
     async execute(
@@ -29,7 +29,7 @@ export class VCExecutor implements AgentExecutor {
             parts: [
                 {
                     kind: "text",
-                    text: "Looking for cash?!"
+                    text: "Please volunteer with us!"
                 }
             ],
             metadata: {}

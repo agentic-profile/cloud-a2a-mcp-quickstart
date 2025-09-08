@@ -9,18 +9,18 @@ import { Button, ThemeToggle } from '@/components';
 const HomePage = () => {
     const features = [
         {
-            icon: ChatBubbleLeftRightIcon,
+            icon: ShieldCheckIcon,
             title: 'Trust and Accountability',
             description: 'Every agent must be able to prove who it represents to any other agent in the Agentic Economy. ' +
             'With identity verification, agents can be held accountable for their actions and develop reputation.'
         },
         {
-            icon: ShieldCheckIcon,
+            icon: GlobeAltIcon,
             title: 'Reliability, Availability, and Scalability',
             description: 'Agents must be able to leverage best in class cloud services to seamlessly scale to millions of transactions per second, while maintaining high security.'
         },
         {
-            icon: GlobeAltIcon,
+            icon: ChatBubbleLeftRightIcon,
             title: 'Standards and Interoperability',
             description: 'Agents must be able to communicate with each other, and to discovery and use tools available across the Internet.'
         }
@@ -57,7 +57,8 @@ const HomePage = () => {
                                         </span>
                                     </h1>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
-                                        This open-source quickstart makes it easy to deploy scalable and secure A2A and MCP services
+                                        This <a href="https://github.com/agentic-profile/cloud-a2a-mcp-quickstart" target="_blank" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">open-source quickstart</a> makes
+                                        it easy to learn about, develop, and deploy scalable and secure A2A and MCP services
                                         on popular cloud providers such as AWS.
                                     </p>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
@@ -88,7 +89,7 @@ const HomePage = () => {
                         <div className="text-center">
                             <p className="mt-4 max-w-4xl text-xl text-gray-500 dark:text-gray-300 mx-auto">
                                 <b className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">The Agentic Economy will flourish</b> when an agent built in one orchestration framework can discover,
-                                authenticate, and transact with agents built in other frameworks and representing other
+                                authenticate, and transact with agents built in other frameworks and that represent other
                                 entities such as people, businesses, and governments.
                             </p>
                         </div>
