@@ -2,19 +2,18 @@ import { AgentCardProps } from '../utils.js';
 
 export function agentCard({url}: AgentCardProps) {
     return {
-        name: 'Movie Agent',
-        description: 'An agent that can answer questions about movies and actors using TMDB.',
-        // Adjust the base URL and port as needed. /a2a is the default base in A2AExpressApp
+        name: 'Charity Agent',
+        description: 'An agent that finds volunteers for charities',
         url, 
         provider: {
-            organization: 'A2A Samples',
-            url: 'https://example.com/a2a-samples' // Added provider URL
+            organization: 'Agent World Congress',
+            url: 'https://agentworldcongress.org'
         },
         version: '0.0.2', // Incremented version
         capabilities: {
-            streaming: true, // The new framework supports streaming
+            streaming: false, // The new framework supports streaming
             pushNotifications: false, // Assuming not implemented for this agent yet
-            stateTransitionHistory: true, // Agent uses history
+            stateTransitionHistory: false, // Agent uses history
         },
         // authentication: null, // Property 'authentication' does not exist on type 'AgentCard'.
         securitySchemes: undefined, // Or define actual security schemes if any
@@ -23,20 +22,15 @@ export function agentCard({url}: AgentCardProps) {
         defaultOutputModes: ['text', 'task-status'], // task-status is a common output mode
         skills: [
             {
-                id: 'general_movie_chat',
-                name: 'General Movie Chat',
-                description: 'Answer general questions or chat about movies, actors, directors.',
-                tags: ['movies', 'actors', 'directors'],
+                id: 'find_volunteers',
+                name: 'Find Volunteers',
+                description: 'Find volunteers for a charity',
+                tags: ['charity', 'volunteer'],
                 examples: [
-                    'Tell me about the plot of Inception.',
-                    'Recommend a good sci-fi movie.',
-                    'Who directed The Matrix?',
-                    'What other movies has Scarlett Johansson been in?',
-                    'Find action movies starring Keanu Reeves',
-                    'Which came out first, Jurassic Park or Terminator 2?',
+                    'Find volunteers to work for this cahrity',
                 ],
-                inputModes: ['text'], // Explicitly defining for skill
-                outputModes: ['text', 'task-status'] // Explicitly defining for skill
+                inputModes: ['text'],
+                outputModes: ['text', 'task-status']
             },
         ],
         supportsAuthenticatedExtendedCard: false,

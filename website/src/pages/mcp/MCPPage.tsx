@@ -1,7 +1,10 @@
 import React from 'react';
 import { 
     ServerIcon, 
-    CloudIcon
+    MapPinIcon,
+    CurrencyDollarIcon,
+    UserGroupIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { Page, Card, CardBody, Button } from '@/components';
 import { Link, useNavigate } from 'react-router-dom';
@@ -23,16 +26,30 @@ const MCPPage = () => {
             id: '1',
             name: 'Location',
             description: 'Find other people or businesses near you',
-            icon: CloudIcon,
+            icon: MapPinIcon,
             route: '/mcp/location'
         },
-        /*{
+        {
             id: '2',
-            name: 'Match',
+            name: 'VC Match',
+            description: 'Connecting startups with capital',
+            icon: CurrencyDollarIcon,
+            route: '/mcp/vc-match'
+        },
+        {
+            id: '3',
+            name: 'Volunteer Match',
             description: 'Connect with similar people',
-            icon: CircleStackIcon,
-            route: '/mcp/match'
-        }*/
+            icon: UserGroupIcon,
+            route: '/mcp/volunteer-match'
+        },
+        {
+            id: '4',
+            name: 'Reputation',
+            description: 'Check on the reputation of people and businesses',
+            icon: ShieldCheckIcon,
+            route: '/mcp/reputation'
+        }
     ];
 
     const handleTestService = (route: string) => {

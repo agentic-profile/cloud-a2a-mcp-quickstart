@@ -1,10 +1,34 @@
 [
-  {
-    "id": "venture",
-    "name": "Venture Agent",
-    "description": "Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, new hires, and technology partners.",
-    "avatar": "VA",
-    "route": "/agents/venture",
-    "agentUrl": "/a2a/venture"
-  }
+    {
+        "id": "venture",
+        "name": "Venture Agent",
+        "description": "Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, new hires, and technology partners.",
+        "avatar": "VA",
+        "route": "/agents/venture",
+        "agentUrl": "/a2a/venture"
+    },
+    {
+        "id": "capital",
+        "name": "Capital Agent",
+        "description": "For VCs and other capital partners, helps identify ventures worth looking into",
+        "avatar": "CA",
+        "route": "/agents/capital",
+        "agentUrl": "/a2a/capital"
+    },    
+    {
+        "id": "volunteer",
+        "name": "Volunteer Agent",
+        "description": "For volunteers, helps find volunteering opportunities",
+        "avatar": "VA",
+        "route": "/agents/volunteer",
+        "agentUrl": "/a2a/volunteer"
+    },    
+    {
+        "id": "charity",
+        "name": "Charity Agent",
+        "description": "For charities, helps find volunteers",
+        "avatar": "CA",
+        "route": "/agents/charity",
+        "agentUrl": "/a2a/charity"
+    }
 ]

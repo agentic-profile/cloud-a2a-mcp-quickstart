@@ -25,6 +25,13 @@ const AgentsPage = () => {
         if( rpcUrl )
             window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
     };
+
+    const handleAgentCardClick = (agent: Agent) => {
+        const agentCardUrl = serverUrl ? buildEndpoint(serverUrl, `${agent.agentUrl}/agent-card.json`) : null;
+        if( agentCardUrl ) {
+            window.open(agentCardUrl, '_blank');
+        }
+    };
     
     return (
         <Page
@@ -73,20 +80,27 @@ const AgentsPage = () => {
                             </p>
                             
                             {/* Action Buttons */}
-                            <div className="flex space-x-2 mt-4">
+                            <div className="flex flex-wrap gap-2 mt-4">
                                 <Button
                                     color="primary"
                                     size="sm"
                                     onClick={() => handleAgentAction(agent)}
                                 >
-                                    Details
+                                    Sign Up
                                 </Button>
                                 {serverUrl && <Button
-                                    color="secondary"
                                     size="sm"
+                                    variant="ghost"
                                     onClick={() => handleChatClick(agent)}
                                 >
                                     Chat
+                                </Button>}
+                                {serverUrl && <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleAgentCardClick(agent)}
+                                >
+                                    Agent Card
                                 </Button>}
                             </div>
                         </CardBody>

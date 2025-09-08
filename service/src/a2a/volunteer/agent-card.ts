@@ -2,8 +2,8 @@ import { AgentCardProps } from '../utils.js';
 
 export function agentCard({url}: AgentCardProps) {
     return {
-        name: 'Movie Agent',
-        description: 'An agent that can answer questions about movies and actors using TMDB.',
+        name: 'Volunteer Agent',
+        description: 'An agent that finds volunteering opportunities',
         // Adjust the base URL and port as needed. /a2a is the default base in A2AExpressApp
         url, 
         provider: {
@@ -12,7 +12,7 @@ export function agentCard({url}: AgentCardProps) {
         },
         version: '0.0.2', // Incremented version
         capabilities: {
-            streaming: true, // The new framework supports streaming
+            streaming: false, // The new framework supports streaming
             pushNotifications: false, // Assuming not implemented for this agent yet
             stateTransitionHistory: true, // Agent uses history
         },
@@ -23,17 +23,12 @@ export function agentCard({url}: AgentCardProps) {
         defaultOutputModes: ['text', 'task-status'], // task-status is a common output mode
         skills: [
             {
-                id: 'general_movie_chat',
-                name: 'General Movie Chat',
-                description: 'Answer general questions or chat about movies, actors, directors.',
-                tags: ['movies', 'actors', 'directors'],
+                id: 'find_volunteering_opportunities',
+                name: 'Find Volunteering Opportunities',
+                description: 'Find volunteering opportunities',
+                tags: ['volunteer', 'opportunity'],
                 examples: [
-                    'Tell me about the plot of Inception.',
-                    'Recommend a good sci-fi movie.',
-                    'Who directed The Matrix?',
-                    'What other movies has Scarlett Johansson been in?',
-                    'Find action movies starring Keanu Reeves',
-                    'Which came out first, Jurassic Park or Terminator 2?',
+                    'Find volunteering opportunities with this charity',
                 ],
                 inputModes: ['text'], // Explicitly defining for skill
                 outputModes: ['text', 'task-status'] // Explicitly defining for skill
