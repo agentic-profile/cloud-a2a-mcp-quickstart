@@ -24,13 +24,7 @@
     "service:status:prod": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-demo-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
     "service:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-service-a2a-mcp-demo-prod",
 
-    "service:deploy:venture": "./deploy-service.sh staging venture",
-    "service:deploy:venture:prod": "./deploy-service.sh prod venture",
-    "service:deploy:volunteer": "./deploy-service.sh staging volunteer",
-    "service:deploy:volunteer:prod": "./deploy-service.sh prod volunteer",
-
     "website:build": "cd ../website && npm run build",
-
     "website:deploy": "./deploy-website.sh staging demo",
     "website:deploy:prod": "./deploy-website.sh prod demo",
 

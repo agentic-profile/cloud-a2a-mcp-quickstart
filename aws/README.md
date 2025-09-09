@@ -37,3 +37,55 @@ npm run website:deploy
 ```
 
 3. View the Cloudformation logs to determine the URLs for both the A2A/MCP service, and the website service
+
+## Environment Variables
+
+The deployment scripts support environment variables through `.env` files for easier configuration management.
+
+### Using .env Files
+
+1. Copy the example environment file:
+   ```bash
+   cp env.example .env
+   ```
+
+2. Edit the `.env` file with your specific values:
+   ```bash
+   # Required: Environment name (e.g., dev, staging, prod)
+   ENVIRONMENT=staging
+   
+   # Required: Project name (defaults to 'demo' if not set)
+   PROJECT=demo
+   
+   # Optional: AWS Region (defaults to us-east-1 if not set)
+   AWS_REGION=us-west-2
+   
+   # Optional: Certificate ARN for HTTPS
+   CERTIFICATE_ARN=arn:aws:acm:us-east-1:123456789012:certificate/your-cert-id
+   
+   # Optional: Base domain name for the website
+   # The actual domain will be automatically prefixed based on environment and project:
+   # - staging: {PROJECT}-staging.{DOMAIN_NAME}
+   # - prod: {PROJECT}.{DOMAIN_NAME}
+   # - other: {DOMAIN_NAME} (defaults to demo.agenticprofile.ai)
+   DOMAIN_NAME=agenticprofile.ai
+   ```
+
+3. Run the deployment script (environment variables will be loaded automatically):
+   ```bash
+   ./deploy-website.sh
+   ```
+
+### Priority Order
+
+Configuration values are resolved in the following priority order:
+1. Command-line arguments (highest priority)
+2. Environment variables from `.env` file
+3. Default values (lowest priority)
+
+### Command-line Usage
+
+You can still override any values using command-line arguments:
+```bash
+./deploy-website.sh dev myproject
+```

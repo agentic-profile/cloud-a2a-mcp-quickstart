@@ -15,7 +15,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Custom domain name for the website (optional)
-  
   CertificateArn:
     Type: String
     Default: ''

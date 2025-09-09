@@ -12,10 +12,41 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
+# Load environment variables from .env file if it exists
+if [ -f ".env" ]; then
+    echo -e "${YELLOW}📄 Loading environment variables from .env file...${NC}"
+    export $(grep -v '^#' .env | xargs)
+    echo -e "${GREEN}✅ Environment variables loaded from .env${NC}"
+fi
+
+# Configuration with priority: command-line args > .env file > defaults
 ENVIRONMENT=${1}
-PROJECT=${2:-demo}  # Default to 'demo' if not provided
+PROJECT=${2}
 STACK_NAME="agentic-website-${PROJECT}-${ENVIRONMENT}"
+
+# Validate required parameters
+if [ -z "${PROJECT}" ]; then
+    echo -e "${RED}❌ Error: PROJECT is required. Please provide a project name as the second argument.${NC}"
+    echo -e "${YELLOW}Usage: $0 <environment> <project>${NC}"
+    echo -e "${YELLOW}Example: $0 staging myproject${NC}"
+    exit 1
+fi
+
+if [ "${ENVIRONMENT}" != "staging" ] && [ "${ENVIRONMENT}" != "prod" ]; then
+    echo -e "${RED}❌ Error: ENVIRONMENT must be either 'staging' or 'prod'. Got: '${ENVIRONMENT}'${NC}"
+    echo -e "${YELLOW}Usage: $0 <environment> <project>${NC}"
+    echo -e "${YELLOW}Example: $0 staging myproject${NC}"
+    exit 1
+fi
+
+# Set domain name based on environment (only if DOMAIN_NAME is already defined)
+if [ -n "${DOMAIN_NAME}" ]; then
+    if [ "${ENVIRONMENT}" = "staging" ]; then
+        DOMAIN_NAME="${PROJECT}-staging.${DOMAIN_NAME}"
+    elif [ "${ENVIRONMENT}" = "prod" ]; then
+        DOMAIN_NAME="${PROJECT}.${DOMAIN_NAME}"
+    fi
+fi
 
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
@@ -25,6 +56,8 @@ echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${YELLOW}Project: ${PROJECT}${NC}"
 echo -e "${YELLOW}Region: ${REGION}${NC}"
 echo -e "${YELLOW}Stack Name: ${STACK_NAME}${NC}"
+echo -e "${YELLOW}Certificate ARN: ${CERTIFICATE_ARN}${NC}"
+echo -e "${YELLOW}Domain Name: ${DOMAIN_NAME}${NC}"
 echo ""
 
 # Check if AWS CLI is installed
@@ -68,7 +101,7 @@ aws cloudformation deploy \
     --template-file agentic-website.yaml \
     --stack-name ${STACK_NAME} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-    --parameter-overrides Environment=${ENVIRONMENT} Project=${PROJECT} \
+    --parameter-overrides Environment=${ENVIRONMENT} Project=${PROJECT} CertificateArn=${CERTIFICATE_ARN} DomainName=${DOMAIN_NAME} \
     --region ${REGION}
 
 if [ $? -ne 0 ]; then

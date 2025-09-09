@@ -5,7 +5,7 @@ import {
     ExecutionEventBus,
 } from "@a2a-js/sdk/server";
 import { Message, TextPart } from '@a2a-js/sdk';
-import { completion } from './inference.js';
+//import { completion } from './inference.js';
 
 
 export class VentureExecutor implements AgentExecutor {  

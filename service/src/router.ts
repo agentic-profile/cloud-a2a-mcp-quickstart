@@ -14,6 +14,7 @@ import locationRouter from "./mcp/location/router.js";
 import reputationRouter from "./mcp/reputation/router.js";
 import vcMatchRouter from "./mcp/vc-match/router.js";
 import volunteerMatchRouter from "./mcp/volunteer-match/router.js";
+import ventureRouter from "./mcp/venture/router.js";
 import { A2AServiceRouter } from './a2a/router.js';
 
 // Create Express app
@@ -55,7 +56,7 @@ app.get('/status', (_req: Request, res: Response) => {
     });
 });
 
-// Verify we can access the Internet via NAT gateway
+/* Verify we can access the Internet via NAT gateway
 app.get('/internet', async (req: Request, res: Response) => {
     // Allow custom URL via query parameter, default to httpbin.org
     const testUrl = (req.query.url as string) || 'https://httpbin.org/json';
@@ -115,22 +116,8 @@ app.get('/internet', async (req: Request, res: Response) => {
         });
     }
 });
-
-/* A2A HireMe TaskHandler endpoint
-app.post('/a2a/hireme', async (req: Request, res: Response) => {
-    await handleA2ARequest( req, res, new HireMeExecutor(), false );
-});
-
-// A2A Venture TaskHandler endpoint
-app.post('/a2a/venture', async (req: Request, res: Response) => {
-    await handleA2ARequest(req, res, new VentureExecutor() );
-});
-
-// A2A Capital TaskHandler endpoint
-app.post('/a2a/capital', async (req: Request, res: Response) => {
-    await handleA2ARequest(req, res, new CapitalExecutor(), false );
-});
 */
+
 
 // A2A handlers
 app.use('/a2a/venture', A2AServiceRouter( new VentureExecutor(), ventureCard ));
@@ -143,6 +130,7 @@ app.use('/mcp/location', locationRouter);
 app.use('/mcp/vc-match', vcMatchRouter);
 app.use('/mcp/volunteer-match', volunteerMatchRouter);
 app.use('/mcp/reputation', reputationRouter);
+app.use('/mcp/venture', ventureRouter);
 
 // Serve the web interface for non-API routes
 app.get('/', (_req: Request, res: Response) => {

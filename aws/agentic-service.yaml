@@ -3,6 +3,8 @@ Description: 'Universal Auth A2A MCP Lambda Function'
 
 Conditions:
   HasVersion: !Not [!Equals [!Ref FunctionZipVersion, ""]]
+  HasCustomDomain: !Not [!Equals [!Ref DomainName, ""]]
+  NoCustomDomain: !Equals [!Ref DomainName, ""]
 
 Parameters:
   Environment:
@@ -22,8 +24,49 @@ Parameters:
     Type: String
     Description: S3 bucket name from foundation stack
     Default: ""
+  DomainName:
+    Type: String
+    Default: ''
+    Description: Custom domain name for the HTTP service (optional)
+  CertificateArn:
+    Type: String
+    Default: ''
+    Description: ACM certificate ARN for custom domain (required if DomainName is provided)
 
 Resources:
+  # DynamoDB Table
+  A2aMcpTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'agentic-service-a2a-mcp-${Project}-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: type
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: TypeIndex
+          KeySchema:
+            - AttributeName: type
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
   # Lambda Function
   A2aMcpFunction:
     Type: AWS::Lambda::Function
@@ -47,6 +90,11 @@ Resources:
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyCachePort'
           VALKEY_PASSWORD_SECRET_ARN: !ImportValue 
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyPasswordSecretArn'
+          DYNAMODB_TABLE_NAME: !Ref A2aMcpTable
+          SERVICE_URL: !If 
+            - HasCustomDomain
+            - !Sub 'https://${DomainName}'
+            - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
       Timeout: 30
       MemorySize: 256
       VpcConfig:
@@ -151,6 +199,23 @@ Resources:
                 Resource: 
                   - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0'
                   - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-*'
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                Resource: 
+                  - !GetAtt A2aMcpTable.Arn
+                  - !Sub '${A2aMcpTable.Arn}/index/*'
 
   # HTTP API Gateway
   HttpApi:
@@ -247,6 +312,25 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
 
+  # API Gateway Domain Mapping (conditional)
+  ApiDomainMapping:
+    Type: AWS::ApiGatewayV2::DomainName
+    Condition: HasCustomDomain
+    Properties:
+      DomainName: !Ref DomainName
+      DomainNameConfigurations:
+        - CertificateArn: !Ref CertificateArn
+          EndpointType: REGIONAL
+
+  # API Gateway API Mapping (conditional)
+  ApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Condition: HasCustomDomain
+    Properties:
+      ApiId: !Ref HttpApi
+      DomainName: !Ref ApiDomainMapping
+      Stage: !Ref HttpApiStage
+
   # CloudWatch Log Group
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -261,6 +345,13 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-HttpApiUrl'
 
+  CustomDomainUrl:
+    Description: 'Custom Domain URL'
+    Value: !Sub 'https://${DomainName}'
+    Condition: HasCustomDomain
+    Export:
+      Name: !Sub '${AWS::StackName}-CustomDomainUrl'
+
   LambdaFunctionArn:
     Description: 'Lambda Function ARN'
     Value: !GetAtt A2aMcpFunction.Arn
@@ -272,6 +363,27 @@ Outputs:
     Value: !Ref A2aMcpFunction
     Export:
       Name: !Sub '${AWS::StackName}-LambdaFunctionName'
+
+  DynamoDBTableName:
+    Description: 'DynamoDB Table Name'
+    Value: !Ref A2aMcpTable
+    Export:
+      Name: !Sub '${AWS::StackName}-DynamoDBTableName'
+
+  DynamoDBTableArn:
+    Description: 'DynamoDB Table ARN'
+    Value: !GetAtt A2aMcpTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DynamoDBTableArn'
+
+  ServiceUrl:
+    Description: 'Service URL (API Gateway or Custom Domain)'
+    Value: !If 
+      - HasCustomDomain
+      - !Sub 'https://${DomainName}'
+      - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceUrl'
 
 
 

@@ -18,3 +18,15 @@ export function mcpTextContentResponse( id: string | number, text: string ): JSO
     const content = [{ type: "text" as const, text }];
     return mcpContentResponse( id, content );
 }
+
+export type MCPResult = {
+    [key: string]: unknown;
+};
+
+export function mcpResultResponse( id: string | number, result: MCPResult ): JSONRPCResponse {
+    return {
+        jsonrpc: '2.0',
+        id,
+        result
+    };
+}

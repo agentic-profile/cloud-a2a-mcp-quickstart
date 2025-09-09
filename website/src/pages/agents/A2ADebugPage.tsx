@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
 import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/tools/misc';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
@@ -18,8 +18,8 @@ const A2ADebugPage = () => {
     const sendButtonRef = useRef<HTMLButtonElement>(null);
     const jsonRpcDebugRef = useRef<HTMLDivElement>(null);
 
-    const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setCustomPayload(e.target.value);
+    const handlePayloadChange = (value: string) => {
+        setCustomPayload(value);
     };
 
     const handleResult = (result: any) => {
@@ -119,10 +119,6 @@ const A2ADebugPage = () => {
         },
     ];
 
-    const loadPresetPayload = (payload: any) => {
-        setCustomPayload(JSON.stringify(payload, null, 2));
-    };
-
     return (
         <Page
             title="A2A Debug"
@@ -145,41 +141,14 @@ const A2ADebugPage = () => {
                             Request Payload
                         </h3>
                         
-                        {/* Preset Payloads */}
-                        <div className="mb-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {presetPayloads.map((preset, index) => (
-                                    <Button
-                                        key={index}
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() => loadPresetPayload(preset.payload)}
-                                        className="text-left h-auto p-3"
-                                    >
-                                        {preset.name}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-
                         {/* Custom Payload Editor */}
-                        <div className="mb-4">
-                            <textarea
-                                value={customPayload}
-                                onChange={handlePayloadChange}
-                                className={`w-full h-48 p-3 font-mono text-sm rounded-md border resize-none ${
-                                    isValidJson()
-                                        ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
-                                        : 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                                }`}
-                                placeholder="Enter your A2A JSON RPC payload here..."
-                            />
-                            {!isValidJson() && (
-                                <div className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                    Invalid JSON format
-                                </div>
-                            )}
-                        </div>
+                        <JsonEditor
+                            value={customPayload}
+                            onChange={handlePayloadChange}
+                            placeholder="Enter your A2A JSON RPC payload here..."
+                            height="h-48"
+                            examples={presetPayloads}
+                        />
 
                         <div className="flex gap-3">
                             <Button

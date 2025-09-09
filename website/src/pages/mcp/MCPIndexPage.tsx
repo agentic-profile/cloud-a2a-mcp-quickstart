@@ -1,56 +1,16 @@
-import React from 'react';
 import { 
     ServerIcon, 
-    MapPinIcon,
-    //CurrencyDollarIcon,
-    //UserGroupIcon,
-    //ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { Page, Card, CardBody, Button } from '@/components';
 import { Link, useNavigate } from 'react-router-dom';
+import { mcpServices } from './mcp-list';
 
-interface MCPService {
-    id: string;
-    name: string;
-    description: string;
-    icon: React.ComponentType<any>;
-    route: string;
-}
 
 const MCPPage = () => {
     const navigate = useNavigate();
     
     // Mock data - in a real app this would come from an API
-    const mcpServices: MCPService[] = [
-        {
-            id: '1',
-            name: 'Location',
-            description: 'Find other people or businesses near you',
-            icon: MapPinIcon,
-            route: '/mcp/location'
-        } /*,
-        {
-            id: '2',
-            name: 'VC Match',
-            description: 'Connecting startups with capital',
-            icon: CurrencyDollarIcon,
-            route: '/mcp/vc-match'
-        },
-        {
-            id: '3',
-            name: 'Volunteer Match',
-            description: 'Connect with similar people',
-            icon: UserGroupIcon,
-            route: '/mcp/volunteer-match'
-        },
-        {
-            id: '4',
-            name: 'Reputation',
-            description: 'Check on the reputation of people and businesses',
-            icon: ShieldCheckIcon,
-            route: '/mcp/reputation'
-        }*/
-    ];
+
 
     const handleTestService = (route: string) => {
         navigate(route);

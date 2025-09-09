@@ -5,11 +5,20 @@
  * This script tests the Redis connection using the same configuration as the main application
  */
 
-// Load environment variables from .env.local if it exists
+// Load environment variables from .env files
+const dotenv = require('dotenv');
+
+// Try to load from .env.local first, then fall back to .env
 try {
-    require('dotenv').config({ path: '.env.local' });
+    dotenv.config({ path: '.env.local' });
+    console.log('📝 Loaded environment variables from .env.local');
 } catch (error) {
-    console.log('📝 No .env.local file found, using system environment variables');
+    try {
+        dotenv.config({ path: '.env' });
+        console.log('📝 Loaded environment variables from .env');
+    } catch (error2) {
+        console.log('📝 No .env files found, using system environment variables');
+    }
 }
 
 // Import the Redis functions from the main application

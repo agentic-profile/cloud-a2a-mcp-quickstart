@@ -136,14 +136,14 @@ Resources:
     Type: AWS::ElastiCache::ServerlessCache
     Properties:
       ServerlessCacheName: !Sub 'agentic-foundation-valkey-${Environment}'
-      Engine: redis
+      Engine: valkey
       UserGroupId: !Ref ValkeyUserGroup
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref ValkeySecurityGroup
-      Description: Serverless Redis cache for agentic foundation
+      Description: Serverless Valkey cache for agentic foundation
       Tags:
         - Key: Name
           Value: !Sub 'agentic-foundation-valkey-${Environment}'
@@ -157,7 +157,7 @@ Resources:
     Type: AWS::ElastiCache::UserGroup
     Properties:
       UserGroupId: !Sub 'agentic-foundation-users-${Environment}'
-      Engine: redis
+      Engine: valkey
       UserIds:
         - !Ref ValkeyUser
 
@@ -166,7 +166,7 @@ Resources:
     Type: AWS::ElastiCache::User
     Properties:
       UserId: !Sub 'agentic-foundation-user-${Environment}'
-      Engine: redis
+      Engine: valkey
       UserName: default
       Passwords:
         - !Sub '{{resolve:secretsmanager:${ValkeyPassword}:SecretString:password}}'
@@ -200,12 +200,12 @@ Resources:
           FromPort: 6379
           ToPort: 6379
           CidrIp: 0.0.0.0/0
-          Description: Allow Redis access from anywhere (IPv4)
+          Description: Allow Redis/Valkey access from anywhere (IPv4)
         - IpProtocol: tcp
           FromPort: 6379
           ToPort: 6379
           CidrIpv6: ::/0
-          Description: Allow Redis access from anywhere (IPv6)
+          Description: Allow Redis/Valkey access from anywhere (IPv6)
 
   # Default VPC
   DefaultVpc:
@@ -366,8 +366,8 @@ Resources:
   NatInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}'
-      InstanceType: t3.micro
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-arm64}}'
+      InstanceType: t4g.nano
       KeyName: !Ref KeyPairName
       SubnetId: !Ref DefaultSubnet1
       SecurityGroupIds:

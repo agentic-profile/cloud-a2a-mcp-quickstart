@@ -31,3 +31,4 @@ export { UserProfileDisplay } from './UserProfileDisplay';
 export { LabelValue } from './LabelValue';
 export { LabelJson } from './LabelJson';
 export { EditableUrl } from './EditableUrl';
+export { default as JsonEditor } from './JsonEditor';
