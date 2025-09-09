@@ -7,7 +7,9 @@ import { VentureProfile } from '../src/stores/types.js';
  * This example demonstrates how to:
  * 1. Save a venture profile to DynamoDB
  * 2. Load a venture profile from DynamoDB
- * 3. Handle errors appropriately
+ * 3. List all items in the table
+ * 4. Query venture profiles using GSI
+ * 5. Handle errors appropriately
  */
 
 async function exampleUsage() {
@@ -46,6 +48,18 @@ async function exampleUsage() {
         } else {
             console.log('✅ Correctly returned undefined for non-existent profile');
         }
+
+        // List all items in the table
+        console.log('Listing all items in the table...');
+        const allItems = await ventureProfileStore.listAllItems();
+        console.log(`✅ Found ${allItems.length} items in the table:`);
+        console.log(JSON.stringify(allItems, null, 2));
+
+        // Query venture profiles using GSI
+        console.log('Querying venture profiles using GSI...');
+        const queriedProfiles = await ventureProfileStore.queryVentureProfiles();
+        console.log(`✅ Found ${queriedProfiles.length} venture profiles via query:`);
+        console.log(JSON.stringify(queriedProfiles, null, 2));
 
     } catch (error) {
         console.error('❌ Error in example usage:', error);

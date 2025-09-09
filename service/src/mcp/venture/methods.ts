@@ -16,6 +16,8 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
             return await handleUpdate(request,session);
         case 'query':
             return await handleQuery(request);
+        case 'list-all':
+            return await handleListAll(request);
         default:
             return jrpcError(request.id!, -32601, `Tool ${name} not found`);
     }
@@ -45,6 +47,16 @@ export async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCRespo
         return mcpResultResponse(request.id!, { profiles });
     } catch (error) {
         console.log('🔍 getValue failed, using fallback:', error);
-        return jrpcError(request.id!, -32603, 'Location data unavailable (Redis connection issue)');
+        return jrpcError(request.id!, -32603, 'Failed to query venture profiles: ' + (error as Error).message);
+    }
+}
+
+export async function handleListAll(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {    
+    try {
+        const allItems = await ventureProfileStore.listAllItems();
+        return mcpResultResponse(request.id!, { items: allItems, count: allItems.length });
+    } catch (error) {
+        console.log('🔍 listAll failed:', error);
+        return jrpcError(request.id!, -32603, 'Failed to list all items: ' + (error as Error).message);
     }
 }

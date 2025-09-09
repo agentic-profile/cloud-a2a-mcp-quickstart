@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { VentureProfile, VentureProfileStore } from "./types.js";
 
 // redundant, but resolves module loading order issues
@@ -81,14 +81,28 @@ export const ventureProfileStore: VentureProfileStore = {
             const result = await docClient.send(new QueryCommand({
                 TableName: TABLE_NAME,
                 IndexName: "TypeIndex",
-                KeyConditionExpression: "type = :type",
-                ExpressionAttributeValues: { ":type": "venture-profile" }
+                KeyConditionExpression: "#type = :type",
+                ExpressionAttributeNames: { "#type": "type" },
+                ExpressionAttributeValues: { ":type": "startup" }
             }));
 
             return result.Items as VentureProfile[];
         } catch (error) {
             console.error("Error querying venture profiles from DynamoDB:", error);
             throw new Error(`Failed to query venture profiles: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    },
+
+    async listAllItems(): Promise<any[]> {
+        try {
+            const result = await docClient.send(new ScanCommand({
+                TableName: TABLE_NAME
+            }));
+
+            return result.Items || [];
+        } catch (error) {
+            console.error("Error scanning all items from DynamoDB:", error);
+            throw new Error(`Failed to scan all items: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 };

@@ -12,4 +12,5 @@ export interface VentureProfileStore {
     loadVentureProfile(did: string): Promise<VentureProfile | undefined>;
     queryVentureProfiles(): Promise<VentureProfile[]>;
     deleteVentureProfile(did: string): Promise<void>;
+    listAllItems(): Promise<any[]>;
 }

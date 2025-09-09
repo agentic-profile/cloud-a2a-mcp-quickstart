@@ -52,7 +52,7 @@ const McpVenturePage = () => {
     };
 
     const handleQuery = () => {
-        setMcpRequest( mcpToolsCallRequestInit( "query" ));
+        setMcpRequest( mcpToolsCallRequestInit( "list-all" ));
     };
 
     const clearResults = () => {
