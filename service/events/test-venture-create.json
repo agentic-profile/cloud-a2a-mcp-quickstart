@@ -1,8 +1,0 @@
-{
-  "httpMethod": "POST",
-  "path": "/venture",
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "body": "{\"jsonrpc\":\"2.0\",\"id\":\"2\",\"method\":\"venture/create\",\"params\":{\"name\":\"Test Venture\",\"description\":\"A test venture for development\",\"type\":\"startup\"}}"
-}

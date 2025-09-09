@@ -46,3 +46,9 @@ aws dynamodb create-table \
   aws dynamodb delete-table \
     --table-name venture-profiles
 ```
+
+```bash
+aws dynamodb scan \
+    --endpoint-url http://localhost:8000 \
+    --table-name venture-profiles
+```
