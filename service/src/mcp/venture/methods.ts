@@ -7,7 +7,7 @@ import { ClientAgentSession } from '@agentic-profile/auth';
 import { DatedItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
 
-const TABLE_NAME = 'venture-profiles';
+const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'venture-profiles';
 const store = itemStore<DatedItem>('venture', TABLE_NAME);
 const crud = mcpCrud(store);
 

@@ -3,7 +3,7 @@ import { Page, Card, CardBody, Button, JsonRpcDebug, JsonEditor } from '@/compon
 import { MagnifyingGlassIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
-import { mcpToolsCallRequestInit } from './util/misc';
+import { mcpToolsCallRequestInit, mcpMethodRequestInit } from './util/misc';
 import { mcpServices } from './mcp-list';
 import McpServiceDescription from './util/McpServiceDescription';
 import type { JsonExample } from '@/components/JsonEditor';
@@ -117,79 +117,82 @@ const McpVenturePage = () => {
                 dataFormat="Venture profiles are stored with uuid, did, name, description, and timestamps for creation and updates."
             />
 
-            <div className="grid gap-6 md:grid-cols-2">
-                {/* Profile Update Form */}
-                <Card>
-                    <CardBody>
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                                <ArrowUpIcon className="w-5 h-5 text-white" />
-                            </div>
-                            <h3 className="text-lg font-semibold">Update Venture Profile</h3>
+            {/* Profile Update Form */}
+            <Card>
+                <CardBody>
+                    <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+                            <ArrowUpIcon className="w-5 h-5 text-white" />
                         </div>
-                        
-                        <div className="space-y-4">
-                            <JsonEditor 
-                                value={profileJson}
-                                onChange={setProfileJson}
-                                placeholder="Enter your JSON RPC payload here..."
-                                height="h-48"
-                                examples={EXAMPLE_PROFILES}
-                            />
-                            
-                            <Button
-                                onClick={handleUpdate}
-                                className="w-full"
-                                color="primary"
-                            >
-                                Update Venture Profile
-                            </Button>
-                        </div>
-                    </CardBody>
-                </Card>
-
-                {/* Profile Query Form */}
-                <Card>
-                    <CardBody>
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
-                                <MagnifyingGlassIcon className="w-5 h-5 text-white" />
-                            </div>
-                            <h3 className="text-lg font-semibold">Query Venture Profiles</h3>
-                        </div>
-                        
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            Click the button below to query the current ventures.
-                        </p>
+                        <h3 className="text-lg font-semibold">Update Venture Profile</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <JsonEditor 
+                            value={profileJson}
+                            onChange={setProfileJson}
+                            placeholder="Enter your JSON RPC payload here..."
+                            height="h-48"
+                            examples={EXAMPLE_PROFILES}
+                        />
                         
                         <Button
-                            onClick={handleRecentUpdates}
+                            onClick={handleUpdate}
                             className="w-full"
-                            color="success"
+                            color="primary"
                         >
-                            Query Ventures
+                            Update Venture Profile
                         </Button>
-                    </CardBody>
-                </Card>
-            </div>
+                    </div>
+                </CardBody>
+            </Card>
+
+            {/* Profile Query Form */}
+            {false && <Card>
+                <CardBody>
+                    <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
+                            <MagnifyingGlassIcon className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="text-lg font-semibold">Query Venture Profiles</h3>
+                    </div>
+                    
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Click the button below to query the current ventures.
+                    </p>
+                    
+                    <Button
+                        onClick={handleRecentUpdates}
+                        className="w-full"
+                        color="success"
+                    >
+                        Query Ventures
+                    </Button>
+                </CardBody>
+            </Card> }
 
             {/* Action Buttons Row */}
             <div className="mt-6">
                 <div className="flex flex-wrap gap-3 mb-4">
                     <Button
-                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("read", {}))}
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("read"))}
                     >
                         Read Profile
                     </Button>
                     <Button
-                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("recent-updates", {}))}
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("recent-updates"))}
                     >
                         Recent Profiles
                     </Button>
                     <Button
-                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("delete", {}))}
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("delete"))}
                     >
                         Delete Profile
+                    </Button>
+                    <Button
+                        onClick={() => setMcpRequest(mcpMethodRequestInit("tools/list"))}
+                    >
+                        List Tools
                     </Button>
                 </div>
             </div>

@@ -23,6 +23,7 @@ const client = new DynamoDBClient(dynamoConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
 export function itemStore<T extends DatedItem>(kind: string, tableName: string): ItemStore<T> {
+    console.log("DynamoDB itemStore", kind, tableName);
     return {
         async readItem(id: string): Promise<T | undefined> {
             try {

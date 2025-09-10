@@ -52,7 +52,6 @@ const McpDebugPage = () => {
         setCustomPayload(value);
     };
 
-
     const handleResult = (result: any) => {
         console.log('JSON RPC Result:', result);
     };
