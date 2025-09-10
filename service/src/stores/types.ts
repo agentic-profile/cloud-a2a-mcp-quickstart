@@ -1,16 +1,13 @@
-export interface VentureProfile {
-    uuid: string;
-    did: string;
-    name: string;
-    description: string;
-    createdAt: string;
-    updatedAt: string;
+export interface DatedItem {
+    id: string;
+    updated: string;
+    [key: string]: any;
 }
 
-export interface VentureProfileStore {
-    saveVentureProfile(profile: VentureProfile): Promise<void>;
-    loadVentureProfile(did: string): Promise<VentureProfile | undefined>;
-    queryVentureProfiles(): Promise<VentureProfile[]>;
-    deleteVentureProfile(did: string): Promise<void>;
-    listAllItems(): Promise<any[]>;
+export interface ItemStore<T extends DatedItem> {
+    readItem(id: string): Promise<T | undefined>;
+    updateItem(item: T): Promise<void>;
+    deleteItem(id: string): Promise<void>;
+    queryItems(): Promise<T[]>;
+    recentItems(since: string): Promise<T[]>;
 }

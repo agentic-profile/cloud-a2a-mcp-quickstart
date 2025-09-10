@@ -1,10 +1,15 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
-import { ventureProfileStore } from '../../stores/dynamodb-store.js';
+import { itemStore } from '../../stores/dynamodb-store.js';
 import { jrpcError } from '../../json-rpc/index.js';
-import { mcpResultResponse, mcpTextContentResponse } from '../utils.js';
+import { mcpResultResponse } from '../utils.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';
-import { VentureProfile } from '../../stores/types.js';
+import { DatedItem } from '../../stores/types.js';
+import { mcpCrud } from '../mcp-crud.js';
+
+const TABLE_NAME = 'venture-profiles';
+const store = itemStore<DatedItem>('venture', TABLE_NAME);
+const crud = mcpCrud(store);
 
 export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
@@ -12,51 +17,27 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
     console.log('🔍 handleToolsCall', name, session);
     
     switch (name) {
+        case 'read':
+            return await crud.handleRead(request,session);
         case 'update':
-            return await handleUpdate(request,session);
-        case 'query':
-            return await handleQuery(request);
-        case 'list-all':
-            return await handleListAll(request);
+            return await crud.handleUpdate(request,session);
+        case 'delete':
+            return await crud.handleDelete(request,session);
+        case 'recent-updates':
+            return await handleRecentUpdates(request);
         default:
             return jrpcError(request.id!, -32601, `Tool ${name} not found`);
     }
 }
 
-export async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-    const profile = request.params?.profile as VentureProfile | undefined;
-    
-    if (!profile) {
-        return jrpcError(request.id!, -32602, 'Invalid params: profile is required');
-    }
-
-    // I can only upload my own profile
-    profile.did = session.agentDid
-
+export async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {    
     try {
-        await ventureProfileStore.saveVentureProfile(profile);
-        return mcpTextContentResponse(request.id!, `Venture profile updated successfully`);
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        const since = request.params?.since || new Date( twentyFourHoursAgo ).toISOString();
+        const profiles = await store.recentItems(since as string);
+        return mcpResultResponse(request.id!, { profiles, since });
     } catch (error) {
-        return jrpcError(request.id!, -32603, 'Failed to save venture profile:' + (error as Error).message);
-    }
-}
-
-export async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {    
-    try {
-        const profiles = await ventureProfileStore.queryVentureProfiles();
-        return mcpResultResponse(request.id!, { profiles });
-    } catch (error) {
-        console.log('🔍 getValue failed, using fallback:', error);
-        return jrpcError(request.id!, -32603, 'Failed to query venture profiles: ' + (error as Error).message);
-    }
-}
-
-export async function handleListAll(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {    
-    try {
-        const allItems = await ventureProfileStore.listAllItems();
-        return mcpResultResponse(request.id!, { items: allItems, count: allItems.length });
-    } catch (error) {
-        console.log('🔍 listAll failed:', error);
-        return jrpcError(request.id!, -32603, 'Failed to list all items: ' + (error as Error).message);
+        console.log('Get recent updates failed for table:', TABLE_NAME, error);
+        return jrpcError(request.id!, -32603, `Failed to get recent updates for ${TABLE_NAME}: ${(error as Error).message}`);
     }
 }

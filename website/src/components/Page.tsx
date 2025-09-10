@@ -20,7 +20,7 @@ const Page: React.FC<PageProps> = ({
     subtitle,
     showMobileThemeToggle = false,
     className = '',
-    maxWidth = '4xl',
+    maxWidth = '6xl',
     padding = 'lg',
     showHeader = true,
     headerContent,

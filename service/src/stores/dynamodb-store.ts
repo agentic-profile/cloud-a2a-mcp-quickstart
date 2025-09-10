@@ -1,14 +1,14 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { VentureProfile, VentureProfileStore } from "./types.js";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DatedItem, ItemStore } from "./types.js";
 
 // redundant, but resolves module loading order issues
 import dotenv from 'dotenv';
 dotenv.config();
 
-// DynamoDB client configuration
+// DynamoDB client configuration for local development
 const LOCAL_DYNAMODB_URL = process.env.LOCAL_DYNAMODB_URL;
-const dynamoDBConfig = LOCAL_DYNAMODB_URL ? {
+const dynamoConfig = LOCAL_DYNAMODB_URL ? {
     endpoint: LOCAL_DYNAMODB_URL,
     region: 'local',
     credentials: {
@@ -16,93 +16,98 @@ const dynamoDBConfig = LOCAL_DYNAMODB_URL ? {
         secretAccessKey: 'local'
     }
 } : {};
-console.log("dynamoDBConfig", dynamoDBConfig);
+console.log("dynamoConfig", dynamoConfig);
 
 // Initialize DynamoDB client
-const client = new DynamoDBClient(dynamoDBConfig);
+const client = new DynamoDBClient(dynamoConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-// Get table name from environment variable
-const TABLE_NAME = "venture-profiles";
+export function itemStore<T extends DatedItem>(kind: string, tableName: string): ItemStore<T> {
+    return {
+        async readItem(id: string): Promise<T | undefined> {
+            try {
+                const result = await docClient.send(new GetCommand({
+                    TableName: tableName,
+                    Key: {
+                        id
+                    }
+                }));
 
-export const ventureProfileStore: VentureProfileStore = {
-    async saveVentureProfile(profile: VentureProfile): Promise<void> {
-        try {
-            const item = {
-                ...profile,
-                id: `venture-profile:${profile.did}`,
-                type: "venture-profile",
-
-                // Add timestamp for GSI sorting
-                gsi1pk: "venture-profile",
-                gsi1sk: profile.createdAt
-            };
-
-            await docClient.send(new PutCommand({
-                TableName: TABLE_NAME,
-                Item: item
-            }));
-        } catch (error) {
-            console.error("Error saving venture profile to DynamoDB:", error);
-            throw new Error(`Failed to save venture profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    },
-
-    async loadVentureProfile(did: string): Promise<VentureProfile | undefined> {
-        try {
-            const result = await docClient.send(new GetCommand({
-                TableName: TABLE_NAME,
-                Key: {
-                    id: `venture-profile:${did}`
+                if (!result.Item) {
+                    return undefined;
                 }
-            }));
 
-            if (!result.Item) {
-                return undefined;
+                // Convert DynamoDB item back to VentureProfile
+                return result.Item as T;
+            } catch (error) {
+                console.error(`Error loading ${kind}[${id}] from DynamoDB:`, error);
+                throw new Error(`Failed to load ${kind}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
+        },
 
-            // Convert DynamoDB item back to VentureProfile
-            return result.Item as VentureProfile;
-        } catch (error) {
-            console.error("Error loading venture profile from DynamoDB:", error);
-            throw new Error(`Failed to load venture profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    },
+        async updateItem(item: T): Promise<void> {
+            try {
+                const itemToSave = {
+                    ...item,
+                    kind // needed for "updated" sort to work
+                };
 
-    async deleteVentureProfile(did: string): Promise<void> {
-        await docClient.send(new DeleteCommand({
-            TableName: TABLE_NAME,
-            Key: { id: `venture-profile:${did}` }
-        }));
-    },
+                await docClient.send(new PutCommand({
+                    TableName: tableName,
+                    Item: itemToSave
+                }));
+            } catch (error) {
+                console.error(`Error saving ${kind}[${item.id}] to DynamoDB:`, error);
+                throw new Error(`Failed to save ${kind}[${item.id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        },
 
-    async queryVentureProfiles(): Promise<VentureProfile[]> {
-        try {
-            const result = await docClient.send(new QueryCommand({
-                TableName: TABLE_NAME,
-                IndexName: "TypeIndex",
-                KeyConditionExpression: "#type = :type",
-                ExpressionAttributeNames: { "#type": "type" },
-                ExpressionAttributeValues: { ":type": "startup" }
-            }));
+        async deleteItem(id: string): Promise<void> {
+            try {
+                await docClient.send(new DeleteCommand({
+                    TableName: tableName,
+                    Key: { id }
+                }));
+            } catch (error) {
+                console.error(`Error deleting ${kind}[${id}] from DynamoDB:`, error);
+                throw new Error(`Failed to delete ${kind}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        },
 
-            return result.Items as VentureProfile[];
-        } catch (error) {
-            console.error("Error querying venture profiles from DynamoDB:", error);
-            throw new Error(`Failed to query venture profiles: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    },
+        async queryItems(): Promise<T[]> {
+            try {
+                const result = await docClient.send(new QueryCommand({
+                    TableName: tableName,
+                    IndexName: "TypeIndex",
+                    KeyConditionExpression: "kind = :kind",
+                    ExpressionAttributeValues: { ":kind": kind },
+                }));
 
-    async listAllItems(): Promise<any[]> {
-        try {
-            const result = await docClient.send(new ScanCommand({
-                TableName: TABLE_NAME
-            }));
+                return result.Items as T[];
+            } catch (error) {
+                console.error(`Error querying ${kind} from DynamoDB:`, error);
+                throw new Error(`Failed to query ${kind}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        },
 
-            return result.Items || [];
-        } catch (error) {
-            console.error("Error scanning all items from DynamoDB:", error);
-            throw new Error(`Failed to scan all items: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        async recentItems(since: string, limit: number = 100): Promise<T[]> {
+            try {
+                const result = await docClient.send(new QueryCommand({
+                    TableName: tableName,
+                    IndexName: "TypeIndex",
+                    KeyConditionExpression: "kind = :kind AND updated >= :since",
+                    ExpressionAttributeValues: { 
+                        ":kind": kind,
+                        ":since": since
+                    },
+                    ScanIndexForward: false,
+                    Limit: limit
+                }));
+                return result.Items as T[];
+            } catch (error) {
+                console.error(`Error querying ${kind} from DynamoDB:`, error);
+                throw new Error(`Failed to query ${kind}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
         }
     }
-};
+}

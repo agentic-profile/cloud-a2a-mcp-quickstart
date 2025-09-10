@@ -19,15 +19,46 @@ export interface VentureProfile {
     updatedAt: string;
 }
 
-const EXAMPLE_PROFILES = [
+const EXAMPLE_PROFILES: JsonExample[] = [
     {
-        name: 'TechStart Inc.',
+        name: 'Full Profile',
         payload: {
-            name: 'TechStart Inc.',
-            description: 'A revolutionary AI-powered startup focused on sustainable technology solutions.',
-            type: 'startup'
+            "profile": {    // Map
+                "name": "TechStart Inc.",
+                "description": "A revolutionary AI-powered startup focused on sustainable technology solutions.",
+                "company": {
+                    "name": "TechStart Inc.",
+                    "founded": "2024",
+                    "employees": 50,
+                    "location": {
+                        "city": "San Francisco",
+                        "state": "CA",
+                        "country": "USA"
+                    }
+                },
+                "funding": {
+                    "stage": "Series A",
+                    "amount": 5000000,
+                    "investors": ["VC1", "VC2", "VC3"]
+                },
+                "technologies": ["AI", "Machine Learning", "Cloud"],
+                "social": {
+                    "website": "https://techstart.com",
+                    "linkedin": "https://linkedin.com/company/techstart",
+                    "twitter": "@techstart"
+                }
+            }
         }
-    } as JsonExample
+    },
+    {
+        name: 'Simple Profile',
+        payload: {
+            "profile": {
+                "name": "Simple Co.",
+                "description": "A revolutionary AI-powered startup focused on sustainable technology solutions.",
+            }
+        }
+    }
 ]
 
 interface Result {
@@ -48,11 +79,11 @@ const McpVenturePage = () => {
 
     const handleUpdate = () => {
         const profile = JSON.parse(profileJson);
-        setMcpRequest( mcpToolsCallRequestInit( "update", { profile }));
+        setMcpRequest( mcpToolsCallRequestInit( "update", profile ));
     };
 
-    const handleQuery = () => {
-        setMcpRequest( mcpToolsCallRequestInit( "list-all" ));
+    const handleRecentUpdates = () => {
+        setMcpRequest( mcpToolsCallRequestInit( "recent-updates", { since: new Date().toISOString() }));
     };
 
     const clearResults = () => {
@@ -132,7 +163,7 @@ const McpVenturePage = () => {
                         </p>
                         
                         <Button
-                            onClick={handleQuery}
+                            onClick={handleRecentUpdates}
                             className="w-full"
                             color="success"
                         >
@@ -140,6 +171,27 @@ const McpVenturePage = () => {
                         </Button>
                     </CardBody>
                 </Card>
+            </div>
+
+            {/* Action Buttons Row */}
+            <div className="mt-6">
+                <div className="flex flex-wrap gap-3 mb-4">
+                    <Button
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("read", {}))}
+                    >
+                        Read Profile
+                    </Button>
+                    <Button
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("recent-updates", {}))}
+                    >
+                        Recent Profiles
+                    </Button>
+                    <Button
+                        onClick={() => setMcpRequest(mcpToolsCallRequestInit("delete", {}))}
+                    >
+                        Delete Profile
+                    </Button>
+                </div>
             </div>
 
             {/* JsonRpcDebug Component for Update Location */}

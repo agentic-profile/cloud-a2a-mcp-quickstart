@@ -32,19 +32,21 @@ aws dynamodb create-table \
   --table-name venture-profiles \
   --attribute-definitions \
     AttributeName=id,AttributeType=S \
-    AttributeName=type,AttributeType=S \
-    AttributeName=createdAt,AttributeType=S \
+    AttributeName=kind,AttributeType=S \
+    AttributeName=updated,AttributeType=S \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --global-secondary-indexes \
-    'IndexName=TypeIndex,KeySchema=[{AttributeName=type,KeyType=HASH},{AttributeName=createdAt,KeyType=RANGE}],Projection={ProjectionType=ALL}' \
+    'IndexName=TypeIndex,KeySchema=[{AttributeName=kind,KeyType=HASH},{AttributeName=updated,KeyType=RANGE}],Projection={ProjectionType=ALL}' \
   --billing-mode PAY_PER_REQUEST \
   --endpoint-url http://localhost:8000
-  ```
+```
 
 ```bash
-  aws dynamodb delete-table \
+aws dynamodb delete-table \
+    --endpoint-url http://localhost:8000 \
     --table-name venture-profiles
+
 ```
 
 ```bash
