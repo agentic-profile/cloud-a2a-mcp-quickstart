@@ -16,6 +16,7 @@ interface TabbedEditableListsProps {
     }>;
     className?: string;
     values?: TabValues[];
+    selectable?: boolean;
     onUpdate?: (tabId: string, values: string[], selected: number) => void;
 }
 
@@ -23,6 +24,7 @@ export const TabbedEditableLists = ({
     tabs,
     className = "",
     values = [],
+    selectable = false,
     onUpdate
 }: TabbedEditableListsProps) => {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -63,6 +65,7 @@ export const TabbedEditableLists = ({
                     className="border-0 shadow-none bg-transparent"
                     values={tabValues}
                     selected={selected}
+                    selectable={selectable}
                     onUpdate={(values, selected) => onUpdate?.(id, values, selected)}
                 />
             </div>

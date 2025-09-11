@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardBody, Page, TabbedEditableLists } from '@/components';
+import { Card, CardBody, EditableValueList, Page, TabbedEditableLists } from '@/components';
 import agentsData from '../agents.json';
 //import { buildEndpoint } from '@/tools/misc';
 //import { useSettingsStore } from '@/stores';
@@ -26,6 +26,13 @@ const VenturePage = () => {
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture');
     //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
+
+    const [problem, setProblem] = useState<string[]>([]);
+    const [marketOpportunity, setMarketOpportunity] = useState<string[]>([]);
+    const [solution, setSolution] = useState<string[]>([]);
+    const [milestones, setMilestones] = useState<string[]>([]);
+    const [team, setTeam] = useState<string[]>([]);
+
 
     // State to hold the values for each tab
     const [values, setValues] = useState<TabValues[]>(
@@ -93,12 +100,50 @@ const VenturePage = () => {
                     <TabbedEditableLists 
                         tabs={POSITIONING_TABS}
                         values={values}
+                        selectable={true}
                         onUpdate={handleUpdate}
+                    />
+                    <PositioningStatement tabValues={values} />
+                </CardTitleAndBody>
+
+                <CardTitleAndBody title="Step 2: Problem">
+                    <EditableValueList
+                        placeholder="An aspect of your customers problem"
+                        values={problem}
+                        onUpdate={(values) => setProblem(values)}
                     />
                 </CardTitleAndBody>
 
-                <CardTitleAndBody title="Your Positioning Statement">
-                    <PositioningStatement tabValues={values} />
+                <CardTitleAndBody title="Step 3: Market Opportunity">
+                    <EditableValueList
+                        placeholder="The size of the market opportunity"
+                        values={marketOpportunity}
+                        onUpdate={(values) => setMarketOpportunity(values)}
+                    />
+                </CardTitleAndBody>
+
+                <CardTitleAndBody title="Step 4: Solution">
+                    <EditableValueList
+                        placeholder="The solution to the problem"
+                        values={solution}
+                        onUpdate={(values) => setSolution(values)}
+                    />
+                </CardTitleAndBody>
+
+                <CardTitleAndBody title="Step 5: Milestones">
+                    <EditableValueList
+                        placeholder="The milestones for the project"
+                        values={milestones}
+                        onUpdate={(values) => setMilestones(values)}
+                    />
+                </CardTitleAndBody>
+
+                <CardTitleAndBody title="Step 6: Team">
+                    <EditableValueList
+                        placeholder="Another team member..."
+                        values={team}
+                        onUpdate={(values) => setTeam(values)}
+                    />
                 </CardTitleAndBody>
             </div>
         </Page>
