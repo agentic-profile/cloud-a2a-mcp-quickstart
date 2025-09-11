@@ -1,4 +1,4 @@
-import { Button, Card, CardBody } from '@/components';
+import { Button } from '@/components';
 import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';

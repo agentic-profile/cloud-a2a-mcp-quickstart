@@ -5,7 +5,7 @@ import agentsData from '../agents.json';
 //import { useSettingsStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody } from '@/components/Card';
-import { EditableTable, EditableNumberColumn } from '@/components/EditableTable';
+import { EditableTable, EditableNumberColumn, EditableTextColumn } from '@/components/EditableTable';
 
 interface TabValues {
     id: string;
@@ -118,8 +118,8 @@ const VenturePage = () => {
                 <CardTitleAndBody title="Step 3: Market Opportunity">
                     <EditableTable
                         columns={[
-                            { header: "Market Segment", renderCell: (value) => <span>{value}</span> },
-                            EditableNumberColumn("Size (TAM)", 0, undefined, 1000000)
+                            EditableTextColumn("Market Segment"),
+                            EditableNumberColumn("Size (TAM)")
                         ]}
                         values={marketOpportunity}
                         onUpdate={(values) => setMarketOpportunity(values)}

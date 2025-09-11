@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export interface EditableTableProps {
     placeholders?: string[];
@@ -8,36 +8,14 @@ export interface EditableTableProps {
 }
 
 export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableProps) => {
-    const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
-    const [editValue, setEditValue] = useState('');
-
-    const handleCellClick = (rowIndex: number, colIndex: number, currentValue: string) => {
-        setEditingCell({ row: rowIndex, col: colIndex });
-        setEditValue(currentValue);
-    };
-
-    const handleCellSave = () => {
-        if (editingCell && onUpdate) {
+    const updateCellValue = (rowIndex: number, colIndex: number, newValue: string) => {
+        if (onUpdate) {
             const newValues = [...values];
-            newValues[editingCell.row][editingCell.col] = editValue;
+            newValues[rowIndex][colIndex] = newValue;
             onUpdate(newValues);
         }
-        setEditingCell(null);
-        setEditValue('');
     };
 
-    const handleCellCancel = () => {
-        setEditingCell(null);
-        setEditValue('');
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleCellSave();
-        } else if (e.key === 'Escape') {
-            handleCellCancel();
-        }
-    };
 
     const addRow = () => {
         if (onUpdate) {
@@ -69,41 +47,20 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                     </tr>
                 </thead>
                 <tbody>
-                    {values.map((row, rowIndex) => (
+                    {values.length === 0 ? (
+                        <tr>
+                            <td colSpan={columns.length + 1} className="text-center py-8 text-gray-500 italic">
+                                No data yet. Click "Add Row" to get started.
+                            </td>
+                        </tr>
+                    ) : (
+                        values.map((row, rowIndex) => (
                         <tr key={rowIndex} className="group">
                             {columns.map((column, colIndex) => (
-                                <td 
-                                    key={colIndex} 
-                                    className="border border-gray-300 px-4 py-2 cursor-pointer hover:bg-gray-50"
-                                    onClick={() => handleCellClick(rowIndex, colIndex, row[colIndex] || '')}
-                                >
-                                    {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
-                                        column.renderEditCell ? 
-                                            column.renderEditCell(
-                                                editValue, 
-                                                rowIndex, 
-                                                colIndex, 
-                                                setEditValue, 
-                                                handleCellSave, 
-                                                handleCellCancel, 
-                                                handleKeyDown
-                                            ) : 
-                                            <input
-                                                type={column.inputType || 'text'}
-                                                value={editValue}
-                                                onChange={(e) => setEditValue(e.target.value)}
-                                                onBlur={handleCellSave}
-                                                onKeyDown={handleKeyDown}
-                                                className="w-full border-none outline-none bg-transparent"
-                                                min={column.min}
-                                                max={column.max}
-                                                step={column.step}
-                                                autoFocus
-                                            />
-                                    ) : (
-                                        column.renderCell ? 
-                                            column.renderCell(row[colIndex] || '', rowIndex, colIndex) : 
-                                            (row[colIndex] || '')
+                                <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                                    {column.renderEditCell(
+                                        row[colIndex] || '', 
+                                        (newValue) => updateCellValue(rowIndex, colIndex, newValue)
                                     )}
                                 </td>
                             ))}
@@ -129,7 +86,8 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                 </button>
                             </td>
                         </tr>
-                    ))}
+                        ))
+                    )}
                 </tbody>
             </table>
             <div className="mt-4 flex justify-end">
@@ -159,50 +117,33 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
 
 interface EditableTableColumn {
     header: string;
-    inputType?: 'text' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local';
-    min?: number;
-    max?: number;
-    step?: number;
-    renderCell?: (value: string, rowIndex: number, colIndex: number) => React.ReactNode;
-    renderEditCell?: (
+    renderCell?: (value: string) => React.ReactNode;
+    renderEditCell: (
         value: string, 
-        rowIndex: number, 
-        colIndex: number,
-        onChange: (value: string) => void,
-        onSave: () => void,
-        onCancel: () => void,
-        onKeyDown: (e: React.KeyboardEvent) => void
+        onChange: (value: string) => void
     ) => React.ReactNode;
 }
 
 export function EditableTextColumn(header: string, inputType: 'text' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local' = 'text'): EditableTableColumn {
     return {
         header,
-        inputType,
         renderCell: (value: string) => (
             <span className="text-gray-900">{value || <span className="text-gray-400 italic">Click to edit</span>}</span>
         ),
-        renderEditCell: (value: string, _rowIndex: number, _colIndex: number, onChange: (value: string) => void, onSave: () => void, _onCancel: () => void, onKeyDown: (e: React.KeyboardEvent) => void) => (
+        renderEditCell: (value: string, onChange: (value: string) => void) => (
             <input
                 type={inputType}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                onBlur={onSave}
-                onKeyDown={onKeyDown}
                 className="w-full border-none outline-none bg-transparent"
-                autoFocus
             />
         )
     };
 }
 
-export function EditableNumberColumn(header: string, min?: number, max?: number, step?: number): EditableTableColumn {
+export function EditableNumberColumn(header: string): EditableTableColumn {
     return {
         header,
-        inputType: 'number',
-        min,
-        max,
-        step,
         renderCell: (value: string) => {
             const numValue = parseFloat(value);
             const displayValue = isNaN(numValue) ? '' : numValue.toLocaleString();
@@ -212,18 +153,12 @@ export function EditableNumberColumn(header: string, min?: number, max?: number,
                 </span>
             );
         },
-        renderEditCell: (value: string, _rowIndex: number, _colIndex: number, onChange: (value: string) => void, onSave: () => void, _onCancel: () => void, onKeyDown: (e: React.KeyboardEvent) => void) => (
+        renderEditCell: (value: string, onChange: (value: string) => void) => (
             <input
                 type="number"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                onBlur={onSave}
-                onKeyDown={onKeyDown}
                 className="w-full border-none outline-none bg-transparent text-right font-mono"
-                min={min}
-                max={max}
-                step={step}
-                autoFocus
             />
         )
     };
