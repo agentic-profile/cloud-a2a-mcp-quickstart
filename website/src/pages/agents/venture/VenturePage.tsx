@@ -32,7 +32,7 @@ const VenturePage = () => {
     const [marketOpportunity, setMarketOpportunity] = useState<string[][]>([]);
     const [solution, setSolution] = useState<string[]>([]);
     const [milestones, setMilestones] = useState<string[][]>([]);
-    const [team, setTeam] = useState<string[]>([]);
+    const [team, setTeam] = useState<string[][]>([]);
 
 
     // State to hold the values for each tab
@@ -108,6 +108,9 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 2: Problem">
+                    <p>
+                        Describe three or four elements of the problem your customers are facing.
+                    </p>
                     <EditableValueList
                         placeholder="An aspect of your customers problem"
                         values={problem}
@@ -116,6 +119,9 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 3: Market Opportunity">
+                    <p className="mb-4">
+                        Describe the market segment and the size of the market opportunity.
+                    </p>
                     <EditableTable
                         columns={[
                             EditableTextColumn("Market Segment"),
@@ -127,6 +133,9 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 4: Solution">
+                    <p className="mb-4">
+                        Describe the solution to the problem as three or four bullet points.
+                    </p>
                     <EditableValueList
                         placeholder="The solution to the problem"
                         values={solution}
@@ -135,6 +144,10 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 5: Milestones">
+                    <p className="mb-4">
+                        Describe three or four milestones for the project, how long each should take,
+                        and how much funding is needed for each milestone.
+                    </p>
                     <EditableTable
                         columns={[
                             EditableTextColumn("Milestone"),
@@ -147,11 +160,15 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 6: Team">
-                    <EditableValueList
-                        placeholder="Another team member..."
-                        values={team}
-                        onUpdate={(values) => setTeam(values)}
-                    />
+                <EditableTable
+                    columns={[
+                        EditableTextColumn("Name"),
+                        EditableTextColumn("LinkedIn Profile"),
+                        EditableTextColumn("Full or part-time?")
+                    ]}
+                    values={team}
+                    onUpdate={(values) => setTeam(values)}
+                />
                 </CardTitleAndBody>
             </div>
         </Page>
