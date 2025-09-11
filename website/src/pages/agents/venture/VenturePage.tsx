@@ -5,6 +5,7 @@ import agentsData from '../agents.json';
 //import { useSettingsStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody } from '@/components/Card';
+import { EditableTable } from '@/components/EditableTable';
 
 interface TabValues {
     id: string;
@@ -28,7 +29,7 @@ const VenturePage = () => {
     //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
 
     const [problem, setProblem] = useState<string[]>([]);
-    const [marketOpportunity, setMarketOpportunity] = useState<string[]>([]);
+    const [marketOpportunity, setMarketOpportunity] = useState<string[][]>([]);
     const [solution, setSolution] = useState<string[]>([]);
     const [milestones, setMilestones] = useState<string[]>([]);
     const [team, setTeam] = useState<string[]>([]);
@@ -92,7 +93,7 @@ const VenturePage = () => {
                 {/* Tabbed Option List */}
                 <CardTitleAndBody title="Step 1: Positioning Worksheet">
                     <p className="mb-4">
-                        This worksheet is based on Geoffrey A. Moore's
+                        This worksheet is based on Geoffrey Moore's
                         book <a href="https://en.wikipedia.org/wiki/Crossing_the_Chasm" target="_blank">Crossing the Chasm</a>.
                         Use each tab to brainstorm your business venture and then select the best option from each tab to create a positioning
                         statement (shown below).
@@ -115,8 +116,11 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 3: Market Opportunity">
-                    <EditableValueList
-                        placeholder="The size of the market opportunity"
+                    <EditableTable
+                        columns={[
+                            { header: "Market Segment", renderCell: (value) => <span>{value}</span> },
+                            { header: "Size (TAM)", renderCell: (value) => <span>{value}</span> }
+                        ]}
                         values={marketOpportunity}
                         onUpdate={(values) => setMarketOpportunity(values)}
                     />
