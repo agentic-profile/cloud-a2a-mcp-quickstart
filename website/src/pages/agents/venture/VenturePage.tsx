@@ -5,7 +5,7 @@ import agentsData from '../agents.json';
 //import { useSettingsStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody } from '@/components/Card';
-import { EditableTable, EditableNumberColumn, EditableTextColumn } from '@/components/EditableTable';
+import { EditableTable, EditableTextColumn, EditableCurrencyColumn } from '@/components/EditableTable';
 
 interface TabValues {
     id: string;
@@ -31,7 +31,7 @@ const VenturePage = () => {
     const [problem, setProblem] = useState<string[]>([]);
     const [marketOpportunity, setMarketOpportunity] = useState<string[][]>([]);
     const [solution, setSolution] = useState<string[]>([]);
-    const [milestones, setMilestones] = useState<string[]>([]);
+    const [milestones, setMilestones] = useState<string[][]>([]);
     const [team, setTeam] = useState<string[]>([]);
 
 
@@ -119,7 +119,7 @@ const VenturePage = () => {
                     <EditableTable
                         columns={[
                             EditableTextColumn("Market Segment"),
-                            EditableNumberColumn("Size (TAM)")
+                            EditableCurrencyColumn("Size (TAM)", "USD")
                         ]}
                         values={marketOpportunity}
                         onUpdate={(values) => setMarketOpportunity(values)}
@@ -135,8 +135,12 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 5: Milestones">
-                    <EditableValueList
-                        placeholder="The milestones for the project"
+                    <EditableTable
+                        columns={[
+                            EditableTextColumn("Milestone"),
+                            EditableTextColumn("Duration"),
+                            EditableCurrencyColumn("Funding Needed", "USD")
+                        ]}
                         values={milestones}
                         onUpdate={(values) => setMilestones(values)}
                     />
