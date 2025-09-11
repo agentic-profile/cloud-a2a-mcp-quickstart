@@ -85,6 +85,9 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                             onBlur={handleCellSave}
                                             onKeyDown={handleKeyDown}
                                             className="w-full border-none outline-none bg-transparent"
+                                            min={column.min}
+                                            max={column.max}
+                                            step={column.step}
                                             autoFocus
                                         />
                                     ) : (
@@ -147,6 +150,9 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
 interface EditableTableColumn {
     header: string;
     inputType?: 'text' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local';
+    min?: number;
+    max?: number;
+    step?: number;
     renderCell?: (value: string, rowIndex: number, colIndex: number) => React.ReactNode;
 }
 
@@ -157,5 +163,24 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
         renderCell: (value: string) => (
             <span className="text-gray-900">{value || <span className="text-gray-400 italic">Click to edit</span>}</span>
         )
+    };
+}
+
+export function EditableNumberColumn(header: string, min?: number, max?: number, step?: number): EditableTableColumn {
+    return {
+        header,
+        inputType: 'number',
+        min,
+        max,
+        step,
+        renderCell: (value: string) => {
+            const numValue = parseFloat(value);
+            const displayValue = isNaN(numValue) ? '' : numValue.toLocaleString();
+            return (
+                <span className="text-gray-900 text-right font-mono">
+                    {displayValue || <span className="text-gray-400 italic">Click to edit</span>}
+                </span>
+            );
+        }
     };
 }
