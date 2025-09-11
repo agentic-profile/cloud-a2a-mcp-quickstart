@@ -78,18 +78,28 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                     onClick={() => handleCellClick(rowIndex, colIndex, row[colIndex] || '')}
                                 >
                                     {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
-                                        <input
-                                            type={column.inputType || 'text'}
-                                            value={editValue}
-                                            onChange={(e) => setEditValue(e.target.value)}
-                                            onBlur={handleCellSave}
-                                            onKeyDown={handleKeyDown}
-                                            className="w-full border-none outline-none bg-transparent"
-                                            min={column.min}
-                                            max={column.max}
-                                            step={column.step}
-                                            autoFocus
-                                        />
+                                        column.renderEditCell ? 
+                                            column.renderEditCell(
+                                                editValue, 
+                                                rowIndex, 
+                                                colIndex, 
+                                                setEditValue, 
+                                                handleCellSave, 
+                                                handleCellCancel, 
+                                                handleKeyDown
+                                            ) : 
+                                            <input
+                                                type={column.inputType || 'text'}
+                                                value={editValue}
+                                                onChange={(e) => setEditValue(e.target.value)}
+                                                onBlur={handleCellSave}
+                                                onKeyDown={handleKeyDown}
+                                                className="w-full border-none outline-none bg-transparent"
+                                                min={column.min}
+                                                max={column.max}
+                                                step={column.step}
+                                                autoFocus
+                                            />
                                     ) : (
                                         column.renderCell ? 
                                             column.renderCell(row[colIndex] || '', rowIndex, colIndex) : 
@@ -154,6 +164,15 @@ interface EditableTableColumn {
     max?: number;
     step?: number;
     renderCell?: (value: string, rowIndex: number, colIndex: number) => React.ReactNode;
+    renderEditCell?: (
+        value: string, 
+        rowIndex: number, 
+        colIndex: number,
+        onChange: (value: string) => void,
+        onSave: () => void,
+        onCancel: () => void,
+        onKeyDown: (e: React.KeyboardEvent) => void
+    ) => React.ReactNode;
 }
 
 export function EditableTextColumn(header: string, inputType: 'text' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local' = 'text'): EditableTableColumn {
@@ -162,6 +181,17 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
         inputType,
         renderCell: (value: string) => (
             <span className="text-gray-900">{value || <span className="text-gray-400 italic">Click to edit</span>}</span>
+        ),
+        renderEditCell: (value: string, _rowIndex: number, _colIndex: number, onChange: (value: string) => void, onSave: () => void, _onCancel: () => void, onKeyDown: (e: React.KeyboardEvent) => void) => (
+            <input
+                type={inputType}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onBlur={onSave}
+                onKeyDown={onKeyDown}
+                className="w-full border-none outline-none bg-transparent"
+                autoFocus
+            />
         )
     };
 }
@@ -181,6 +211,20 @@ export function EditableNumberColumn(header: string, min?: number, max?: number,
                     {displayValue || <span className="text-gray-400 italic">Click to edit</span>}
                 </span>
             );
-        }
+        },
+        renderEditCell: (value: string, _rowIndex: number, _colIndex: number, onChange: (value: string) => void, onSave: () => void, _onCancel: () => void, onKeyDown: (e: React.KeyboardEvent) => void) => (
+            <input
+                type="number"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onBlur={onSave}
+                onKeyDown={onKeyDown}
+                className="w-full border-none outline-none bg-transparent text-right font-mono"
+                min={min}
+                max={max}
+                step={step}
+                autoFocus
+            />
+        )
     };
 }
