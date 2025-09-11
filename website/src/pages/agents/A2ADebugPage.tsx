@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/tools/misc';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/misc';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
 
@@ -14,9 +15,13 @@ export interface A2ARequest {
 const A2ADebugPage = () => {
     const [customPayload, setCustomPayload] = useState<string>('');
     const [request, setRequest] = useState<RequestInit | null>(null);
-    const rpcUrl = useRpcUrlFromWindow();
+    const queryRpcUrl = useRpcUrlFromWindow();
+    const { serverUrl } = useSettingsStore();
     const sendButtonRef = useRef<HTMLButtonElement>(null);
     const jsonRpcDebugRef = useRef<HTMLDivElement>(null);
+
+    // Use queryRpcUrl if available, otherwise fallback to serverUrl + "/mcp/location"
+    const rpcUrl = queryRpcUrl || (serverUrl ? buildEndpoint(serverUrl, '/a2a/venture') : null);
 
     const handlePayloadChange = (value: string) => {
         setCustomPayload(value);

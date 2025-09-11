@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { HeroUIProvider } from '@heroui/react';
+import { useEffect } from 'react';
 import Layout from './components/Layout';
 import { ChatPage } from './pages/agents/ChatPage';
 import HomePage from './pages/HomePage';
@@ -18,8 +19,24 @@ import McpVenturePage from './pages/mcp/McpVenturePage';
 import McpReputationPage from './pages/mcp/McpReputationPage';
 import SettingsPage from './pages/SettingsPage';
 import IdentityPage from './pages/IdentityPage';
+import { useSettingsStore } from './stores/settingsStore';
 
 function App() {
+    const { serverUrl, setServerUrl } = useSettingsStore();
+
+    useEffect(() => {
+        // Only set serverUrl if it's not already set or if it's the default localhost value
+        if (serverUrl === undefined) {
+            const hostname = window.location.hostname.toLowerCase();
+            
+            if (hostname === 'localhost') {
+                setServerUrl('http://localhost:3000');
+            } else if (hostname === 'demo.agenticprofile.ai') {
+                setServerUrl('https://demo-api.agenticprofile.ai');
+            }
+        }
+    }, [serverUrl, setServerUrl]);
+
     return (
         <HeroUIProvider>
             <Layout>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS } from '@/tools/misc';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/misc';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/mcp/location');
 
@@ -44,9 +45,13 @@ export interface McpRequest {
 }
 
 const McpDebugPage = () => {
-    const rpcUrl = useRpcUrlFromWindow();
     const [customPayload, setCustomPayload] = useState<string>('{\n  "method": "tools/list",\n  "params": {\n    "name": "test"\n  }\n}');
     const [request, setRequest] = useState<RequestInit | null>(null);
+    const queryRpcUrl = useRpcUrlFromWindow();
+    const { serverUrl } = useSettingsStore();
+
+    // Use queryRpcUrl if available, otherwise fallback to serverUrl + "/mcp/location"
+    const rpcUrl = queryRpcUrl || (serverUrl ? buildEndpoint(serverUrl, '/mcp/location') : null);
 
     const handlePayloadChange = (value: string) => {
         setCustomPayload(value);
