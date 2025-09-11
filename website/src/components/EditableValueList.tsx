@@ -2,9 +2,9 @@ import { Button, Card, CardBody } from '@/components';
 import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 
 interface EditableValueListProps {
-    title?: string;
     placeholder?: string;
     className?: string;
     values?: string[];
@@ -13,22 +13,43 @@ interface EditableValueListProps {
 }
 
 export const EditableValueList = ({ 
-    title = "Values", 
     placeholder = "Enter value...",
     className = "",
     values = [],
     selected = -1,
     onUpdate
 }: EditableValueListProps) => {
+    // Add a blank value if the values array is empty and ensure there's always a selected row
+    useEffect(() => {
+        if (values.length === 0 && onUpdate) {
+            onUpdate([''], 0); // Set first row as selected
+        } else if (values.length > 0 && selected === -1 && onUpdate) {
+            onUpdate(values, 0); // Select first row if none selected
+        }
+    }, [values.length, selected, onUpdate]);
+
+    // Ensure we always have at least one empty value to show
+    const displayValues = values.length === 0 ? [''] : values;
 
     const addValue = () => {
         const newValues = [...values, ''];
-        onUpdate?.(newValues, selected);
+        onUpdate?.(newValues, newValues.length - 1); // Select the newly added row
     };
 
     const deleteValue = (index: number) => {
+        // Don't allow deleting if it would result in no values
+        if (values.length <= 1) return;
+        
         const newValues = values.filter((_, i) => i !== index);
-        const newSelected = selected >= newValues.length ? -1 : selected;
+        // Ensure we always have a selected row after deletion
+        let newSelected = selected;
+        if (selected === index) {
+            // If deleting the selected row, select the previous row or first row
+            newSelected = index > 0 ? index - 1 : 0;
+        } else if (selected > index) {
+            // If deleting a row before the selected one, adjust the index
+            newSelected = selected - 1;
+        }
         onUpdate?.(newValues, newSelected);
     };
 
@@ -44,25 +65,10 @@ export const EditableValueList = ({
     };
 
     return (
-        <Card className={clsx("mt-6", className)}>
+        <Card className={className}>
             <CardBody>
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {title}
-                    </h3>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={addValue}
-                        className="flex items-center gap-2"
-                    >
-                        <PlusIcon className="w-4 h-4" />
-                        Add Value
-                    </Button>
-                </div>
-
                 <div>
-                    {values.map((value, index) => (
+                    {displayValues?.map((value, index) => (
                         <div
                             key={index}
                             className={clsx(
@@ -96,21 +102,28 @@ export const EditableValueList = ({
                                 )}
                             />
 
-                            <button
-                                onClick={() => deleteValue(index)}
-                                className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
-                                title="Delete value"
-                            >
-                                <TrashIcon className="w-4 h-4" />
-                            </button>
+                            {values.length > 1 && (
+                                <button
+                                    onClick={() => deleteValue(index)}
+                                    className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
+                                    title="Delete value"
+                                >
+                                    <TrashIcon className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
                     ))}
-
-                    {values.length === 0 && (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <p>No values yet. Click "Add Value" to get started.</p>
-                        </div>
-                    )}
+                </div>
+                <div className="flex items-center justify-end mt-3">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={addValue}
+                        className="flex items-center gap-2"
+                    >
+                        <PlusIcon className="w-4 h-4" />
+                        Add Value
+                    </Button>
                 </div>
             </CardBody>
         </Card>

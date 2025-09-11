@@ -72,3 +72,22 @@ export function CardHeader({ className = "", onEdit, onDelete, onRefresh, onClos
 export function CardBody({ className = "", ...props }: any ) {
     return <HeroCardBody className={clsx("p-2",className)} {...props} />
 }
+
+interface CardTitleAndBodyProps {
+    className?: string;
+    title: string;
+    children?: React.ReactNode;
+}
+
+export function CardTitleAndBody({ className, title, children }: CardTitleAndBodyProps ) {
+    return (
+    <Card className={className}>
+        <CardHeader>
+            <h3>{title}</h3>
+        </CardHeader>
+        <CardBody>
+            {children}
+        </CardBody>
+    </Card>
+    )
+}

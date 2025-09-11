@@ -5,7 +5,7 @@ import Layout from './components/Layout';
 import { ChatPage } from './pages/agents/ChatPage';
 import HomePage from './pages/HomePage';
 import AgentsIndexPage from './pages/agents/AgentsIndexPage';
-import VenturePage from './pages/agents/VenturePage';
+import VenturePage from './pages/agents/venture/VenturePage';
 import CapitalPage from './pages/agents/CapitalPage';
 import VolunteerPage from './pages/agents/VolunteerPage';
 import CharityPage from './pages/agents/CharityPage';
