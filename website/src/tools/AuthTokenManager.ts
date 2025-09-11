@@ -14,7 +14,15 @@ export async function deleteAuthToken(url:string): Promise<void> {
     tokenStore.delete(url);
 }
 
-export function useAuthToken(url: string) {
+export function useAuthToken(url: string | undefined) {
+    if( !url )
+        return {
+            authToken: null,
+            setAuthToken: () => {},
+            clearAuthToken: () => {},
+            hasAuthToken: false
+        };
+
     const [ authToken, setTokenState] = useState<string | null>(() => tokenStore.get(url) || null);
 
     const setAuthToken = useCallback(async (token: string) => {

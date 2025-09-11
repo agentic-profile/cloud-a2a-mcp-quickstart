@@ -13,7 +13,7 @@ interface Result {
 }
 
 interface JsonRpcDebugProps {
-    url: string;
+    url: string | undefined;
     request: RequestInit | null;
     onFinalResult: (result: Result) => void;
     onClose?: () => void;
@@ -73,6 +73,8 @@ export const JsonRpcDebug = ({
     };
 
     const handleSendRequest = async (request: RequestInit) => {
+        if( !url )
+            return;
 
         setRetryInit(null);
         setRetrySpinner(false);

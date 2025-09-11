@@ -5,14 +5,16 @@ export const DEFAULT_SERVER_URLS = [
     'http://localhost:3000'
 ];
 
-export function buildEndpoint(serverUrl: string, path: string) {
-    if( !serverUrl.endsWith('/') ) {
+export function buildEndpoint(serverUrl: string | undefined, path: string) {
+    if( !serverUrl )
+        return undefined;
+    else if( !serverUrl.endsWith('/') )
         serverUrl += '/';
-    }
+
     return new URL(path, serverUrl).toString();
 }
 
-export function validateHttpUrl(url: string | null): boolean {
+export function validateHttpUrl(url: string | null | undefined): boolean {
     if (!url?.trim()) return true; // Empty is considered valid
     try {
         const parsed = new URL(url);

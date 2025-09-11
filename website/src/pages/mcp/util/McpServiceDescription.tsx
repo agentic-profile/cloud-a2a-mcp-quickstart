@@ -3,7 +3,7 @@ import type { MCPService } from '../types';
 
 interface McpServiceDescriptionProps {
     service: MCPService;
-    endpoint: string;
+    endpoint: string | undefined;
     tools: Array<{
         name: string;
         description: string;

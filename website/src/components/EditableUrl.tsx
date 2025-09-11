@@ -6,7 +6,7 @@ import { validateHttpUrl } from '@/tools/misc';
 
 interface EditableUrlProps {
     label: string;
-    value: string | null;
+    value: string | null | undefined;
     placeholder?: string;
     options?: string[];
     onUpdate: (newValue: string) => void;
