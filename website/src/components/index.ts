@@ -32,3 +32,5 @@ export { LabelValue } from './LabelValue';
 export { LabelJson } from './LabelJson';
 export { EditableUrl } from './EditableUrl';
 export { default as JsonEditor } from './JsonEditor';
+export { EditableValueList } from './EditableValueList';
+export { TabbedEditableLists } from './TabbedEditableLists';

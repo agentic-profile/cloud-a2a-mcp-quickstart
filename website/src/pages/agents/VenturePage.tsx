@@ -1,20 +1,46 @@
-import { 
-    ChatBubbleLeftRightIcon
-} from '@heroicons/react/24/outline';
-import { Button, Card, CardBody, Page } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Page, TabbedEditableLists } from '@/components';
 import agentsData from './agents.json';
-import { buildEndpoint } from '@/tools/misc';
-import { useSettingsStore } from '@/stores';
+//import { buildEndpoint } from '@/tools/misc';
+//import { useSettingsStore } from '@/stores';
+
+interface TabValues {
+    id: string;
+    values: string[];
+    selected: number;
+}
+
+const POSITIONING_TABS = [
+    { id: "for-who", title: "For who", placeholder: "Enter target market..." },
+    { id: "who-need", title: "Who needs", placeholder: "Enter customer needs or problems..." },
+    { id: "product-category", title: "Product Category", placeholder: "Enter product category..." },
+    { id: "key-benefit", title: "Key Benefit", placeholder: "Enter key benefit..." },
+    { id: "unlike", title: "Unlike", placeholder: "Name of closest competitor..." },
+    { id: "primary-differentiator", title: "Primary Differentiator", placeholder: "Enter primary differentiator..." }
+]
 
 const VenturePage = () => {
-    const { serverUrl } = useSettingsStore();
+    //const { serverUrl } = useSettingsStore();
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture');
-    const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
-    
-    const handleChatClick = () => {
-        if( rpcUrl )
-            window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
+    //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
+
+    // State to hold the values for each tab
+    const [values, setValues] = useState<TabValues[]>(
+        POSITIONING_TABS.map(tab => ({
+            id: tab.id,
+            values: [],
+            selected: -1
+        }))
+    );
+
+    // Handle updates to tab values
+    const handleUpdate = (tabId: string, values: string[], selected: number) => {
+        setValues(prev => prev.map(tab => 
+            tab.id === tabId 
+                ? { ...tab, values, selected }
+                : tab
+        ));
     };
 
     if (!ventureAgent) {
@@ -52,17 +78,12 @@ const VenturePage = () => {
                 </Card>
             </div>
 
-            {/* Chat Button */}
-            {rpcUrl && <div className="mt-8 text-center">
-                <Button
-                    color="success"
-                    size="lg"
-                    onClick={handleChatClick}
-                >
-                    <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
-                    Start Chat
-                </Button>
-            </div>}
+            {/* Tabbed Option List */}
+            <TabbedEditableLists 
+                tabs={POSITIONING_TABS}
+                values={values}
+                onUpdate={handleUpdate}
+            />
         </Page>
     );
 };
