@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
             {/* Sidebar */}
             <div className={`
-                bg-white dark:bg-gray-800 border-r-4 border-red-500
+                bg-white dark:bg-gray-800 border-r-1 border-gray-500
                 transition-transform duration-300 ease-in-out
                 w-full max-w-xs lg:w-56
                 fixed inset-y-0 left-0 z-50
@@ -80,7 +80,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                         <p>v1.0.0</p>
-                        <p className="mt-1">Decentralized Agents</p>
+                        <p className="mt-1">Agent World Congress</p>
                     </div>
                 </div>
             </div>

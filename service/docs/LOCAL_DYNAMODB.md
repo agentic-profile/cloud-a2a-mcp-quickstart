@@ -14,6 +14,8 @@ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 ```
 
+This command will return a list of all tables in your local DynamoDB instance. If you haven't created any tables yet, it will return an empty list.
+
 5. Configure your application to use local DynamoDB
 
 Set the `LOCAL_DYNAMODB` environment variable in your `.env.local` file:
@@ -46,7 +48,6 @@ aws dynamodb create-table \
 aws dynamodb delete-table \
     --endpoint-url http://localhost:8000 \
     --table-name venture-profiles
-
 ```
 
 ```bash
@@ -54,3 +55,56 @@ aws dynamodb scan \
     --endpoint-url http://localhost:8000 \
     --table-name venture-profiles
 ```
+
+## AWS CLI Commands Reference
+
+### List Tables
+
+**Local DynamoDB:**
+```bash
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
+
+**Production DynamoDB:**
+```bash
+aws dynamodb list-tables
+```
+
+Both commands will return a JSON response with a `TableNames` array containing all available tables.
+
+### Describe Table Structure
+
+**Local DynamoDB:**
+```bash
+aws dynamodb describe-table \
+    --table-name venture-profiles \
+    --endpoint-url http://localhost:8000
+```
+
+**Production DynamoDB:**
+```bash
+aws dynamodb describe-table --table-name venture-profiles
+```
+
+This command provides detailed information about the table structure, including attributes, indexes, and configuration.
+
+### Check Table Status
+
+**Local DynamoDB:**
+```bash
+aws dynamodb describe-table \
+    --table-name venture-profiles \
+    --endpoint-url http://localhost:8000 \
+    --query 'Table.TableStatus'
+```
+
+**Production DynamoDB:**
+```bash
+aws dynamodb describe-table \
+    --table-name venture-profiles \
+    --query 'Table.TableStatus'
+```
+
+This returns just the table status (e.g., "ACTIVE", "CREATING", "DELETING").
+
+

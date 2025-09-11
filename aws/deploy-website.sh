@@ -56,7 +56,7 @@ echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${YELLOW}Project: ${PROJECT}${NC}"
 echo -e "${YELLOW}Region: ${REGION}${NC}"
 echo -e "${YELLOW}Stack Name: ${STACK_NAME}${NC}"
-echo -e "${YELLOW}Certificate ARN: ${CERTIFICATE_ARN}${NC}"
+echo -e "${YELLOW}Certificate ARN: ${GLOBAL_CERTIFICATE_ARN}${NC}"
 echo -e "${YELLOW}Domain Name: ${DOMAIN_NAME}${NC}"
 echo ""
 
@@ -101,7 +101,7 @@ aws cloudformation deploy \
     --template-file agentic-website.yaml \
     --stack-name ${STACK_NAME} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-    --parameter-overrides Environment=${ENVIRONMENT} Project=${PROJECT} CertificateArn=${CERTIFICATE_ARN} DomainName=${DOMAIN_NAME} \
+    --parameter-overrides Environment=${ENVIRONMENT} Project=${PROJECT} CertificateArn=${GLOBAL_CERTIFICATE_ARN} DomainName=${DOMAIN_NAME} \
     --region ${REGION}
 
 if [ $? -ne 0 ]; then

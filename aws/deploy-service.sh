@@ -50,6 +50,7 @@ fi
 
 # Get region from AWS CLI configuration, fallback to environment variable, then default
 REGION=$(aws configure get region 2>/dev/null || echo ${AWS_REGION:-us-east-1})
+CERTIFICATE_ARN=${REGIONAL_CERTIFICATE_ARN}
 
 echo -e "${GREEN}🚀 Deploying Universal Auth A2A and MCP Lambda Function${NC}"
 echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
@@ -76,7 +77,7 @@ echo -e "${GREEN}✅ AWS CLI and credentials verified${NC}"
 
 # Build the function.zip
 echo -e "${YELLOW}📦 Creating function.zip...${NC}"
-npm run service:package
+npm run service:package > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Generating function.zip failed${NC}"
     exit 1

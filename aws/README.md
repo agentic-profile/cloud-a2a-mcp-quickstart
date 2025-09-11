@@ -51,12 +51,6 @@ The deployment scripts support environment variables through `.env` files for ea
 
 2. Edit the `.env` file with your specific values:
    ```bash
-   # Required: Environment name (e.g., dev, staging, prod)
-   ENVIRONMENT=staging
-   
-   # Required: Project name (defaults to 'demo' if not set)
-   PROJECT=demo
-   
    # Optional: AWS Region (defaults to us-east-1 if not set)
    AWS_REGION=us-west-2
    
@@ -67,7 +61,6 @@ The deployment scripts support environment variables through `.env` files for ea
    # The actual domain will be automatically prefixed based on environment and project:
    # - staging: {PROJECT}-staging.{DOMAIN_NAME}
    # - prod: {PROJECT}.{DOMAIN_NAME}
-   # - other: {DOMAIN_NAME} (defaults to demo.agenticprofile.ai)
    DOMAIN_NAME=agenticprofile.ai
    ```
 
