@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Card, CardBody, EditableValueList, Page, TabbedEditableLists } from '@/components';
+import { EditableValueList, Page, TabbedEditableLists } from '@/components';
 import agentsData from '../agents.json';
 //import { buildEndpoint } from '@/tools/misc';
 //import { useSettingsStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
-import { CardTitleAndBody } from '@/components/Card';
+import { CardTitleAndBody, Card, CardHeader, CardBody } from '@/components/Card';
+import ShareVentureJson from './ShareVentureJson';
+import ImportVentureJson from './ImportVentureJson';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
+import { MarkdownGenerator } from './MarkdownGenerator';
 
 interface TabValues {
     id: string;
@@ -29,22 +32,24 @@ const VenturePage = () => {
     const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
     //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
 
+    // Create empty positioning data
+    const emptyPositioning = () => POSITIONING_TABS.map(tab => ({
+        id: tab.id,
+        values: [],
+        selected: -1
+    }));
+
     const [problem, setProblem] = useState<string[]>([]);
     const [marketOpportunity, setMarketOpportunity] = useState<(string | number)[][]>([]);
     const [solution, setSolution] = useState<string[]>([]);
     const [milestones, setMilestones] = useState<(string | number)[][]>([]);
     const [team, setTeam] = useState<(string | number)[][]>([]);
     const [references, setReferences] = useState<(string | number)[][]>([]);
-
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [showMarkdown, setShowMarkdown] = useState(false);
 
     // State to hold the values for each tab
-    const [values, setValues] = useState<TabValues[]>(
-        POSITIONING_TABS.map(tab => ({
-            id: tab.id,
-            values: [],
-            selected: -1
-        }))
-    );
+    const [values, setValues] = useState<TabValues[]>(emptyPositioning());
 
     // Handle updates to tab values
     const handleUpdate = (tabId: string, values: string[], selected: number) => {
@@ -53,6 +58,52 @@ const VenturePage = () => {
                 ? { ...tab, values, selected }
                 : tab
         ));
+    };
+
+    // Handle importing venture data from JSON
+    const handleImportData = (importedData: any) => {
+        // Import basic arrays
+        if (importedData.problem) setProblem(importedData.problem);
+        if (importedData.solution) setSolution(importedData.solution);
+        if (importedData.marketOpportunity) setMarketOpportunity(importedData.marketOpportunity);
+        if (importedData.milestones) setMilestones(importedData.milestones);
+        if (importedData.team) setTeam(importedData.team);
+        if (importedData.references) setReferences(importedData.references);
+
+        // Import positioning data
+        if (importedData.positioning && Array.isArray(importedData.positioning)) {
+            setValues(importedData.positioning);
+        }
+
+        // Close the import modal
+        setShowImportModal(false);
+    };
+
+    // Handle clearing all venture data
+    const handleClearData = () => {
+        // Clear all arrays
+        setProblem([]);
+        setSolution([]);
+        setMarketOpportunity([]);
+        setMilestones([]);
+        setTeam([]);
+        setReferences([]);
+        
+        // Reset positioning data to empty state
+        setValues(emptyPositioning());
+    };
+
+    // Generate Markdown summary using the MarkdownGenerator
+    const generateMarkdownSummary = () => {
+        return MarkdownGenerator.generateMarkdownSummary({
+            problem,
+            solution,
+            team,
+            positioning: values,
+            marketOpportunity,
+            milestones,
+            references
+        });
     };
 
     return (
@@ -174,7 +225,96 @@ const VenturePage = () => {
                         onUpdate={(values) => setReferences(values)}
                     />
                 </CardTitleAndBody>
+
+                <CardTitleAndBody title="Import/Export your Venture">
+                    <p className="mb-4">
+                        Import existing venture data from a JSON file, export your current data, or clear all data to start fresh.
+                    </p>
+                    <div className="space-y-4">
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                            >
+                                Import Venture JSON
+                            </button>
+                            <button
+                                onClick={() => setShowMarkdown(true)}
+                                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                            >
+                                Show Markdown
+                            </button>
+                            <button
+                                onClick={handleClearData}
+                                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                            >
+                                Clear All Data
+                            </button>
+                        </div>
+                        <ShareVentureJson
+                            values={{
+                                problem,
+                                solution,
+                                team,
+                                positioning: values,
+                                marketOpportunity,
+                                milestones,
+                                references
+                            }}
+                        />
+                    </div>
+                </CardTitleAndBody>
+
+                {showMarkdown && (
+                    <Card>
+                        <CardHeader onClose={() => setShowMarkdown(false)}>
+                            <h3>Markdown Summary</h3>
+                        </CardHeader>
+                        <CardBody>
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                Generated Markdown summary of your venture data
+                            </p>
+                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <pre className="whitespace-pre-wrap text-sm font-mono overflow-x-auto">
+                                    {generateMarkdownSummary()}
+                                </pre>
+                                <div className="mt-4 flex justify-end">
+                                    <button
+                                        onClick={() => navigator.clipboard.writeText(generateMarkdownSummary())}
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                                    >
+                                        Copy Markdown
+                                    </button>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+                )}
             </div>
+
+            {/* Import Modal */}
+            {showImportModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                    Import Venture Data
+                                </h2>
+                                <button
+                                    onClick={() => setShowImportModal(false)}
+                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <ImportVentureJson onImport={handleImportData} />
+                        </div>
+                    </div>
+                </div>
+            )}
         </Page>
     );
 };

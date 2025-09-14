@@ -1,6 +1,79 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components';
-import { PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+// Common number handlers for reuse across number and currency columns
+const renderNumberCell = (value: string | number, formatFunction?: (value: string | number) => string) => {
+    // Special handling for zero values
+    if (value === 0) {
+        const displayValue = formatFunction ? formatFunction(0) : "0";
+        return (
+            <span className="text-gray-900 text-right font-mono">
+                {displayValue}
+            </span>
+        );
+    }
+    
+    const numValue = typeof value === 'number' ? value : parseFloat(String(value));
+    const displayValue = isNaN(numValue) ? '' : (formatFunction ? formatFunction(numValue) : numValue.toLocaleString());
+    return (
+        <span className="text-gray-900 text-right font-mono">
+            {displayValue !== '' ? displayValue : <span className="text-gray-400 italic font-sans">Click to edit</span>}
+        </span>
+    );
+};
+
+const renderNumberEditCell = (
+    value: string | number, 
+    onChange: (value: string | number) => void, 
+    onExit: () => void, 
+    ref?: React.RefObject<HTMLInputElement | null>,
+    placeholder?: string
+) => (
+    <input
+        ref={ref}
+        type="number"
+        value={value === 0 ? "0" : String(value)}
+        onChange={(e) => {
+            const inputValue = e.target.value;
+            if (inputValue === '') {
+                onChange('');
+            } else if (inputValue === '0' || inputValue === '0.') {
+                onChange(0);
+            } else {
+                const numValue = parseFloat(inputValue);
+                if (!isNaN(numValue)) {
+                    onChange(numValue);
+                } else {
+                    // Keep the string value if it's not a valid number
+                    onChange(inputValue);
+                }
+            }
+        }}
+        onBlur={onExit}
+        onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') onExit();
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        placeholder={placeholder}
+        className="w-full border-none outline-none bg-transparent text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    />
+);
+
+const asNumberOrString = (value: string | number | undefined | null ): string | number => {
+    if (value === undefined || value === null) return '';
+    return value
+};
+
+const asString = (value: string | number | undefined | null ): string => {
+    if( typeof value === 'string')
+        return value;
+    else if( typeof value === 'number')
+        return String(value);
+    else
+    return '';
+};
 
 export interface EditableTableProps {
     placeholders?: string[];
@@ -103,15 +176,15 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                 >
                                     {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
                                         column.renderEditCell(
-                                            rowArray[colIndex] || '', 
+                                            asNumberOrString(rowArray[colIndex]), 
                                             (newValue) => updateCellValue(rowIndex, colIndex, newValue),
                                             handleCellExit,
                                             inputRef
                                         )
                                     ) : (
                                         column.renderCell ? 
-                                            column.renderCell(rowArray[colIndex] || '') : 
-                                            String(rowArray[colIndex] || '')
+                                            column.renderCell(asNumberOrString(rowArray[colIndex])) : 
+                                            asString(rowArray[colIndex])
                                     )}
                                 </td>
                             ))}
@@ -119,22 +192,10 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                 {values.length > 1 && (
                                     <button
                                         onClick={() => deleteRow(rowIndex)}
-                                        className="opacity-30 group-hover:opacity-100 transition-opacity duration-200 p-1 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
                                         title="Delete row"
                                     >
-                                        <svg 
-                                            className="w-4 h-4" 
-                                            fill="none" 
-                                            stroke="currentColor" 
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path 
-                                                strokeLinecap="round" 
-                                                strokeLinejoin="round" 
-                                                strokeWidth={2} 
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                                            />
-                                        </svg>
+                                        <TrashIcon className="w-4 h-4" />
                                     </button>
                                 )}
                             </td>
@@ -196,38 +257,9 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
 export function EditableNumberColumn(header: string): EditableTableColumn {
     return {
         header,
-        renderCell: (value: string | number) => {
-            const numValue = typeof value === 'number' ? value : parseFloat(String(value));
-            const displayValue = isNaN(numValue) ? '' : numValue.toLocaleString();
-            return (
-                <span className="text-gray-900 text-right font-mono">
-                    {displayValue || <span className="text-gray-400 italic font-sans">Click to edit</span>}
-                </span>
-            );
-        },
-        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
-            <input
-                ref={ref}
-                type="number"
-                value={value}
-                onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === '') {
-                        onChange('');
-                    } else {
-                        const numValue = parseFloat(inputValue);
-                        onChange(isNaN(numValue) ? inputValue : numValue);
-                    }
-                }}
-                onBlur={onExit}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === 'Escape') onExit();
-                }}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                className="w-full border-none outline-none bg-transparent text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-        )
+        renderCell: (value: string | number) => renderNumberCell(value),
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => 
+            renderNumberEditCell(value, onChange, onExit, ref)
     };
 }
 
@@ -245,38 +277,9 @@ export function EditableCurrencyColumn(header: string, currency: string = 'USD')
 
     return {
         header,
-        renderCell: (value: string | number) => {
-            const displayValue = formatCurrency(value);
-            return (
-                <span className="text-gray-900 text-right font-mono">
-                    {displayValue || <span className="text-gray-400 italic font-sans">Click to edit</span>}
-                </span>
-            );
-        },
-        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
-            <input
-                ref={ref}
-                type="number"
-                value={value}
-                onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === '') {
-                        onChange('');
-                    } else {
-                        const numValue = parseFloat(inputValue);
-                        onChange(isNaN(numValue) ? inputValue : numValue);
-                    }
-                }}
-                onBlur={onExit}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === 'Escape') onExit();
-                }}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                placeholder="$100,000"
-                className="w-full border-none outline-none bg-transparent text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-        )
+        renderCell: (value: string | number) => renderNumberCell(value, formatCurrency),
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => 
+            renderNumberEditCell(value, onChange, onExit, ref, "$100,000")
     };
 }
 
