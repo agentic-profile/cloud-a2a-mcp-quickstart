@@ -2,7 +2,7 @@ import { Button } from '@/components';
 import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface EditableValueListProps {
     placeholder?: string;
@@ -21,6 +21,8 @@ export const EditableValueList = ({
     selected = -1,
     onUpdate
 }: EditableValueListProps) => {
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
     // Add a blank value if the values array is empty and ensure there's always a selected row
     useEffect(() => {
         if (values.length === 0 && onUpdate) {
@@ -35,7 +37,16 @@ export const EditableValueList = ({
 
     const addValue = () => {
         const newValues = [...values, ''];
-        onUpdate?.(newValues, newValues.length - 1); // Select the newly added row
+        const newIndex = newValues.length - 1;
+        onUpdate?.(newValues, newIndex); // Select the newly added row
+        
+        // Focus the newly added input field after a short delay to ensure it's rendered
+        setTimeout(() => {
+            const inputElement = inputRefs.current[newIndex];
+            if (inputElement) {
+                inputElement.focus();
+            }
+        }, 0);
     };
 
     const deleteValue = (index: number) => {
@@ -91,6 +102,7 @@ export const EditableValueList = ({
                     </button>}
 
                     <input
+                        ref={(el) => { inputRefs.current[index] = el; }}
                         type="text"
                         value={value}
                         onChange={(e) => updateValue(index, e.target.value)}
@@ -119,7 +131,7 @@ export const EditableValueList = ({
                     variant="ghost"
                     size="sm"
                     onClick={addValue}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 focus:ring-0 focus:ring-offset-0"
                 >
                     <PlusIcon className="w-4 h-4" />
                     Add Value

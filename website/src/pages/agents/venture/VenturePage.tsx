@@ -25,7 +25,7 @@ const POSITIONING_TABS = [
 const VenturePage = () => {
     //const { serverUrl } = useSettingsStore();
     // Find the venture agent from the agents data
-    const ventureAgent = agentsData.find(agent => agent.id === 'venture');
+    const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
     //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
 
     const [problem, setProblem] = useState<string[]>([]);
@@ -53,39 +53,22 @@ const VenturePage = () => {
         ));
     };
 
-    if (!ventureAgent) {
-        return (
-            <Page
-                title="Venture Agent"
-                subtitle="Agent not found"
-                maxWidth="6xl"
-            >
-                <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Venture Agent data not found. Please check the agents configuration.
-                    </p>
-                </div>
-            </Page>
-        );
-    }
-
     return (
         <Page
             title={ventureAgent.name}
-            subtitle="This AI-powered agent will help you find investors, technology providers, and talent"
+            //subtitle="This AI-powered agent will help you find investors, technology providers, and talent"
             maxWidth="6xl"
         >
             <div className="space-y-4">
                 <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
                     <CardBody>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white text-center">
-                            Join the Northstar Program
-                        </h3>
-                        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                        <p className="text-lg text-gray-600 dark:text-gray-400 m-6">
                             Use this interactive tool to help summarize your business venture, generate an elevator
-                            pitch, and set milestones.  We will publish your profile with MCP so you can be found by 
+                            pitch, and set milestones.  This is not
+                            a full <a href="https://www.slideshare.net/slideshow/sequoia-capital-pitchdecktemplate/46231251" target="_blank">Sequoia ready pitch deck</a>,
+                            but it does make sure you have covered the basics.  We will publish this summary with MCP so you can be found by 
                             investors, technology providers, and talent.  It only takes a 
-                            few minutes to get started!
+                            few minutes to finish!
                         </p>
                     </CardBody>
                 </Card>
