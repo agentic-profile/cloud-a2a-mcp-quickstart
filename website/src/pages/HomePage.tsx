@@ -11,7 +11,7 @@ const HomePage = () => {
         {
             icon: ShieldCheckIcon,
             title: 'Trust and Accountability',
-            description: 'Every agent must be able to prove who it represents to any other agent in the Agentic Economy. ' +
+            description: 'Every agent must be able to prove who it represents to any other agent on the Agentic Web. ' +
             'With identity verification, agents can be held accountable for their actions and develop reputation.'
         },
         {
@@ -53,7 +53,7 @@ const HomePage = () => {
                                     <h1 className="text-4xl tracking-tight font-bold text-gray-900 dark:text-white sm:text-5xl md:text-6xl leading-tight">
                                         <span className="block xl:inline">Welcome to the </span>{' '}
                                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 xl:inline leading-tight">
-                                            Agentic Economy
+                                            Agentic Web
                                         </span>
                                     </h1>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
@@ -63,8 +63,8 @@ const HomePage = () => {
                                     </p>
                                     <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-auto">
                                         Quickstart examples support global creation and discovery of entities (e.g. people, businesses, 
-                                        governments), <a href="https://decentralizedauth.org" target="_blank" className="link-external">universal authentication</a> of
-                                        their AI agents, and secure transactions in the Agentic Economy.
+                                        governments), <a href="https://universalauth.org" target="_blank" className="link-external">universal authentication</a> of
+                                        their AI agents, and secure transactions on the Agentic Web.
                                     </p>
                                     <div className="mt-5 sm:mt-8 flex justify-center">
                                         <div className="mt-3 sm:mt-0">
@@ -89,7 +89,7 @@ const HomePage = () => {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="text-center">
                             <p className="mt-4 max-w-4xl text-xl text-gray-500 dark:text-gray-300 mx-auto">
-                                <b className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">The Agentic Economy will flourish</b> when an agent built in one orchestration framework can discover,
+                                <b className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">The Agentic Web will flourish</b> when an agent built in one orchestration framework can discover,
                                 authenticate, and transact with agents built in other frameworks and that represent other
                                 entities such as people, businesses, and governments.
                             </p>
