@@ -62,7 +62,6 @@ export const TabbedEditableLists = ({
             <div>
                 <EditableValueList
                     placeholder={placeholder ?? "Enter option..."}
-                    className="border-0 shadow-none bg-transparent"
                     values={tabValues}
                     selected={selected}
                     selectable={selectable}

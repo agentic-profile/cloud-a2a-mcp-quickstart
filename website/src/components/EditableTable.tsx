@@ -5,8 +5,8 @@ import { PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
 export interface EditableTableProps {
     placeholders?: string[];
     columns: EditableTableColumn[];
-    values?: string[][];
-    onUpdate?: (values: string[][]) => void;
+    values?: (string | number)[][];
+    onUpdate?: (values: (string | number)[][]) => void;
 }
 
 export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableProps) => {
@@ -27,7 +27,7 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
         }
     }, [editingCell]);
 
-    const updateCellValue = (rowIndex: number, colIndex: number, newValue: string) => {
+    const updateCellValue = (rowIndex: number, colIndex: number, newValue: string | number) => {
         if (onUpdate) {
             const newValues = [...values];
             // Ensure the row is an array
@@ -111,7 +111,7 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                                     ) : (
                                         column.renderCell ? 
                                             column.renderCell(rowArray[colIndex] || '') : 
-                                            (rowArray[colIndex] || '')
+                                            String(rowArray[colIndex] || '')
                                     )}
                                 </td>
                             ))}
@@ -160,10 +160,10 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
 
 interface EditableTableColumn {
     header: string;
-    renderCell?: (value: string) => React.ReactNode;
+    renderCell?: (value: string | number) => React.ReactNode;
     renderEditCell: (
-        value: string, 
-        onChange: (value: string) => void,
+        value: string | number, 
+        onChange: (value: string | number) => void,
         onExit: () => void,
         ref?: React.RefObject<HTMLInputElement | null>
     ) => React.ReactNode;
@@ -172,10 +172,10 @@ interface EditableTableColumn {
 export function EditableTextColumn(header: string, inputType: 'text' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local' = 'text'): EditableTableColumn {
     return {
         header,
-        renderCell: (value: string) => (
-            <span className="text-gray-900">{value || <span className="text-gray-400 italic">Click to edit</span>}</span>
+        renderCell: (value: string | number) => (
+            <span className="text-gray-900">{String(value) || <span className="text-gray-400 italic">Click to edit</span>}</span>
         ),
-        renderEditCell: (value: string, onChange: (value: string) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
             <input
                 ref={ref}
                 type={inputType}
@@ -196,8 +196,8 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
 export function EditableNumberColumn(header: string): EditableTableColumn {
     return {
         header,
-        renderCell: (value: string) => {
-            const numValue = parseFloat(value);
+        renderCell: (value: string | number) => {
+            const numValue = typeof value === 'number' ? value : parseFloat(String(value));
             const displayValue = isNaN(numValue) ? '' : numValue.toLocaleString();
             return (
                 <span className="text-gray-900 text-right font-mono">
@@ -205,12 +205,20 @@ export function EditableNumberColumn(header: string): EditableTableColumn {
                 </span>
             );
         },
-        renderEditCell: (value: string, onChange: (value: string) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
             <input
                 ref={ref}
                 type="number"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                        onChange('');
+                    } else {
+                        const numValue = parseFloat(inputValue);
+                        onChange(isNaN(numValue) ? inputValue : numValue);
+                    }
+                }}
                 onBlur={onExit}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Escape') onExit();
@@ -224,8 +232,8 @@ export function EditableNumberColumn(header: string): EditableTableColumn {
 }
 
 export function EditableCurrencyColumn(header: string, currency: string = 'USD'): EditableTableColumn {
-    const formatCurrency = (value: string) => {
-        const numValue = parseFloat(value);
+    const formatCurrency = (value: string | number) => {
+        const numValue = typeof value === 'number' ? value : parseFloat(String(value));
         if (isNaN(numValue)) return '';
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -237,7 +245,7 @@ export function EditableCurrencyColumn(header: string, currency: string = 'USD')
 
     return {
         header,
-        renderCell: (value: string) => {
+        renderCell: (value: string | number) => {
             const displayValue = formatCurrency(value);
             return (
                 <span className="text-gray-900 text-right font-mono">
@@ -245,19 +253,27 @@ export function EditableCurrencyColumn(header: string, currency: string = 'USD')
                 </span>
             );
         },
-        renderEditCell: (value: string, onChange: (value: string) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
             <input
                 ref={ref}
                 type="number"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                        onChange('');
+                    } else {
+                        const numValue = parseFloat(inputValue);
+                        onChange(isNaN(numValue) ? inputValue : numValue);
+                    }
+                }}
                 onBlur={onExit}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Escape') onExit();
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                placeholder="1000000"
+                placeholder="$100,000"
                 className="w-full border-none outline-none bg-transparent text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
         )
@@ -272,19 +288,20 @@ export interface SelectOption {
 export function EditableSelectColumn(header: string, options: SelectOption[]): EditableTableColumn {
     return {
         header,
-        renderCell: (value: string) => {
-            const selectedOption = options.find(option => option.key === value);
-            const displayValue = selectedOption ? selectedOption.label : value;
+        renderCell: (value: string | number) => {
+            const stringValue = String(value);
+            const selectedOption = options.find(option => option.key === stringValue);
+            const displayValue = selectedOption ? selectedOption.label : stringValue;
             return (
                 <span className="text-gray-900">
                     {displayValue || <span className="text-gray-400 italic">Click to edit</span>}
                 </span>
             );
         },
-        renderEditCell: (value: string, onChange: (value: string) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
             <select
-                ref={ref as React.RefObject<HTMLSelectElement>}
-                value={value}
+                ref={ref as unknown as React.RefObject<HTMLSelectElement>}
+                value={String(value)}
                 onChange={(e) => onChange(e.target.value)}
                 onBlur={onExit}
                 onKeyDown={(e) => {
@@ -330,8 +347,9 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
 
     return {
         header,
-        renderCell: (value: string) => {
-            if (!value.trim()) {
+        renderCell: (value: string | number) => {
+            const stringValue = String(value);
+            if (!stringValue.trim()) {
                 return (
                     <div className="flex items-center justify-between">
                         <span className="text-gray-400 italic">Click to edit</span>
@@ -340,13 +358,13 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                 );
             }
             
-            const isValid = isValidUrl(value);
-            const displayText = formatUrlForDisplay(value);
+            const isValid = isValidUrl(stringValue);
+            const displayText = formatUrlForDisplay(stringValue);
             
             return (
                 <div className="flex items-center justify-between">
                     <a
-                        href={isValid ? value : '#'}
+                        href={isValid ? stringValue : '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`text-blue-600 hover:text-blue-800 hover:underline flex-1 ${
@@ -357,7 +375,7 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                                 e.preventDefault();
                             }
                         }}
-                        title={value}
+                        title={stringValue}
                     >
                         {displayText}
                     </a>
@@ -365,15 +383,16 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                 </div>
             );
         },
-        renderEditCell: (value: string, onChange: (value: string) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => {
-            const isValid = isValidUrl(value);
+        renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => {
+            const stringValue = String(value);
+            const isValid = isValidUrl(stringValue);
             
             return (
                 <div className="w-full">
                     <input
                         ref={ref}
                         type="url"
-                        value={value}
+                        value={stringValue}
                         onChange={(e) => onChange(e.target.value)}
                         onBlur={onExit}
                         onKeyDown={(e) => {
@@ -383,10 +402,10 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                         onMouseDown={(e) => e.stopPropagation()}
                         placeholder="https://example.com"
                         className={`w-full border-none outline-none bg-transparent ${
-                            value.trim() && !isValid ? 'text-red-500' : ''
+                            stringValue.trim() && !isValid ? 'text-red-500' : ''
                         }`}
                     />
-                    {value.trim() && !isValid && (
+                    {stringValue.trim() && !isValid && (
                         <div className="text-xs text-red-500 mt-1">
                             Invalid URL format
                         </div>

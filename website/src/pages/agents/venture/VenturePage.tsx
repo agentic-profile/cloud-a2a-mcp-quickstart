@@ -16,6 +16,7 @@ interface TabValues {
 const POSITIONING_TABS = [
     { id: "forWho", title: "For who", placeholder: "Enter target market..." },
     { id: "whoNeed", title: "Who needs", placeholder: "Enter customer needs or problems..." },
+    { id: "name", title: "Company name", placeholder: "Company or project name..." },
     { id: "productCategory", title: "Product Category", placeholder: "Enter product category..." },
     { id: "keyBenefit", title: "Key Benefit", placeholder: "Enter key benefit..." },
     { id: "unlike", title: "Unlike", placeholder: "Name of closest competitor..." },
@@ -29,11 +30,11 @@ const VenturePage = () => {
     //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
 
     const [problem, setProblem] = useState<string[]>([]);
-    const [marketOpportunity, setMarketOpportunity] = useState<string[][]>([]);
+    const [marketOpportunity, setMarketOpportunity] = useState<(string | number)[][]>([]);
     const [solution, setSolution] = useState<string[]>([]);
-    const [milestones, setMilestones] = useState<string[][]>([]);
-    const [team, setTeam] = useState<string[][]>([]);
-    const [references, setReferences] = useState<string[][]>([]);
+    const [milestones, setMilestones] = useState<(string | number)[][]>([]);
+    const [team, setTeam] = useState<(string | number)[][]>([]);
+    const [references, setReferences] = useState<(string | number)[][]>([]);
 
 
     // State to hold the values for each tab

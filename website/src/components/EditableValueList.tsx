@@ -86,7 +86,7 @@ export const EditableValueList = ({
                         "flex items-center gap-3 p-3 transition-colors",
                         selectable && selected === index 
                             ? "bg-yellow-50 dark:bg-yellow-900/20" 
-                            : "bg-white dark:bg-gray-700"
+                            : "" //bg-white dark:bg-transparent"
                     )}
                 >
                     {selectable && <button
