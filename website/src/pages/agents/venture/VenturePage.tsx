@@ -5,7 +5,7 @@ import agentsData from '../agents.json';
 //import { useSettingsStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody } from '@/components/Card';
-import { EditableTable, EditableTextColumn, EditableCurrencyColumn } from '@/components/EditableTable';
+import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
 
 interface TabValues {
     id: string;
@@ -33,6 +33,7 @@ const VenturePage = () => {
     const [solution, setSolution] = useState<string[]>([]);
     const [milestones, setMilestones] = useState<string[][]>([]);
     const [team, setTeam] = useState<string[][]>([]);
+    const [references, setReferences] = useState<string[][]>([]);
 
 
     // State to hold the values for each tab
@@ -134,7 +135,7 @@ const VenturePage = () => {
                     <EditableTable
                         columns={[
                             EditableTextColumn("Milestone"),
-                            EditableTextColumn("Duration"),
+                            EditableNumberColumn("Duration in weeks"),
                             EditableCurrencyColumn("Funding Needed", "USD")
                         ]}
                         values={milestones}
@@ -143,15 +144,34 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 6: Team">
-                <EditableTable
-                    columns={[
-                        EditableTextColumn("Name"),
-                        EditableTextColumn("LinkedIn Profile"),
-                        EditableTextColumn("Full or part-time?")
-                    ]}
-                    values={team}
-                    onUpdate={(values) => setTeam(values)}
-                />
+                    <EditableTable
+                        columns={[
+                            EditableTextColumn("Name"),
+                            EditableUrlColumn("LinkedIn Profile"),
+                            EditableSelectColumn("Full or part-time?", [
+                                { key: "full", label: "Full-time" },
+                                { key: "part", label: "Part-time" },
+                                { key: "advisor", label: "Advisor" }
+                            ])
+                        ]}
+                        values={team}
+                        onUpdate={(values) => setTeam(values)}
+                    />
+                </CardTitleAndBody>
+
+                <CardTitleAndBody title="Bonus: References">
+                    <p className="mb-4">
+                        Provide links to any additional information to help understand your venture.  Examples include
+                        a link to your website, blog, full pitch deck, and video interviews of your team.
+                    </p>
+                    <EditableTable
+                        columns={[
+                            EditableUrlColumn("Link URL"),
+                            EditableTextColumn("Description")
+                        ]}
+                        values={references}
+                        onUpdate={(values) => setReferences(values)}
+                    />
                 </CardTitleAndBody>
             </div>
         </Page>
