@@ -80,7 +80,7 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                 <thead>
                     <tr>
                         {columns.map((column, index) => (
-                            <th key={index} className="border border-gray-300 px-4 py-2 bg-gray-100 text-left">
+                            <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 text-left">
                                 {column.header}
                             </th>
                         ))}
@@ -98,7 +98,7 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                             {columns.map((column, colIndex) => (
                                 <td 
                                     key={colIndex} 
-                                    className="border border-gray-300 px-4 py-2 cursor-pointer hover:bg-gray-50"
+                                    className="border border-gray-300 dark:border-gray-500 px-4 py-2 cursor-pointer hover:bg-gray-50"
                                     onClick={(e) => handleCellClick(rowIndex, colIndex, e)}
                                 >
                                     {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
