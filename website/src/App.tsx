@@ -31,8 +31,8 @@ function App() {
             
             if (hostname === 'localhost') {
                 setServerUrl('http://localhost:3000');
-            } else if (hostname === 'demo.agenticprofile.ai') {
-                setServerUrl('https://demo-api.agenticprofile.ai');
+            } else if (hostname === 'example.agenticprofile.ai') {
+                setServerUrl('https://example-api.agenticprofile.ai');
             }
         }
     }, [serverUrl, setServerUrl]);

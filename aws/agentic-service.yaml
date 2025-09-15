@@ -14,8 +14,8 @@ Parameters:
     AllowedValues: [staging, prod]
   Project:
     Type: String
-    Default: demo
-    Description: Project name (demo, venture, volunteer)
+    Default: example
+    Description: Project name (example, venture, volunteer)
   FunctionZipVersion:
     Type: String
     Description: S3 object version for the function zip file

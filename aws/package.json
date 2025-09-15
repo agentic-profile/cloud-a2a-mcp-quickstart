@@ -16,23 +16,23 @@
     "service:build": "cd ../service && npm run build",
     "service:package": "npm run service:build && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist www node_modules package.json",
     
-    "service:deploy": "./deploy-service.sh staging demo",
-    "service:status": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-demo-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "service:undeploy": "aws cloudformation delete-stack --stack-name agentic-service-a2a-mcp-demo-staging",
+    "service:deploy": "./deploy-service.sh staging example",
+    "service:status": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-example-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "service:undeploy": "aws cloudformation delete-stack --stack-name agentic-service-a2a-mcp-example-staging",
 
-    "service:deploy:prod": "./deploy-service.sh prod demo",
-    "service:status:prod": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-demo-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "service:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-service-a2a-mcp-demo-prod",
+    "service:deploy:prod": "./deploy-service.sh prod example",
+    "service:status:prod": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-example-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "service:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-service-a2a-mcp-example-prod",
 
     "website:build": "cd ../website && npm run build",
-    "website:deploy": "./deploy-website.sh staging demo",
-    "website:deploy:prod": "./deploy-website.sh prod demo",
+    "website:deploy": "./deploy-website.sh staging example",
+    "website:deploy:prod": "./deploy-website.sh prod example",
 
-    "website:status": "aws cloudformation describe-stacks --stack-name agentic-website-demo-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
-    "website:status:prod": "aws cloudformation describe-stacks --stack-name agentic-website-demo-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "website:status": "aws cloudformation describe-stacks --stack-name agentic-website-example-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
+    "website:status:prod": "aws cloudformation describe-stacks --stack-name agentic-website-example-prod --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",
 
-    "website:undeploy": "aws cloudformation delete-stack --stack-name agentic-website-demo-staging",
-    "website:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-website-demo-prod",
+    "website:undeploy": "aws cloudformation delete-stack --stack-name agentic-website-example-staging",
+    "website:undeploy:prod": "aws cloudformation delete-stack --stack-name agentic-website-example-prod",
    
     "test:redis": "node scripts/test-redis-connection.js",
     "test:local-redis": "npm run build && node scripts/test-local-redis.js"

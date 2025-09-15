@@ -28,7 +28,7 @@ cd aws
 npm run foundation:up
 ```
 
-2. Start the A2A and MCP service, and the demo website service
+2. Start the A2A and MCP service, and the example-staging website service
 
 ```bash
 cd aws

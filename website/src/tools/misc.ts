@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const DEFAULT_SERVER_URLS = [
-    'https://demo-api.agenticprofile.ai',
+    'https://example-api.agenticprofile.ai',
     'http://localhost:3000'
 ];
 
