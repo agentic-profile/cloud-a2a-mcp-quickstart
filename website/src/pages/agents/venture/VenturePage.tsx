@@ -38,7 +38,7 @@ const VenturePage = () => {
         setTeam,
         setReferences,
         importVentureData,
-        clearAllData,
+        clearVentureData,
         prunedVentureData
     } = useVentureStore();
     
@@ -87,7 +87,7 @@ const VenturePage = () => {
 
     // Handle clearing all venture data
     const handleClearData = () => {
-        clearAllData();
+        clearVentureData();
     };
 
     // Generate Markdown summary using the MarkdownGenerator
