@@ -5,4 +5,5 @@ export interface Agent {
     avatar: string;
     route: string;
     agentUrl: string;
+    mcpUrl?: string;
 }

@@ -1,14 +1,6 @@
 import type { TabValues } from '@/components/TabbedEditableLists';
+import type { VentureData } from '@/stores/ventureStore';
 
-export interface VentureData {
-    problem: string[];
-    solution: string[];
-    team: (string | number)[][];
-    positioning: TabValues[];
-    marketOpportunity: (string | number)[][];
-    milestones: (string | number)[][];
-    references: (string | number)[][];
-}
 
 export class MarkdownGenerator {
     /**
@@ -37,7 +29,7 @@ export class MarkdownGenerator {
         markdown += `${positioningStatement}\n\n`;
 
         // Problem
-        if (problem.length > 0) {
+        if ( problem && problem.length > 0) {
             markdown += `## Problem\n\n`;
             problem.forEach(item => {
                 markdown += `- ${item}\n`;
@@ -46,7 +38,7 @@ export class MarkdownGenerator {
         }
 
         // Market Opportunity
-        if (marketOpportunity.length > 0) {
+        if (marketOpportunity && marketOpportunity.length > 0) {
             markdown += `## Market Opportunity\n\n`;
             marketOpportunity.forEach(([segment, size]) => {
                 segment = segment?.toString().trim();
@@ -58,7 +50,7 @@ export class MarkdownGenerator {
         }
 
         // Solution
-        if (solution.length > 0) {
+        if (solution && solution.length > 0) {
             markdown += `## Solution\n\n`;
             solution.forEach(item => {
                 markdown += `- ${item}\n`;
@@ -67,7 +59,7 @@ export class MarkdownGenerator {
         }
 
         // Milestones
-        if (milestones.length > 0) {
+        if (milestones && milestones.length > 0) {
             markdown += `## Milestones\n\n`;
             markdown += `| Milestone | Duration | Funding Needed |\n`;
             markdown += `|-----------|----------|----------------|\n`;
@@ -80,7 +72,7 @@ export class MarkdownGenerator {
         }
 
         // Team
-        if (team.length > 0) {
+        if (team && team.length > 0) {
             markdown += `## Team\n\n`;
             markdown += `| Name | LinkedIn | Role |\n`;
             markdown += `|------|----------|------|\n`;
@@ -94,7 +86,7 @@ export class MarkdownGenerator {
         }
 
         // References
-        if (references.length > 0) {
+        if (references && references.length > 0) {
             markdown += `## References\n\n`;
             references.forEach(([url, description]) => {
                 if (url && url.toString().trim()) {
@@ -110,7 +102,9 @@ export class MarkdownGenerator {
     /**
      * Extract positioning values from tab values array
      */
-    private static extractPositioningValues(positioning: TabValues[]): Record<string, string> {
+    private static extractPositioningValues(positioning: TabValues[] | undefined): Record<string, string> {
+        if (!positioning)
+            return {};
         return positioning.reduce((acc, tab) => {
             acc[tab.id] = tab.values[tab.selected];
             return acc;

@@ -5,7 +5,8 @@
         "description": "Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, new hires, and technology partners.",
         "avatar": "VA",
         "route": "/agents/venture",
-        "agentUrl": "/a2a/venture"
+        "agentUrl": "/a2a/venture",
+        "mcpUrl": "/mcp/venture"
     },
     {
         "id": "_capital",

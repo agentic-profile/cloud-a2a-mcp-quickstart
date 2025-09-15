@@ -34,7 +34,9 @@ export const TabbedEditableLists = ({
     }
 
     const { id, placeholder } = tabs[activeTabIndex];
-    const { values: tabValues, selected }= values[activeTabIndex];
+    // Find the tab values by ID instead of by index to handle imported data correctly
+    const currentTabValues = values.find(tab => tab.id === id);
+    const { values: tabValues = [], selected = -1 } = currentTabValues || {};
 
     return (
         <div className={className}>

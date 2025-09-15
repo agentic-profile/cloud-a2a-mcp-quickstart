@@ -1,20 +1,15 @@
-import { useState } from 'react';
-import { EditableValueList, Page, TabbedEditableLists } from '@/components';
+import { useState, useCallback } from 'react';
+import { EditableValueList, Page, TabbedEditableLists, Button } from '@/components';
 import agentsData from '../agents.json';
-//import { buildEndpoint } from '@/tools/misc';
-//import { useSettingsStore } from '@/stores';
+import { useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody, Card, CardHeader, CardBody } from '@/components/Card';
 import ShareVentureJson from './ShareVentureJson';
 import ImportVentureJson from './ImportVentureJson';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
 import { MarkdownGenerator } from './MarkdownGenerator';
+import PublishVentureToMcp from './PublishVentureToMcp';
 
-interface TabValues {
-    id: string;
-    values: string[];
-    selected: number;
-}
 
 const POSITIONING_TABS = [
     { id: "forWho", title: "For who", placeholder: "Enter target market..." },
@@ -27,84 +22,79 @@ const POSITIONING_TABS = [
 ]
 
 const VenturePage = () => {
-    //const { serverUrl } = useSettingsStore();
+    const {
+        positioning,
+        problem,
+        solution,
+        marketOpportunity,
+        milestones,
+        team,
+        references,
+        updatePositioningTab,
+        setProblem,
+        setSolution,
+        setMarketOpportunity,
+        setMilestones,
+        setTeam,
+        setReferences,
+        importVentureData,
+        clearAllData,
+        prunedVentureData
+    } = useVentureStore();
+    
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
-    //const rpcUrl = serverUrl && ventureAgent ? buildEndpoint(serverUrl, ventureAgent?.agentUrl ) : null;
-
-    // Create empty positioning data
-    const emptyPositioning = () => POSITIONING_TABS.map(tab => ({
-        id: tab.id,
-        values: [],
-        selected: -1
-    }));
-
-    const [problem, setProblem] = useState<string[]>([]);
-    const [marketOpportunity, setMarketOpportunity] = useState<(string | number)[][]>([]);
-    const [solution, setSolution] = useState<string[]>([]);
-    const [milestones, setMilestones] = useState<(string | number)[][]>([]);
-    const [team, setTeam] = useState<(string | number)[][]>([]);
-    const [references, setReferences] = useState<(string | number)[][]>([]);
+    
     const [showImportModal, setShowImportModal] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(false);
 
-    // State to hold the values for each tab
-    const [values, setValues] = useState<TabValues[]>(emptyPositioning());
+    // Memoized callback functions to prevent infinite loops
+    const handleProblemUpdate = useCallback((values: string[]) => {
+        setProblem(values);
+    }, [setProblem]);
+
+    const handleSolutionUpdate = useCallback((values: string[]) => {
+        setSolution(values);
+    }, [setSolution]);
+
+    const handleMarketOpportunityUpdate = useCallback((values: (string | number)[][]) => {
+        setMarketOpportunity(values);
+    }, [setMarketOpportunity]);
+
+    const handleMilestonesUpdate = useCallback((values: (string | number)[][]) => {
+        setMilestones(values);
+    }, [setMilestones]);
+
+    const handleTeamUpdate = useCallback((values: (string | number)[][]) => {
+        setTeam(values);
+    }, [setTeam]);
+
+    const handleReferencesUpdate = useCallback((values: (string | number)[][]) => {
+        setReferences(values);
+    }, [setReferences]);
 
     // Handle updates to tab values
-    const handleUpdate = (tabId: string, values: string[], selected: number) => {
-        setValues(prev => prev.map(tab => 
-            tab.id === tabId 
-                ? { ...tab, values, selected }
-                : tab
-        ));
-    };
+    const handleUpdate = useCallback((tabId: string, values: string[], selected: number) => {
+        updatePositioningTab(tabId, values, selected);
+    }, [updatePositioningTab]);
 
     // Handle importing venture data from JSON
     const handleImportData = (importedData: any) => {
-        // Import basic arrays
-        if (importedData.problem) setProblem(importedData.problem);
-        if (importedData.solution) setSolution(importedData.solution);
-        if (importedData.marketOpportunity) setMarketOpportunity(importedData.marketOpportunity);
-        if (importedData.milestones) setMilestones(importedData.milestones);
-        if (importedData.team) setTeam(importedData.team);
-        if (importedData.references) setReferences(importedData.references);
-
-        // Import positioning data
-        if (importedData.positioning && Array.isArray(importedData.positioning)) {
-            setValues(importedData.positioning);
-        }
-
+        importVentureData(importedData);
         // Close the import modal
         setShowImportModal(false);
     };
 
     // Handle clearing all venture data
     const handleClearData = () => {
-        // Clear all arrays
-        setProblem([]);
-        setSolution([]);
-        setMarketOpportunity([]);
-        setMilestones([]);
-        setTeam([]);
-        setReferences([]);
-        
-        // Reset positioning data to empty state
-        setValues(emptyPositioning());
+        clearAllData();
     };
 
     // Generate Markdown summary using the MarkdownGenerator
     const generateMarkdownSummary = () => {
-        return MarkdownGenerator.generateMarkdownSummary({
-            problem,
-            solution,
-            team,
-            positioning: values,
-            marketOpportunity,
-            milestones,
-            references
-        });
+        return MarkdownGenerator.generateMarkdownSummary(prunedVentureData());
     };
+
 
     return (
         <Page
@@ -136,11 +126,11 @@ const VenturePage = () => {
                     </p>
                     <TabbedEditableLists 
                         tabs={POSITIONING_TABS}
-                        values={values}
+                        values={positioning}
                         selectable={true}
                         onUpdate={handleUpdate}
                     />
-                    <PositioningStatement tabValues={values} />
+                    <PositioningStatement tabValues={positioning} />
                 </CardTitleAndBody>
 
                 <CardTitleAndBody title="Step 2: Problem">
@@ -150,7 +140,7 @@ const VenturePage = () => {
                     <EditableValueList
                         placeholder="An aspect of your customers problem"
                         values={problem}
-                        onUpdate={(values) => setProblem(values)}
+                        onUpdate={handleProblemUpdate}
                     />
                 </CardTitleAndBody>
 
@@ -164,7 +154,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Size (TAM)", "USD")
                         ]}
                         values={marketOpportunity}
-                        onUpdate={(values) => setMarketOpportunity(values)}
+                        onUpdate={handleMarketOpportunityUpdate}
                     />
                 </CardTitleAndBody>
 
@@ -175,7 +165,7 @@ const VenturePage = () => {
                     <EditableValueList
                         placeholder="The solution to the problem"
                         values={solution}
-                        onUpdate={(values) => setSolution(values)}
+                        onUpdate={handleSolutionUpdate}
                     />
                 </CardTitleAndBody>
 
@@ -191,7 +181,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Funding Needed", "USD")
                         ]}
                         values={milestones}
-                        onUpdate={(values) => setMilestones(values)}
+                        onUpdate={handleMilestonesUpdate}
                     />
                 </CardTitleAndBody>
 
@@ -207,7 +197,7 @@ const VenturePage = () => {
                             ])
                         ]}
                         values={team}
-                        onUpdate={(values) => setTeam(values)}
+                        onUpdate={handleTeamUpdate}
                     />
                 </CardTitleAndBody>
 
@@ -222,45 +212,36 @@ const VenturePage = () => {
                             EditableTextColumn("Description")
                         ]}
                         values={references}
-                        onUpdate={(values) => setReferences(values)}
+                        onUpdate={handleReferencesUpdate}
                     />
                 </CardTitleAndBody>
 
-                <CardTitleAndBody title="Import/Export your Venture">
-                    <p className="mb-4">
-                        Import existing venture data from a JSON file, export your current data, or clear all data to start fresh.
-                    </p>
+                <PublishVentureToMcp />
+
+                <CardTitleAndBody title="Advanced Features">
                     <div className="space-y-4">
                         <div className="flex gap-3">
-                            <button
+                            <Button
                                 onClick={() => setShowImportModal(true)}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                                variant="primary"
                             >
                                 Import Venture JSON
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={() => setShowMarkdown(true)}
-                                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                                variant="success"
                             >
                                 Show Markdown
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleClearData}
-                                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                                variant="danger"
                             >
                                 Clear All Data
-                            </button>
+                            </Button>
                         </div>
                         <ShareVentureJson
-                            values={{
-                                problem,
-                                solution,
-                                team,
-                                positioning: values,
-                                marketOpportunity,
-                                milestones,
-                                references
-                            }}
+                            values={prunedVentureData()}
                         />
                     </div>
                 </CardTitleAndBody>
@@ -279,12 +260,13 @@ const VenturePage = () => {
                                     {generateMarkdownSummary()}
                                 </pre>
                                 <div className="mt-4 flex justify-end">
-                                    <button
+                                    <Button
                                         onClick={() => navigator.clipboard.writeText(generateMarkdownSummary())}
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                                        variant="primary"
+                                        size="sm"
                                     >
                                         Copy Markdown
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </CardBody>
@@ -301,14 +283,15 @@ const VenturePage = () => {
                                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                                     Import Venture Data
                                 </h2>
-                                <button
+                                <Button
                                     onClick={() => setShowImportModal(false)}
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    variant="ghost"
+                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                </button>
+                                </Button>
                             </div>
                             <ImportVentureJson onImport={handleImportData} />
                         </div>

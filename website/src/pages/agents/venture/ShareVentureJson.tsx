@@ -1,9 +1,14 @@
+import { Button } from '@/components';
+
 interface ShareVentureJsonProps {
     values: Record<string, any>;
 }
 
 function resolveName(positioning: Record<string, any> | undefined) {
-    const { selected, values } = positioning?.find((p: { id: string; values: string[] }) => p.id === 'name');
+    const nameTab = positioning?.find((p: { id: string; values: string[] }) => p.id === 'name');
+    if (!nameTab) return 'Your Venture';
+    
+    const { selected, values } = nameTab;
     return values?.[selected ?? 0] ?? 'Your Venture';
 }
 
@@ -64,18 +69,18 @@ const ShareVentureJson = ({ values }: ShareVentureJsonProps) => {
 
     return (
         <div className="flex gap-3">
-            <button
+            <Button
                 onClick={handleShareJson}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                variant="primary"
             >
                 View JSON
-            </button>
-            <button
+            </Button>
+            <Button
                 onClick={handleDownloadJson}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                variant="success"
             >
                 Download JSON
-            </button>
+            </Button>
         </div>
     );
 };

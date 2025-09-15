@@ -5,8 +5,8 @@ export const DEFAULT_SERVER_URLS = [
     'http://localhost:3000'
 ];
 
-export function buildEndpoint(serverUrl: string | undefined, path: string) {
-    if( !serverUrl )
+export function buildEndpoint(serverUrl: string | undefined, path: string | undefined ) {
+    if( !serverUrl || !path)
         return undefined;
     else if( !serverUrl.endsWith('/') )
         serverUrl += '/';

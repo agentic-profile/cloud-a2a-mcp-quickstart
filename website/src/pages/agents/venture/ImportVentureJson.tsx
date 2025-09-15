@@ -33,16 +33,20 @@ const ImportVentureJson = ({ onImport }: ImportVentureJsonProps) => {
         reader.onload = (e) => {
             try {
                 const content = e.target?.result as string;
+                console.log('Raw JSON content:', content);
                 const data: VentureData = JSON.parse(content);
+                console.log('Parsed JSON data:', data);
                 
                 // Validate that the JSON contains expected venture data structure
                 if (!data || typeof data !== 'object') {
                     throw new Error('Invalid JSON structure');
                 }
 
+                console.log('About to import data:', data);
                 onImport(data);
                 setIsImporting(false);
             } catch (err) {
+                console.error('JSON parsing error:', err);
                 setError('Failed to parse JSON file. Please ensure it contains valid venture data.');
                 setIsImporting(false);
             }
