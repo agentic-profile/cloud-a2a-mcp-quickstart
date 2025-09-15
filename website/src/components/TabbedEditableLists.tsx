@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EditableValueList } from '@/components';
 import clsx from 'clsx';
 
@@ -36,7 +36,15 @@ export const TabbedEditableLists = ({
     const { id, placeholder } = tabs[activeTabIndex];
     // Find the tab values by ID instead of by index to handle imported data correctly
     const currentTabValues = values.find(tab => tab.id === id);
-    const { values: tabValues = [], selected = -1 } = currentTabValues || {};
+    const tabValues = currentTabValues?.values || [];
+    const selected = currentTabValues?.selected ?? -1;
+    
+    // Auto-initialize empty tabs
+    useEffect(() => {
+        if (currentTabValues && currentTabValues.values.length === 0 && onUpdate) {
+            onUpdate(id, [''], 0);
+        }
+    }, [id, currentTabValues, onUpdate]);
 
     return (
         <div className={className}>
@@ -64,8 +72,8 @@ export const TabbedEditableLists = ({
             <div>
                 <EditableValueList
                     placeholder={placeholder ?? "Enter option..."}
-                    values={tabValues}
-                    selected={selected}
+                    values={tabValues.length === 0 ? [''] : tabValues}
+                    selected={tabValues.length === 0 ? 0 : selected}
                     selectable={selectable}
                     onUpdate={(values, selected) => onUpdate?.(id, values, selected)}
                 />

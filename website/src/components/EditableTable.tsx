@@ -209,7 +209,8 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                     variant="ghost"
                     size="sm"
                     onClick={addRow}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:ring-transparent"
+                    style={{ outline: 'none' }}
                 >
                     <PlusIcon className="w-4 h-4" />
                     Add Row

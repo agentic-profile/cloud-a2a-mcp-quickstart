@@ -48,9 +48,10 @@ export interface VentureState {
     
     // Bulk actions
     importVentureData: (data: Partial<VentureState>) => void;
-    clearAllData: () => void;
+    clearVentureData: () => void;
     
     // Utility actions
+    allVentureData: () => VentureData;
     prunedVentureData: () => VentureData;
 }
 
@@ -89,13 +90,30 @@ export const useVentureStore = create<VentureState>()(
             setPositioning: (positioning) => set({ positioning }),
             
             updatePositioningTab: (tabId, values, selected) => 
-                set((state) => ({
-                    positioning: state.positioning.map(tab => 
-                        tab.id === tabId 
-                            ? { ...tab, values, selected }
-                            : tab
-                    )
-                })),
+                set((state) => {
+                    const existingTabIndex = state.positioning.findIndex(tab => tab.id === tabId);
+                    
+                    if (existingTabIndex !== -1) {
+                        // Update existing tab
+                        return {
+                            positioning: state.positioning.map(tab => 
+                                tab.id === tabId 
+                                    ? { ...tab, values, selected }
+                                    : tab
+                            )
+                        };
+                    } else {
+                        // Create new tab if not found
+                        const newTab: TabValues = {
+                            id: tabId,
+                            values,
+                            selected
+                        };
+                        return {
+                            positioning: [...state.positioning, newTab]
+                        };
+                    }
+                }),
             
             resetPositioning: () => set({ positioning: createEmptyPositioning() }),
             
@@ -127,7 +145,7 @@ export const useVentureStore = create<VentureState>()(
                 }));
             },
             
-            clearAllData: () => set({
+            clearVentureData: () => set({
                 positioning: createEmptyPositioning(),
                 problem: [],
                 solution: [],
@@ -136,6 +154,19 @@ export const useVentureStore = create<VentureState>()(
                 team: [],
                 references: [],
             }),
+
+            allVentureData: () => {
+                const state = get();
+                return {
+                    positioning: state.positioning,
+                    problem: state.problem,
+                    solution: state.solution,
+                    marketOpportunity: state.marketOpportunity,
+                    milestones: state.milestones,
+                    team: state.team,
+                    references: state.references,
+                };
+            },
             
             // Utility action to get all venture data in the format expected by the page
             prunedVentureData: () => {

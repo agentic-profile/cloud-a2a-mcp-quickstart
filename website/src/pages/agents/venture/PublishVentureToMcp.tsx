@@ -4,10 +4,10 @@ import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useVentureStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
 import agentsData from '../agents.json';
-
+import { MarkdownGenerator } from './MarkdownGenerator';
 
 const PublishVentureToMcp = () => {
-    const { getVentureData } = useVentureStore();
+    const { prunedVentureData } = useVentureStore();
     const { serverUrl } = useSettingsStore();
     
     // Find the venture agent from the agents data
@@ -36,14 +36,16 @@ const PublishVentureToMcp = () => {
         }
 
         // Create the venture data payload
-        const ventureData = getVentureData();
+        const ventureData = prunedVentureData();
+        const markdown = MarkdownGenerator.generateMarkdownSummary(ventureData);
 
         // Create the JSON-RPC request
         const jsonRpcRequest = {
             method: 'tools/call',
             params: {
                 name: 'update',
-                profile: ventureData
+                profile: ventureData,
+                markdown
             }
         };
 

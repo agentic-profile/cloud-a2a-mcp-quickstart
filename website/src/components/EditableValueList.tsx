@@ -2,7 +2,7 @@ import { Button } from '@/components';
 import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { useEffect, useRef, useCallback } from 'react';
+import { useRef } from 'react';
 
 interface EditableValueListProps {
     placeholder?: string;
@@ -23,27 +23,10 @@ export const EditableValueList = ({
 }: EditableValueListProps) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // Memoize the onUpdate callback to prevent infinite loops
-    const memoizedOnUpdate = useCallback((newValues: string[], newSelected: number) => {
-        onUpdate?.(newValues, newSelected);
-    }, [onUpdate]);
-
-    // Add a blank value if the values array is empty and ensure there's always a selected row
-    useEffect(() => {
-        if (values.length === 0 && onUpdate) {
-            onUpdate([''], 0); // Set first row as selected
-        } else if (values.length > 0 && selected === -1 && onUpdate) {
-            onUpdate(values, 0); // Select first row if none selected
-        }
-    }, [values.length, selected]); // Remove onUpdate from dependencies to prevent infinite loop
-
-    // Ensure we always have at least one empty value to show
-    const displayValues = values.length === 0 ? [''] : values;
-
     const addValue = () => {
         const newValues = [...values, ''];
         const newIndex = newValues.length - 1;
-        memoizedOnUpdate(newValues, newIndex); // Select the newly added row
+        onUpdate?.(newValues, newIndex); // Select the newly added row
         
         // Focus the newly added input field after a short delay to ensure it's rendered
         setTimeout(() => {
@@ -68,23 +51,23 @@ export const EditableValueList = ({
             // If deleting a row before the selected one, adjust the index
             newSelected = selected - 1;
         }
-        memoizedOnUpdate(newValues, newSelected);
+        onUpdate?.(newValues, newSelected);
     };
 
     const updateValue = (index: number, text: string) => {
         const newValues = values.map((value, i) => 
             i === index ? text : value
         );
-        memoizedOnUpdate(newValues, selected);
+        onUpdate?.(newValues, selected);
     };
 
     const setSelectedValue = (index: number) => {
-        memoizedOnUpdate(values, index);
+        onUpdate?.(values, index);
     };
 
     return (
         <div className={className}>
-            {displayValues?.map((value, index) => (
+            {values?.map((value, index) => (
                 <div
                     key={index}
                     className={clsx(
@@ -136,7 +119,8 @@ export const EditableValueList = ({
                     variant="ghost"
                     size="sm"
                     onClick={addValue}
-                    className="flex items-center gap-2 focus:ring-0 focus:ring-offset-0"
+                    className="flex items-center gap-2 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:ring-transparent"
+                    style={{ outline: 'none' }}
                 >
                     <PlusIcon className="w-4 h-4" />
                     Add Value
