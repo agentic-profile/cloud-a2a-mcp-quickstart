@@ -34,3 +34,4 @@ export { EditableUrl } from './EditableUrl';
 export { default as JsonEditor } from './JsonEditor';
 export { EditableValueList } from './EditableValueList';
 export { TabbedEditableLists } from './TabbedEditableLists';
+export { default as ImportIdentity } from './ImportIdentity';

@@ -83,7 +83,7 @@ const PublishVentureToMcp = () => {
 
     return (
         <>
-            <CardTitleAndBody title="Publish Venture">
+            <CardTitleAndBody title="Publish Venture to MCP">
                 <div className="space-y-4">
                     <EditableUrl
                         label="MCP URL"

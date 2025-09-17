@@ -9,6 +9,7 @@ import ImportVentureJson from './ImportVentureJson';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
 import { MarkdownGenerator } from './MarkdownGenerator';
 import PublishVentureToMcp from './PublishVentureToMcp';
+import PublishVentureToIdentityHost from './PublishVentureToIdentityHost';
 
 
 const POSITIONING_TABS = [
@@ -217,6 +218,7 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <PublishVentureToMcp />
+                <PublishVentureToIdentityHost />
 
                 <CardTitleAndBody title="Advanced Features">
                     <div className="space-y-4">
