@@ -30,6 +30,8 @@ export { UserProfileDisplay } from './UserProfileDisplay';
 // Utility components
 export { LabelValue } from './LabelValue';
 export { LabelJson } from './LabelJson';
+export { RadioButton } from './RadioButton';
+export { RadioGroup } from './RadioGroup';
 export { EditableUrl } from './EditableUrl';
 export { default as JsonEditor } from './JsonEditor';
 export { EditableValueList } from './EditableValueList';

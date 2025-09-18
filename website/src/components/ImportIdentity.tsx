@@ -8,6 +8,7 @@ import { EditableUrl } from './EditableUrl';
 import { Button } from './Button';
 import { useImportIdentityStore, useUserProfileStore } from '../stores';
 import { LabelValue } from './LabelValue';
+import { Card, CardBody } from './Card';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
     'https://matchwise.ai/import',
@@ -110,6 +111,7 @@ export default function ImportIdentity() {
             const response = await fetch(url);
             if( response.ok ) {
                 const data = await response.json();
+                console.log('profile',data);
                 setUserProfile({profile: data, keyring: [exportKeyring]});
             }
         }
@@ -135,6 +137,14 @@ export default function ImportIdentity() {
             />
             <LabelValue label="DID" value={did} />
 
+            {did && (
+                <Card variant="success" className="mt-4">
+                    <CardBody>
+                        Your keys have been added to Matchwise. Click Complete Import to save.
+                    </CardBody>
+                </Card>
+            )}
+
             <div className="mt-4 flex justify-end gap-3">
                 <Button
                     onClick={startOver}
@@ -154,7 +164,7 @@ export default function ImportIdentity() {
                 <Button
                     onClick={saveIdentity}
                     disabled={!exportKeyring?.publicJwk || !did}
-                    variant="primary"
+                    variant="success"
                     size="md"
                 >
                     Complete Import

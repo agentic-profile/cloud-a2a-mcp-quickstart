@@ -105,6 +105,18 @@ h4 {
   @apply text-base font-medium mb-1 text-gray-800 dark:text-gray-200;
 }
 
+p.sm {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+p.md {
+  @apply text-base text-black dark:text-white;
+}
+
+p.lg {
+  @apply text-lg text-gray-600 dark:text-gray-400;
+}
+
 /* Global form label styles */
 .form-label {
   @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;

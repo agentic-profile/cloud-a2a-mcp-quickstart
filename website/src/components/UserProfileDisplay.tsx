@@ -1,90 +1,178 @@
-import { UserIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components';
+import { UserIcon } from '@heroicons/react/24/outline';
+import externalLinkIcon from "@iconify-icons/lucide/external-link";
+import { Button, Card, CardBody, CardHeader, LabelValue, RadioButton, RadioGroup } from '@/components';
 import { useUserProfileStore } from '@/stores';
 import { webDidToUrl } from "@agentic-profile/common";
+import { type AgentService } from '@agentic-profile/common/schema';
+import { type VerificationMethod } from 'did-resolver';
+import Icon from './Icon';
+import { useEffect } from 'react';
 
 export const UserProfileDisplay = () => {
-    const { userProfile, clearUserProfile } = useUserProfileStore();
+    const { userProfile, userAgentDid, verificationId, setUserAgentDid, clearUserProfile } = useUserProfileStore();
 
     if (!userProfile) {
         return null;
     }
 
     const { profile, keyring } = userProfile;
+    const did = profile.id;
 
     return (
         <div className="max-w-2xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <Card className="p-6">
                 <div className="text-center mb-6">
                     <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
                         <UserIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <p>
-                        Your agentic profile
-                    </p>
+                    <h2>Your Agentic Profile</h2>
                 </div>
 
                 <div className="space-y-4 mb-6">
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                        <h4>Basic Information</h4>
-                        <div className="space-y-2 text-sm">
-                            <div>
-                                <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>
-                                <span className="ml-2 text-gray-600 dark:text-gray-400">{profile.name || 'Not specified'}</span>
-                            </div>
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-start">
-                                    <span className="font-medium text-gray-700 dark:text-gray-300">DID:</span>
-                                    <span className="ml-2 text-gray-600 dark:text-gray-400 font-mono break-all">{userProfile.profile.id}</span>
-                                </div>
-                                <button
-                                    onClick={() => window.open(webDidToUrl(userProfile.profile.id), '_blank')}
-                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
-                                    title="Open DID in new tab"
+                    <Card variant="default" className="p-4">
+                        <CardHeader>
+                            <h3>Basic Information</h3>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="space-y-2 text-sm">
+                                <LabelValue 
+                                    label="Name" 
+                                    value={profile.name || 'Not specified'} 
+                                />
+                                <LabelValue 
+                                    label="DID" 
+                                    value={did}
+                                    className="font-mono break-all"
                                 >
-                                    <ArrowTopRightOnSquareIcon className="w-7 h-7" />
-                                </button>
+                                    <Icon
+                                        src={externalLinkIcon}
+                                        onClick={() => window.open(webDidToUrl(did), '_blank')}
+                                        className="inline-block ml-1"
+                                    />
+                                </LabelValue>
+                                <LabelValue
+                                    label="userAgentDid"
+                                    value={userAgentDid ?? 'none'}
+                                />
+                                <LabelValue
+                                    label="verificationId"
+                                    value={verificationId ?? 'none'}
+                                />
                             </div>
-                        </div>
-                    </div>
+                        </CardBody>
+                    </Card>
 
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                        <h4>Agents</h4>
-                        <div className="space-y-2">
-                            {profile.service?.map((service, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 rounded border">
-                                    <div className="flex-1">
-                                        <div className="font-medium text-gray-900 dark:text-white">{service.name}</div>
-                                        <div className="text-xs text-gray-600 dark:text-gray-400">{service.type} • {service.id}</div>
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400 font-mono max-w-xs truncate">
-                                        {service.url}
-                                    </div>
+                    <Card variant="default" className="p-4">
+                        <CardHeader>
+                            <h3>Agents</h3>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="space-y-2">
+                                {profile.service?.map((service, index) => (
+                                    <Card key={index} variant="default" className="p-2">
+                                        <div className="flex items-start gap-3">
+                                            <RadioButton
+                                                name="userAgentDid"
+                                                value={did + service.id}
+                                                checked={userAgentDid === (did + service.id)}
+                                                onChange={setUserAgentDid}
+                                                className="mt-1"
+                                            />
+                                            <div>
+                                                <div className="flex-1">
+                                                    <p className="md">{service.name}</p>
+                                                    <p className="sm">{service.type} • {service.id}</p>
+                                                </div>
+                                                <p className="sm">
+                                                    {String(service.serviceEndpoint)}
+                                                </p>
+                                                {userAgentDid === (did + service.id) && <SelectVerificationMethod methods={(service as AgentService).capabilityInvocation} />}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))} 
+                                <div className="flex ml-2 gap-3">
+                                    <RadioButton
+                                        name="userAgentDid"
+                                        value={did}
+                                        checked={userAgentDid === did}
+                                        onChange={setUserAgentDid}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <p>No agent assigned - entity authentication</p>
+                                        {userAgentDid === did && <SelectVerificationMethod methods={profile.verificationMethod} />}
+                                    </div> 
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+                            </div>
+                        </CardBody>
+                    </Card>
 
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                        <h4>JWK Keyring - Keep this secret!  Only for testing purposes</h4>
-                        <div className="bg-white dark:bg-gray-600 p-3 rounded border">
-                            <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
-                                {JSON.stringify(keyring, null, 2)}
-                            </pre>
-                        </div>
-                    </div>
+                    <Card variant="error" className="p-4">
+                        <CardHeader>
+                            <h3>JWK Keyring - Keep this secret!  Only for testing purposes</h3>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="bg-white dark:bg-gray-600 p-3 rounded border">
+                                <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
+                                    {JSON.stringify(keyring, null, 2)}
+                                </pre>
+                            </div>
+                        </CardBody>
+                    </Card>
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex justify-end">
                     <Button
                         onClick={clearUserProfile}
                         variant="secondary"
-                        className="flex-1"
                     >
                         Start Over with New Identity
                     </Button>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };
+
+interface SelectVerificationMethodProps {
+    methods: (string | VerificationMethod)[] | undefined;
+}
+
+function SelectVerificationMethod({ methods }: SelectVerificationMethodProps) {
+    const { verificationId, setVerificationId } = useUserProfileStore();
+
+    const options = methods?.map((e: any) => {
+        if (typeof e === 'string') {
+            return { id: e, label: e };
+        } else {
+            const vm = e as VerificationMethod;
+            return { id: vm.id, label: vm.id };
+        }
+    }) ?? [];
+
+    useEffect(() => {
+        // Get all available verification IDs
+        const availableIds = options.map((option) => option.id);
+
+        // Check if verificationId is not set or not in the available IDs
+        if (!verificationId || !availableIds.includes(verificationId)) {
+            // Set to the first available ID
+            if (availableIds.length > 0) {
+                setVerificationId(availableIds[0]);
+            } else if( verificationId ) {
+                setVerificationId(null);
+            }
+        }
+    }, [verificationId, options, setVerificationId]);
+
+    return (
+        <RadioGroup
+            name="verificationId"
+            options={options}
+            selectedValue={verificationId || ''}
+            onChange={setVerificationId}
+            className="mt-1"
+        />
+    );
+}
