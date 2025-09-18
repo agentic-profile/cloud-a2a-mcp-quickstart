@@ -123,10 +123,17 @@ async function getRedis() {
  * @param value - The value to store (will be JSON stringified)
  * @param ttl - Time to live in seconds (optional)
  */
-export async function storeValue(key: string, value: any, _ttl?: number) {
-    console.log(`🔍 storeValue called for key: ${key}`);
+export async function storeValue(key: string, value: any, ttl?: number) {
+    console.log(`🔍 storeValue called for key: ${key}${ttl ? ` with TTL: ${ttl}s` : ''}`);
     const client = await getRedis();
-    await client.set(key, JSON.stringify(value));
+    
+    if (ttl && ttl > 0) {
+        // Use SETEX to set value with expiration in one atomic operation
+        await client.setex(key, ttl, JSON.stringify(value));
+    } else {
+        // Set without expiration
+        await client.set(key, JSON.stringify(value));
+    }
 }
 
 /**

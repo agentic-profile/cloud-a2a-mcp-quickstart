@@ -12,14 +12,18 @@ import { storeValue, getValue } from "../cache/redis.js";
 const SESSION_KEY_PREFIX = "session:";
 const PROFILE_KEY_PREFIX = "profile:";
 
+// TTL constants (in seconds)
+const SESSION_TTL = 60 * 60; // one hour for sessions
+const PROFILE_TTL = 5 * 60; // 5 minutes for profiles
+
 export const clientAgentSessionStore = {
     async createClientAgentSession(challenge: string): Promise<number> {
         // Generate a large random number for session ID (changeme)
         const sessionId = Math.floor(Math.random() * 1000000000000) + 1000000000000;
         
-        // Create and store the session
+        // Create and store the session with TTL
         const session = { id: sessionId, challenge } as ClientAgentSession;
-        await storeValue(`${SESSION_KEY_PREFIX}${sessionId}`, session);
+        await storeValue(`${SESSION_KEY_PREFIX}${sessionId}`, session, SESSION_TTL);
         
         return sessionId;
     },
@@ -33,14 +37,14 @@ export const clientAgentSessionStore = {
         const session = await getValue(`${SESSION_KEY_PREFIX}${id}`);
         if (session) {
             const updatedSession = { ...session, ...updates };
-            await storeValue(`${SESSION_KEY_PREFIX}${id}`, updatedSession);
+            await storeValue(`${SESSION_KEY_PREFIX}${id}`, updatedSession, SESSION_TTL);
         }
     }
 } as ClientAgentSessionStore;
 
 export const agenticProfileStore = {
     async saveAgenticProfile(profile: any): Promise<void> {
-        await storeValue(`${PROFILE_KEY_PREFIX}${profile.id}`, profile);
+        await storeValue(`${PROFILE_KEY_PREFIX}${profile.id}`, profile, profile.ttl ?? PROFILE_TTL);
     },
     
     async loadAgenticProfile(did: string): Promise<any | undefined> {
