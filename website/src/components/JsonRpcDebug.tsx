@@ -4,6 +4,9 @@ import { parseChallengeFromWwwAuthenticate, signChallenge } from '@agentic-profi
 import { useUserProfileStore, type UserProfile } from '@/stores';
 import { deleteAuthToken, useAuthToken } from '@/tools/AuthTokenManager';
 import { JwtDetails } from './JwtDetails';
+import { type VerificationMethod } from 'did-resolver';
+import { type AgentService } from '@agentic-profile/common/schema';
+import { type AgenticProfile, type JWKSet } from '@agentic-profile/common/schema';
 
 interface Result {
     fetchResponse: Response | undefined;
@@ -48,7 +51,7 @@ export const JsonRpcDebug = ({
     className = '' 
 }: JsonRpcDebugProps) => {
     const [spinner, setSpinner] = useState(false);
-    const { userProfile } = useUserProfileStore();
+    const { userProfile, userAgentDid, verificationId } = useUserProfileStore();
     const [requestInit, setRequestInit] = useState<RequestInit | null>(null);
     const [method, setMethod] = useState<string | null>(null);
     const [result, setResult] = useState<Result | null>(null);
@@ -91,7 +94,10 @@ export const JsonRpcDebug = ({
             const { headers } = result.fetchResponse;
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
-            const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile );
+            if (!userAgentDid || !verificationId) {
+                throw new Error('User agent DID and verification ID are required for authentication');
+            }
+            const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile, userAgentDid, verificationId );
             const newAuthToken = await signChallenge({
                 challenge,
                 attestation,
@@ -208,24 +214,77 @@ async function doFetch({ url, request, setMethod, setRequestInit, setSpinner, se
     return result;
 }
 
-function resolveAttestationAndPrivateKey( userProfile: UserProfile ) {
+function resolveAttestationAndPrivateKey( userProfile: UserProfile, agentDid: string, verificationId: string ) {
 
     const { profile, keyring } = userProfile;
-    const service = profile!.service![0];
-    const firstCap = service.capabilityInvocation[0];
-    const keyId = firstCap.id;
-
     const attestation = {
-        agentDid: profile.id + service.id,
-        verificationId: profile.id + keyId
+        agentDid, 
+        verificationId
     };
 
-    const privateJwk = keyring.find(keyset => keyset.id === keyId)?.privateJwk;
+    const b64uPublicKey = findPublicKey( profile, agentDid, verificationId );
+    const keyset = keyring.find((keyset: JWKSet) => keyset.b64uPublicKey === b64uPublicKey);
+    if( !keyset )
+        throw new Error('Keyset not found for verificationId: ' + verificationId);
 
-    if( !privateJwk )
-        throw new Error('Private key not found for keyId: ' + keyId);
+    return { attestation, privateJwk: keyset.privateJwk };
+}
 
-    return { attestation, privateJwk };
+function findPublicKey( profile: AgenticProfile, agentDid: string, verificationId: string ) {
+    // make sure verificationId is relative, or the did matches the profile.id
+    if( verificationId.charAt(0) !== '#' ) {
+        const [did,fragment] = verificationId.split('#');
+        if( did !== profile.id )
+            throw new Error('VerificationId refers to another profile: ' + verificationId);
+        verificationId = '#' +fragment;
+    }
+
+    if( agentDid === profile.id ) {
+        // naked DID, go straight to verificationMethods
+        return findVerificationMethodPublicKey( profile.verificationMethod, verificationId );
+    } else {
+        // an agent, first verify did is correct
+        let [did,fragment] = agentDid.split('#');
+        if( did !== profile.id )
+            throw new Error('agentDid refers to another profile: ' + agentDid);
+        fragment = '#' + fragment;  // normalize
+
+        // find service by fragment
+        const agent = profile.service?.find(service => service.id === fragment) as AgentService;
+        if( !agent )
+            throw new Error('Agent not found: ' + agentDid);
+
+        return findVerificationMethodPublicKey( agent.capabilityInvocation, verificationId, profile.verificationMethod );
+    }
+}
+
+function findVerificationMethodPublicKey( methods: (string | VerificationMethod)[] | undefined, verificationId: string, fallbackMethods: (string | VerificationMethod)[] | undefined = undefined) {
+    const found = methods?.find((method: string | VerificationMethod ) => {
+        if( typeof method === 'string' )
+            return method === verificationId;
+        else
+            return method.id === verificationId;
+    });
+
+    if( !found )
+        throw new Error('VerificationMethod not found: ' + verificationId);
+    
+    if( typeof found === 'string' ) {
+        if( fallbackMethods )
+            return findVerificationMethodPublicKey( fallbackMethods, verificationId ); // look in the entity level verificationMethods
+        else
+            throw new Error('VerificationId found, but not resolvable: ' + verificationId);
+    }
+
+    const method = found as VerificationMethod;
+    if( method.type !== 'JsonWebKey2020' )
+        throw new Error('VerificationMethod is not a JsonWebKey2020: ' + verificationId);
+
+    const b64uPublicKey = method.publicKeyJwk?.x;
+    if( !b64uPublicKey )
+        throw new Error('VerificationMethod has no public key: ' + verificationId);
+
+    return b64uPublicKey;
 }
 
 // RequestCard component
