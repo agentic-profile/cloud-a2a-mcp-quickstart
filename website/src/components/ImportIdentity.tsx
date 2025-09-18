@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import {
     createEdDsaJwk
 } from "@agentic-profile/auth";
+import { webDidToUrl } from "@agentic-profile/common";
+
 import { EditableUrl } from './EditableUrl';
 import { Button } from './Button';
-import { useImportIdentityStore } from '../stores';
+import { useImportIdentityStore, useUserProfileStore } from '../stores';
 import { LabelValue } from './LabelValue';
-import { EditableText } from './EditableText';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
     'https://matchwise.ai/import',
@@ -32,9 +33,9 @@ export const wantsFocus = () => {
 }
 
 export default function ImportIdentity() {
+    const { setUserProfile } = useUserProfileStore();
     const { exportKeyring, identityHostUrl, setExportKeyring, setIdentityHostUrl } = useImportIdentityStore();
     const [did,setDid] = useState<string|undefined>(undefined);
-    const [name,setName] = useState<string|undefined>(undefined);
 
     useEffect(() => {
         if (!exportKeyring) 
@@ -44,18 +45,11 @@ export default function ImportIdentity() {
         const urlParams = new URLSearchParams(window.location.search);
         const did = urlParams.get('did');
         const kid = urlParams.get('kid');
-        const nameParam = urlParams.get('name');
         
         // Check if both did and kid are provided and kid matches exportKeyring.b64uPublicKey
-        if (did && kid && exportKeyring && kid === exportKeyring.b64uPublicKey) {
-            console.log('DID:', did);
-            console.log('KID:', kid);
-            console.log('ExportKeyring b64uPublicKey:', exportKeyring.b64uPublicKey);
+        if (did && kid && exportKeyring && kid === exportKeyring.b64uPublicKey)
             setDid(did);
-            if (nameParam) {
-                setName(nameParam);
-            }
-        }
+
     }, [exportKeyring]);
 
     const regenerateKeyring = async () => {
@@ -72,12 +66,11 @@ export default function ImportIdentity() {
         // Regenerate the keyring
         await regenerateKeyring();
         
-        // Clear the name and DID
-        setName(undefined);
+        // Clear the DID
         setDid(undefined);
     };
 
-    const importIdentity = () => {
+    const sharePublicKey = () => {
         try {
             if (!exportKeyring?.publicJwk) {
                 console.error('No keyring available for import');
@@ -106,6 +99,25 @@ export default function ImportIdentity() {
         }
     };
 
+    const saveIdentity = async () => {
+        if(!exportKeyring || !did) {
+            console.error('No keyring available for import');
+            return;
+        }
+
+        try {
+            const url = webDidToUrl(did);
+            const response = await fetch(url);
+            if( response.ok ) {
+                const data = await response.json();
+                setUserProfile({profile: data, keyring: [exportKeyring]});
+            }
+        }
+        catch (error) {
+            console.error('Error saving identity:', error);
+        }
+    }
+
     return (
         <div>
             <p className="mb-6">
@@ -121,13 +133,6 @@ export default function ImportIdentity() {
                 onUpdate={setIdentityHostUrl}
                 options={DEFAULT_IDENTITY_HOST_URLS}
             />
-            <EditableText 
-                card={false}
-                label="Name"
-                value={name}
-                placeholder="Enter name..."
-                onUpdate={setName}
-            />
             <LabelValue label="DID" value={did} />
 
             <div className="mt-4 flex justify-end gap-3">
@@ -139,7 +144,7 @@ export default function ImportIdentity() {
                     Start Over
                 </Button>
                 <Button
-                    onClick={importIdentity}
+                    onClick={sharePublicKey}
                     disabled={!exportKeyring?.publicJwk || !!did}
                     variant="primary"
                     size="md"
@@ -147,7 +152,7 @@ export default function ImportIdentity() {
                     Upload Public Key
                 </Button>
                 <Button
-                    onClick={importIdentity}
+                    onClick={saveIdentity}
                     disabled={!exportKeyring?.publicJwk || !did}
                     variant="primary"
                     size="md"

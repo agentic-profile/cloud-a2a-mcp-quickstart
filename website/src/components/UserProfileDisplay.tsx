@@ -20,7 +20,7 @@ export const UserProfileDisplay = () => {
                         <UserIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
                     <p>
-                        Your agentic profile has been created and published
+                        Your agentic profile
                     </p>
                 </div>
 
