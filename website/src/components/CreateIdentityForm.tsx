@@ -9,6 +9,7 @@ import {
 import {
     createEdDsaJwk
 } from "@agentic-profile/auth";
+import { resolveAgentAndVerificationId } from '@/tools/keyring';
 
 interface Service {
     name: string;
@@ -37,7 +38,7 @@ export const CreateIdentityForm = () => {
     });
     const [serverUrl, setServerUrl] = useState('https://testing.agenticprofile.ai');
     
-    const { setUserProfile } = useUserProfileStore();
+    const { setUserProfile, setUserAgentDid, setVerificationId } = useUserProfileStore();
 
     const handleCreate = async () => {
         if (!userName.trim()) {
@@ -73,7 +74,10 @@ export const CreateIdentityForm = () => {
             }
 
             const result = await response.json();
-            setUserProfile({profile: result.profile, keyring});            
+            setUserProfile({profile: result.profile, keyring});
+            const { agentDid, verificationId } = resolveAgentAndVerificationId( result.profile, keyring );
+            setUserAgentDid(agentDid ?? null);
+            setVerificationId(verificationId ?? null);
         } catch (error) {
             console.error('Error creating identity:', error);
             alert('Error creating identity. Please try again.');

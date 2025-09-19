@@ -17,7 +17,6 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
     className = "",
     disabled = false 
 }) => {
-    console.log( 'RadioButton', name, value, checked, disabled );
     return (
         <input
             type="radio"

@@ -9,6 +9,7 @@ import { Button } from './Button';
 import { useImportIdentityStore, useUserProfileStore } from '../stores';
 import { LabelValue } from './LabelValue';
 import { Card, CardBody } from './Card';
+import { resolveAgentAndVerificationId } from '@/tools/keyring';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
     'https://matchwise.ai/import',
@@ -34,7 +35,7 @@ export const wantsFocus = () => {
 }
 
 export default function ImportIdentity() {
-    const { setUserProfile } = useUserProfileStore();
+    const { setUserProfile, setUserAgentDid, setVerificationId } = useUserProfileStore();
     const { exportKeyring, identityHostUrl, setExportKeyring, setIdentityHostUrl } = useImportIdentityStore();
     const [did,setDid] = useState<string|undefined>(undefined);
 
@@ -111,8 +112,12 @@ export default function ImportIdentity() {
             const response = await fetch(url);
             if( response.ok ) {
                 const data = await response.json();
-                console.log('profile',data);
-                setUserProfile({profile: data, keyring: [exportKeyring]});
+                const keyring = [exportKeyring];
+                setUserProfile({profile: data, keyring});
+
+                const { agentDid, verificationId } = resolveAgentAndVerificationId( data, keyring );
+                setUserAgentDid(agentDid ?? null);
+                setVerificationId(verificationId ?? null);
             }
         }
         catch (error) {

@@ -7,6 +7,7 @@ import { type AgentService } from '@agentic-profile/common/schema';
 import { type VerificationMethod } from 'did-resolver';
 import Icon from './Icon';
 import { useEffect } from 'react';
+import { firstAgentKey } from '@/tools/keyring';
 
 export const UserProfileDisplay = () => {
     const { userProfile, userAgentDid, verificationId, setUserAgentDid, clearUserProfile } = useUserProfileStore();
@@ -17,17 +18,6 @@ export const UserProfileDisplay = () => {
 
     const { profile, keyring } = userProfile;
     const did = profile.id;
-
-    const isServiceDisabled = (service: AgentService) => {
-        const found = service.capabilityInvocation?.some((cap: VerificationMethod | string) => {
-            if( typeof cap === 'string' )
-                return false;
-            const vm = cap as VerificationMethod;
-            return vm.id === verificationId;
-        }) ?? false;
-
-        return !found;
-    }
 
     return (
         <div className="max-w-2xl mx-auto">
@@ -87,7 +77,7 @@ export const UserProfileDisplay = () => {
                                                 value={did + service.id}
                                                 checked={userAgentDid === (did + service.id)}
                                                 onChange={setUserAgentDid}
-                                                disabled={isServiceDisabled(service as AgentService)}
+                                                disabled={!firstAgentKey(service.capabilityInvocation,keyring)}
                                                 className="mt-1"
                                             />
                                             <div>
@@ -109,6 +99,7 @@ export const UserProfileDisplay = () => {
                                         value={did}
                                         checked={userAgentDid === did}
                                         onChange={setUserAgentDid}
+                                        disabled={!firstAgentKey(profile.verificationMethod,keyring)}
                                         className="mt-1"
                                     />
                                     <div>
