@@ -18,6 +18,17 @@ export const UserProfileDisplay = () => {
     const { profile, keyring } = userProfile;
     const did = profile.id;
 
+    const isServiceDisabled = (service: AgentService) => {
+        const found = service.capabilityInvocation?.some((cap: VerificationMethod | string) => {
+            if( typeof cap === 'string' )
+                return false;
+            const vm = cap as VerificationMethod;
+            return vm.id === verificationId;
+        }) ?? false;
+
+        return !found;
+    }
+
     return (
         <div className="max-w-2xl mx-auto">
             <Card className="p-6">
@@ -76,6 +87,7 @@ export const UserProfileDisplay = () => {
                                                 value={did + service.id}
                                                 checked={userAgentDid === (did + service.id)}
                                                 onChange={setUserAgentDid}
+                                                disabled={isServiceDisabled(service as AgentService)}
                                                 className="mt-1"
                                             />
                                             <div>
@@ -115,7 +127,7 @@ export const UserProfileDisplay = () => {
                         <CardBody>
                             <div className="bg-white dark:bg-gray-600 p-3 rounded border">
                                 <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
-                                    {JSON.stringify(keyring, null, 2)}
+                                    {JSON.stringify(keyring, null, 4)}
                                 </pre>
                             </div>
                         </CardBody>
