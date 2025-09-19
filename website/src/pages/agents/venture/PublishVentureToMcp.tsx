@@ -52,8 +52,10 @@ const PublishVentureToMcp = () => {
             method: 'tools/call',
             params: {
                 name: 'update',
-                profile: ventureData,
-                markdown
+                profile: {
+                    ...ventureData,
+                    markdown
+                }
             }
         };
 

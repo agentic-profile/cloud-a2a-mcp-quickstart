@@ -4,12 +4,16 @@ import { jrpcError } from '../../json-rpc/index.js';
 import { mcpResultResponse } from '../utils.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';
-import { DatedItem } from '../../stores/types.js';
+import { StoreItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'venture-profiles';
-const store = itemStore<DatedItem>('venture', TABLE_NAME);
-const crud = mcpCrud(store);
+const store = itemStore<StoreItem>('venture', TABLE_NAME);
+
+function idResolver(_item: StoreItem | undefined, session: ClientAgentSession, _params: any | undefined ): string {
+    return session.agentDid.split('#')[0];
+}
+const crud = mcpCrud(store, { idResolver, itemKey: "profile" } );
 
 export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
@@ -34,8 +38,8 @@ export async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSON
     try {
         const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
         const since = request.params?.since || new Date( twentyFourHoursAgo ).toISOString();
-        const profiles = await store.recentItems(since as string);
-        return mcpResultResponse(request.id!, { profiles, since });
+        const items = await store.recentItems(since as string);
+        return mcpResultResponse(request.id!, { items, since });
     } catch (error) {
         console.log('Get recent updates failed for table:', TABLE_NAME, error);
         return jrpcError(request.id!, -32603, `Failed to get recent updates for ${TABLE_NAME}: ${(error as Error).message}`);

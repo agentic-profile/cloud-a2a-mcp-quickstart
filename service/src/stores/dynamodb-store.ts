@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { DatedItem, ItemStore } from "./types.js";
+import { StoreItem, ItemStore } from "./types.js";
 
 // redundant, but resolves module loading order issues
 import dotenv from 'dotenv';
@@ -22,9 +22,10 @@ console.log("dynamoConfig", dynamoConfig);
 const client = new DynamoDBClient(dynamoConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-export function itemStore<T extends DatedItem>(kind: string, tableName: string): ItemStore<T> {
+export function itemStore<T extends StoreItem>(kind: string, tableName: string): ItemStore<T> {
     console.log(`DynamoDB itemStore of ${kind} in ${tableName}`);
     return {
+        name: () => kind,
         async readItem(id: string): Promise<T | undefined> {
             try {
                 const result = await docClient.send(new GetCommand({
