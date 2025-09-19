@@ -64,7 +64,7 @@ export const UserProfileDisplay = () => {
 
                     <Card variant="default" className="p-4">
                         <CardHeader>
-                            <h3>Agents</h3>
+                            <h3>Default Agent for Authentication</h3>
                         </CardHeader>
                         <CardBody>
                             <div className="space-y-2">

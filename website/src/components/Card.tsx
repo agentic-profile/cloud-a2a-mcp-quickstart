@@ -10,6 +10,9 @@ import deleteIcon from "@iconify-icons/lucide/trash";
 import refreshIcon from "@iconify-icons/lucide/rotate-cw";
 import closeIcon from "@iconify-icons/lucide/x";
 import clearIcon from "@iconify-icons/lucide/eraser";
+import chevronDownIcon from "@iconify-icons/lucide/chevron-down";
+import chevronUpIcon from "@iconify-icons/lucide/chevron-up";
+import { useState } from "react";
 
 import Icon from "./Icon";
 
@@ -76,18 +79,33 @@ export function CardBody({ className = "", ...props }: any ) {
 interface CardTitleAndBodyProps {
     className?: string;
     title: string;
+    collapsible?: boolean;
     children?: React.ReactNode;
 }
 
-export function CardTitleAndBody({ className, title, children }: CardTitleAndBodyProps ) {
+export function CardTitleAndBody({ className, title, collapsible = false, children }: CardTitleAndBodyProps ) {
+    const [isCollapsed, setIsCollapsed] = useState(collapsible);
+
+    const collapseIcon = collapsible ? (
+        <Icon 
+            src={isCollapsed ? chevronDownIcon : chevronUpIcon} 
+            onClick={() => setIsCollapsed(!isCollapsed)} 
+        />
+    ) : null;
+
     return (
-    <Card className={className}>
-        <CardHeader>
-            <h3>{title}</h3>
-        </CardHeader>
-        <CardBody>
-            {children}
-        </CardBody>
-    </Card>
+        <Card className={className}>
+            <CardHeader>
+                <div className="absolute flex top-3 right-3 gap-3">
+                    {collapseIcon}
+                </div>
+                <h3>{title}</h3>
+            </CardHeader>
+            {!isCollapsed && (
+                <CardBody>
+                    {children}
+                </CardBody>
+            )}
+        </Card>
     )
 }

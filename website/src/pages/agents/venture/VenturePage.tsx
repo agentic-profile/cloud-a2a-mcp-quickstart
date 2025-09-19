@@ -218,9 +218,8 @@ const VenturePage = () => {
                 </CardTitleAndBody>
 
                 <PublishVentureToMcp />
-                <PublishVentureToIdentityHost />
 
-                <CardTitleAndBody title="Advanced Features">
+                <CardTitleAndBody title="Advanced Features" collapsible={true}>
                     <div className="space-y-4">
                         <div className="flex gap-3">
                             <Button

@@ -1,17 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
-import { JsonRpcDebug, Button, EditableUrl } from '@/components';
+import { useNavigate } from 'react-router-dom';
+import { JsonRpcDebug, Button, EditableUrl, LabelValue } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
-import { useSettingsStore, useVentureStore } from '@/stores';
+import { useSettingsStore, useUserProfileStore, useVentureStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
 import agentsData from '../agents.json';
 import { MarkdownGenerator } from './MarkdownGenerator';
 
+const DEFAULT_MCP_URLS = [
+    'https://example-api.agenticprofile.ai/mcp/venture',
+    'http://localhost:3000/mcp/venture'
+];
+
 const PublishVentureToMcp = () => {
     const { prunedVentureData } = useVentureStore();
     const { serverUrl } = useSettingsStore();
+    const { userAgentDid, verificationId } = useUserProfileStore();
+    const navigate = useNavigate();
     
     // Find the venture agent from the agents data
-    const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
+    const ventureAgent = agentsData.find(agent => agent.id === 'venture')!
     
     const [showMcpDebug, setShowMcpDebug] = useState(false);
     const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
@@ -81,22 +89,39 @@ const PublishVentureToMcp = () => {
         setMcpUrl(newUrl);
     };
 
+    // Handle navigation to identity page
+    const handleManageIdentity = () => {
+        navigate('/identity');
+    };
+
     return (
         <>
             <CardTitleAndBody title="Publish Venture to MCP">
                 <div className="space-y-4">
                     <EditableUrl
+                        card={false}
                         label="MCP URL"
                         value={mcpUrl}
                         placeholder="Enter MCP server URL..."
                         onUpdate={handleMcpUrlUpdate}
+                        options={DEFAULT_MCP_URLS}
                     />
-                    <div className="flex justify-start">
+                    <LabelValue
+                        label="Publish as" 
+                        value={`${userAgentDid} (key ${verificationId})`} />
+                    <div className="flex justify-end space-x-3">
                         <Button
                             onClick={handlePublishToMcp}
                             variant="primary"
+                            disabled={!userAgentDid || !verificationId}
                         >
                             Publish to MCP
+                        </Button>
+                        <Button
+                            onClick={handleManageIdentity}
+                            variant="secondary"
+                        >
+                            Manage Identity
                         </Button>
                     </div>
                 </div>
