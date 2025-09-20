@@ -17,7 +17,7 @@ import McpVcMatchPage from './pages/mcp/McpVcMatchPage';
 import McpVolunteerMatchPage from './pages/mcp/McpVolunteerMatchPage';
 import McpVenturePage from './pages/mcp/McpVenturePage';
 import McpReputationPage from './pages/mcp/McpReputationPage';
-import McpWalletPage from './pages/mcp/McpWalletPage';
+import McpWalletPage from './pages/mcp/wallet/McpWalletPage';
 import SettingsPage from './pages/SettingsPage';
 import IdentityPage from './pages/IdentityPage';
 import { useSettingsStore } from './stores/settingsStore';
