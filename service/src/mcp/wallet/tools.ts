@@ -1,31 +1,73 @@
 export const MCP_TOOLS = [
     {
         name: 'update',
-        description: 'Update location coordinates for a user',
+        description: 'Create or update a wallet item with credentials',
         inputSchema: {
             type: 'object',
             properties: {
-                coords: {
+                item: {
                     type: 'object',
                     properties: {
-                        latitude: {
-                            type: 'number',
-                            description: 'Latitude coordinate'
+                        key: {
+                            type: 'string',
+                            description: 'Unique identifier for the wallet item'
                         },
-                        longitude: {
-                            type: 'number',
-                            description: 'Longitude coordinate'
+                        credential: {
+                            type: 'object',
+                            description: 'Credential data (JSON object)'
                         }
                     },
-                    required: ['latitude', 'longitude']
+                    required: ['key', 'credential']
                 }
             },
-            required: ['coords']
+            required: ['item']
         }
     },
     {
-        name: 'query',
-        description: 'Get location coordinates for a user',
+        name: 'read',
+        description: 'Retrieve a wallet item by key',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                key: {
+                    type: 'string',
+                    description: 'Key of the wallet item to retrieve'
+                }
+            },
+            required: ['key']
+        }
+    },
+    {
+        name: 'delete',
+        description: 'Delete a wallet item by key',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                key: {
+                    type: 'string',
+                    description: 'Key of the wallet item to delete'
+                }
+            },
+            required: ['key']
+        }
+    },
+    {
+        name: 'present',
+        description: 'Present a credential from the wallet by key',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                key: {
+                    type: 'string',
+                    description: 'Key of the wallet item to present'
+                }
+            },
+            required: ['key']
+        }
+    },
+    {
+        name: 'list',
+        description: 'List all wallet items owned by the current user',
         inputSchema: {
             type: 'object',
             properties: {}

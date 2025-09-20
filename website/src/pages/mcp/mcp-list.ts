@@ -1,5 +1,5 @@
 import type { MCPService } from './types';
-import { MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, GlobeAltIcon, WalletIcon } from '@heroicons/react/24/outline';
 
 export const mcpServices: MCPService[] = [
     {
@@ -15,6 +15,13 @@ export const mcpServices: MCPService[] = [
         description: 'Manage your venture profile and list of others',
         icon:GlobeAltIcon,
         route: '/mcp/venture'
+    },
+    {
+        id: '3',
+        name: 'Wallet',
+        description: 'Manage verifiable credentials and digital wallet items',
+        icon: WalletIcon,
+        route: '/mcp/wallet'
     } /*,
     {
         id: '2',

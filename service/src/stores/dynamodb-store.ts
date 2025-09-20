@@ -22,10 +22,17 @@ console.log("dynamoConfig", dynamoConfig);
 const client = new DynamoDBClient(dynamoConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-export function itemStore<T extends StoreItem>(kind: string, tableName: string): ItemStore<T> {
-    console.log(`DynamoDB itemStore of ${kind} in ${tableName}`);
+export interface StoreOptions {
+    tableName: string;
+    name: string;
+    kind?: string;
+}
+
+export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreOptions): ItemStore<T> {
+    const label = `${kind}${name} in ${tableName}`;
+    console.log(`DynamoDB itemStore of ${label}`);
     return {
-        name: () => kind,
+        name: () => name,
         async readItem(id: string): Promise<T | undefined> {
             try {
                 const result = await docClient.send(new GetCommand({
@@ -42,25 +49,25 @@ export function itemStore<T extends StoreItem>(kind: string, tableName: string):
                 // Convert DynamoDB item back to VentureProfile
                 return result.Item as T;
             } catch (error) {
-                console.error(`Error loading ${kind}[${id}] from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to load ${kind}[${id}] from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error loading ${label}[${id}]:`, error);
+                throw new Error(`Failed to load ${label}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
         async updateItem(item: T): Promise<void> {
             try {
-                const itemToSave = {
+                const itemToSave = kind ? {
                     ...item,
-                    kind // needed for "updated" sort to work
-                };
+                    kind // usually needed for "updated" sort to work
+                } : item;
 
                 await docClient.send(new PutCommand({
                     TableName: tableName,
                     Item: itemToSave
                 }));
             } catch (error) {
-                console.error(`Error saving ${kind}[${item.id}] to DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to save ${kind}[${item.id}] to ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error saving ${label}[${item.id}]:`, error);
+                throw new Error(`Failed to save ${label}[${item.id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -71,8 +78,8 @@ export function itemStore<T extends StoreItem>(kind: string, tableName: string):
                     Key: { id }
                 }));
             } catch (error) {
-                console.error(`Error deleting ${kind}[${id}] from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to delete ${kind}[${id}] from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error deleting ${label}[${id}]:`, error);
+                throw new Error(`Failed to delete ${label}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
