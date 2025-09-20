@@ -15,12 +15,16 @@ const TABLE_NAME = process.env.DYNAMODB_WALLET_TABLE_NAME || 'wallets';
 const store = itemStore<WalletItem>({name: 'wallets', 'tableName': TABLE_NAME});
 function idResolver(item: WalletItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;
-    return `${session.agentDid.split('#')[0]}^${key}`;
+    return `${resolveAgentDid(session)}^${key}`;
 }
 function ownerResolver(_item: WalletItem | undefined, session: ClientAgentSession, _params: any | undefined ): string | undefined {
-    return session.agentDid.split('#')[0];
+    return resolveAgentDid(session);
 }
 const crud = mcpCrud(store, { idResolver, ownerResolver } );
+
+function resolveAgentDid(session: ClientAgentSession): string {
+    return session.agentDid.split('#')[0];
+}
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
@@ -82,47 +86,16 @@ export async function handlePresent(request: JSONRPCRequest, session: ClientAgen
 
 export async function handleList(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     try {
-        // Get all wallet items
-        const allItems = await store.queryItems();
-        
-        // Filter by owner (agent DID)
-        const ownerPrefix = session.agentDid.split('#')[0];
-        const userItems = allItems.filter(item => item.owner === ownerPrefix);
-        
-        // Return list of wallet items with keys and basic info
-        const itemList = userItems.map(item => ({
-            key: item.key,
-            id: item.id,
-            updated: item.updated,
-            hasCredential: !!item.credential
-        }));
+        // Get all MY wallet items
+        const ownerDid = resolveAgentDid(session);
+        const query = {
+            KeyConditionExpression: "ownerDid = :ownerDid",
+            ExpressionAttributeValues: { ":ownerDid": ownerDid }
+        };
+        const items = await store.queryItems(query);
 
-        return mcpResultResponse(request.id!, { 
-            items: itemList,
-            count: itemList.length 
-        });
+        return mcpResultResponse(request.id!, { items });
     } catch (error) {
         return jrpcError(request.id!, -32603, `Failed to list wallet items: ${(error as Error).message}`);
     }
 }
-
-/*
-export async function handleLocationQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
-    const userDid = "did:web:iamagentic.ai:1";
-    const locationKey = `location:${userDid}`;
-    
-    try {
-        const locationData = await getValue(locationKey);
-        
-        if (!locationData) {
-            return jrpcError(request.id!, -32604, 'No location data found for user');
-        }
-
-        const { longitude, latitude } = locationData;
-        return mcpTextContentResponse(request.id!, `Location: ${longitude}, ${latitude}`);
-    } catch (error) {
-        console.log('🔍 getValue failed, using fallback:', error);
-        return jrpcError(request.id!, -32603, 'Location data unavailable (Redis connection issue)');
-    }
-}
-*/

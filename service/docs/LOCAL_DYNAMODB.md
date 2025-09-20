@@ -49,13 +49,19 @@ aws dynamodb create-table \
   --table-name wallets \
   --attribute-definitions \
     AttributeName=id,AttributeType=S \
-    AttributeName=owner,AttributeType=S \
+    AttributeName=ownerDid,AttributeType=S \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --global-secondary-indexes \
-    'IndexName=TypeIndex,KeySchema=[{AttributeName=owner,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+    'IndexName=TypeIndex,KeySchema=[{AttributeName=ownerDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
   --billing-mode PAY_PER_REQUEST \
   --endpoint-url http://localhost:8000
+```
+
+```bash
+aws dynamodb scan \
+    --endpoint-url http://localhost:8000 \
+    --table-name wallets
 ```
 
 

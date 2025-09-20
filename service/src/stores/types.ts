@@ -9,7 +9,7 @@ export interface ItemStore<T extends StoreItem> {
     readItem(id: string): Promise<T | undefined>;
     updateItem(item: T): Promise<void>;
     deleteItem(id: string): Promise<void>;
-    queryItems(): Promise<T[]>;
+    queryItems(query:any): Promise<T[]>;
     recentItems(since: string): Promise<T[]>;
     name(): string
 }

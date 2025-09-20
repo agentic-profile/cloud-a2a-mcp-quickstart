@@ -14,6 +14,7 @@ interface Result {
 const McpWalletPage = () => {
     const { serverUrl } = useSettingsStore();
     const [walletKey, setWalletKey] = useState<string>('default');
+    const [deleteKey, setDeleteKey] = useState<string>('');
     const [credentialData, setCredentialData] = useState<string>('{\n  "type": "VerifiableCredential",\n  "credentialSubject": {\n    "id": "did:example:123",\n    "name": "Example Credential"\n  }\n}');
     const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
 
@@ -72,7 +73,12 @@ const McpWalletPage = () => {
     };
 
     const handleWalletDelete = () => {
-        if (!confirm(`Are you sure you want to delete wallet item "${walletKey}"?`)) {
+        if (!deleteKey.trim()) {
+            alert('Please enter a wallet key to delete');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to delete wallet item "${deleteKey}"?`)) {
             return;
         }
 
@@ -80,7 +86,7 @@ const McpWalletPage = () => {
             method: "tools/call",
             params: {
                 name: "delete",
-                key: walletKey
+                key: deleteKey
             }
         };
 
@@ -310,6 +316,21 @@ const McpWalletPage = () => {
                             <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
                                 Permanently delete the wallet item with the specified key.
                             </p>
+                            
+                            <div className="mb-4">
+                                <label htmlFor="deleteKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Wallet Key to Delete
+                                </label>
+                                <input
+                                    id="deleteKey"
+                                    type="text"
+                                    value={deleteKey}
+                                    onChange={(e) => setDeleteKey(e.target.value)}
+                                    placeholder="Enter wallet key"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Enter the key of the wallet item you want to delete</p>
+                            </div>
                             
                             <Button
                                 onClick={handleWalletDelete}

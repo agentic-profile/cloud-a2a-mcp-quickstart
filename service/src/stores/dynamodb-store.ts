@@ -83,13 +83,14 @@ export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreO
             }
         },
 
-        async queryItems(): Promise<T[]> {
+        async queryItems(query:any): Promise<T[]> {
             try {
                 const result = await docClient.send(new QueryCommand({
                     TableName: tableName,
                     IndexName: "TypeIndex",
-                    KeyConditionExpression: "kind = :kind",
-                    ExpressionAttributeValues: { ":kind": kind },
+                    ...query
+                    //KeyConditionExpression: "kind = :kind",
+                    //ExpressionAttributeValues: { ":kind": kind },
                 }));
 
                 return result.Items as T[];

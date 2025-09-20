@@ -14,12 +14,6 @@ export type Options<T> = {
     ownerResolver?: ResolveOwner<T>;
 }
 
-/*
-function resolveItemId(item: StoreItem, session: ClientAgentSession): string {
-    return `${session.agentDid.split('#')[0]}^${item.key}`;
-}
-*/
-
 export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Options<T> ) {
     const debugLabel = store.name();
     const { idResolver, itemKey = "item", ownerResolver } = options;
@@ -32,7 +26,7 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
 
             // I can only upload my own profile
             item.id = idResolver(item as T,session,request.params);
-            item.owner = ownerResolver?.(item as T,session,request.params);
+            item.ownerDid = ownerResolver?.(item as T,session,request.params);
             item.updated = new Date().toISOString();
 
             try {
