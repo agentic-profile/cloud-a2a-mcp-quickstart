@@ -10,6 +10,7 @@ import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { WalletItem } from './types.js';
 import { mcpResultResponse } from '../utils.js';
+import { presentCredential } from './present.js';
 
 const TABLE_NAME = process.env.DYNAMODB_WALLETS_TABLE_NAME || 'wallets';
 const store = itemStore<WalletItem>({name: 'wallets', 'tableName': TABLE_NAME});
@@ -69,14 +70,16 @@ export async function handlePresent(request: JSONRPCRequest, session: ClientAgen
             return jrpcError(request.id!, -32604, `Wallet item with key '${key}' not found`);
         }
 
-        // Present the credential - return the credential data along with presentation metadata
+        /* Present the credential - return the credential data along with presentation metadata
         const presentation = {
             type: 'VerifiablePresentation',
             presentedAt: new Date().toISOString(),
             presentedBy: session.agentDid.split('#')[0],
             credential: walletItem.credential,
             walletKey: key
-        };
+        };*/
+
+        const presentation = await presentCredential( walletItem.credential );
 
         return mcpResultResponse(request.id!, { presentation });
     } catch (error) {

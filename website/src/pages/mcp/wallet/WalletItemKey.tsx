@@ -21,20 +21,14 @@ const WalletItemKey = ({ walletItemKey, onWalletItemKeyChange }: WalletItemKeyPr
                     Set the wallet item id/key that will be used for all wallet operations below.
                 </p>
                 
-                <div>
-                    <label htmlFor="centralWalletKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Current Wallet Item Key
-                    </label>
-                    <input
-                        id="centralWalletKey"
-                        type="text"
-                        value={walletItemKey}
-                        onChange={(e) => onWalletItemKeyChange(e.target.value)}
-                        placeholder="default"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">This key will be used for create, read, present, and delete operations</p>
-                </div>
+                <input
+                    id="centralWalletKey"
+                    type="text"
+                    value={walletItemKey}
+                    onChange={(e) => onWalletItemKeyChange(e.target.value)}
+                    placeholder="default"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                />
             </CardBody>
         </Card>
     );
