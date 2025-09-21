@@ -11,7 +11,7 @@ import { mcpCrud } from '../mcp-crud.js';
 import { WalletItem } from './types.js';
 import { mcpResultResponse } from '../utils.js';
 
-const TABLE_NAME = process.env.DYNAMODB_WALLET_TABLE_NAME || 'wallets';
+const TABLE_NAME = process.env.DYNAMODB_WALLETS_TABLE_NAME || 'wallets';
 const store = itemStore<WalletItem>({name: 'wallets', 'tableName': TABLE_NAME});
 function idResolver(item: WalletItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;

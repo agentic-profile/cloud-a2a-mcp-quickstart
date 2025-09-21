@@ -7,7 +7,7 @@ import { ClientAgentSession } from '@agentic-profile/auth';
 import { StoreItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'venture-profiles';
+const TABLE_NAME = process.env.DYNAMODB_VENTURES_TABLE_NAME || 'venture-profiles';
 const store = itemStore<StoreItem>({name: 'venture', 'tableName': TABLE_NAME, kind: 'venture'});
 
 function idResolver(_item: StoreItem | undefined, session: ClientAgentSession, _params: any | undefined ): string {
