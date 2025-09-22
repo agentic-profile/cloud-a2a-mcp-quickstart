@@ -99,11 +99,18 @@ export const JsonRpcDebug = ({
         setRetrySpinner(false);
         setRetryResult(null);
 
-        //let authToken = await getAuthToken(url);
+        const steps = [
+            { kind: 'request', summary: `First HTTP Request ${authToken ? 'with auth' : 'without auth'}` } as HttpStep
+        ];
+        httpRequest?.onProgress?.({ steps });
+
         const result = await doFetch({ url, request, setMethod, setRequestInit, setSpinner, setResult, authToken });
 
         // Need to retry with auth?
         if( userProfile && result.fetchResponse && result.fetchResponse.status === 401 ) {
+            steps.push({kind: 'response', summary: `HTTP Response 401 ${authToken ? 'invalid auth token' : 'auth required'}`});
+            httpRequest?.onProgress?.({ steps });
+
             if( authToken )
                 deleteAuthToken(url); // authToken failed, so forget it
 
@@ -121,6 +128,9 @@ export const JsonRpcDebug = ({
             });
         
             // 2nd try with auth new token - may throw an Error on response != ok
+            steps.push({kind: 'request', summary: `Second HTTP Request with new auth token`});
+            httpRequest?.onProgress?.({ steps });
+
             const retryResult = await doFetch({
                 url, 
                 request, 
@@ -133,9 +143,11 @@ export const JsonRpcDebug = ({
             if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
                 setAuthToken(newAuthToken);
 
-            httpRequest?.onProgress?.({ steps: [], result: retryResult });
+            steps.push({kind: 'response', summary: `HTTP Response ${retryResult.fetchResponse?.ok ? 'success' : retryResult.fetchResponse?.statusText}`});
+            httpRequest?.onProgress?.({ steps, result: retryResult });
         } else {
-            httpRequest?.onProgress?.({ steps: [], result });
+            steps.push({kind: 'response', summary: `HTTP Response ${result.fetchResponse?.ok ? 'success' : result.fetchResponse?.statusText}`});
+            httpRequest?.onProgress?.({ steps, result });
         }
     };
 
