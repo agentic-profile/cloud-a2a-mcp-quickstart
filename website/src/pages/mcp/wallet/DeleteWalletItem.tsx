@@ -1,12 +1,16 @@
-import { Card, CardBody, Button } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface DeleteWalletItemProps {
     walletItemKey: string;
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const DeleteWalletItem = ({ walletItemKey, onSubmitMcpRequest }: DeleteWalletItemProps) => {
+const DeleteWalletItem = ({ walletItemKey, onSubmitHttpRequest }: DeleteWalletItemProps) => {
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
+
     const handleWalletDelete = () => {
         if (!walletItemKey.trim()) {
             alert('Please set a wallet key in the Wallet Item Key card above');
@@ -33,7 +37,10 @@ const DeleteWalletItem = ({ walletItemKey, onSubmitMcpRequest }: DeleteWalletIte
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -64,6 +71,8 @@ const DeleteWalletItem = ({ walletItemKey, onSubmitMcpRequest }: DeleteWalletIte
                 >
                     Delete Wallet Item
                 </Button>
+
+                <HttpProgressSummary progress={httpProgress} />
             </CardBody>
         </Card>
     );

@@ -256,8 +256,10 @@ export const ChatPage = () => {
                 <div className="mt-6">
                     <JsonRpcDebug
                         url={rpcUrl}
-                        request={currentRequest}
-                        onFinalResult={handleJsonRpcResult}
+                        httpRequest={currentRequest ? {
+                            requestInit: currentRequest,
+                            onProgress: (progress) => progress.result && handleJsonRpcResult(progress.result)
+                        } : null}
                         onClose={() => {
                             setShowJsonRpcDebug(false);
                             setCurrentRequest(null);

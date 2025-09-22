@@ -10,18 +10,20 @@ import PresentWalletItem from './PresentWalletItem';
 import ListWalletItems from './ListWalletItems';
 import McpWalletTools from './McpWalletTools';
 import WalletItemKey from './WalletItemKey';
+import { type HttpRequest } from '@/components/JsonRpcDebug';
 
+/*
 interface Result {
     fetchResponse: Response | undefined;
     text: string | undefined;
     data: any | undefined;
     error: unknown;
-}
+}*/
 
 const McpWalletPage = () => {
     const { serverUrl } = useSettingsStore();
     const [walletItemKey, setWalletItemKey] = useState<string>('default');
-    const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
+    const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Construct the MCP endpoint URL
     const mcpEndpoint = buildEndpoint(serverUrl, 'mcp/wallet');
@@ -30,17 +32,8 @@ const McpWalletPage = () => {
         setWalletItemKey(key);
     };
 
-    const submitMcpRequest = (request: RequestInit) => {
-        setMcpRequest(request);
-    };
-
     const clearResults = () => {
-        setMcpRequest(null);
-    };
-
-    const handleMcpResult = (result: Result) => {
-        // Handle the result from JsonRpcDebug if needed
-        console.log('Wallet operation result:', result);
+        setHttpRequest(null);
     };
 
     return (
@@ -87,7 +80,7 @@ const McpWalletPage = () => {
                 {/* Create/Update Wallet Item */}
                 <UpdateWalletItem 
                     walletItemKey={walletItemKey}
-                    onSubmitMcpRequest={submitMcpRequest} 
+                    onSubmitHttpRequest={setHttpRequest} 
                 />
 
                 {/* Wallet Operations */}
@@ -95,36 +88,35 @@ const McpWalletPage = () => {
                     {/* Read Wallet Item */}
                     <ReadWalletItem 
                         walletItemKey={walletItemKey}
-                        onSubmitMcpRequest={submitMcpRequest}
+                        onSubmitHttpRequest={setHttpRequest}
                     />
 
                     {/* Present Wallet Item */}
                     <PresentWalletItem 
                         walletItemKey={walletItemKey}
-                        onSubmitMcpRequest={submitMcpRequest}
+                        onSubmitHttpRequest={setHttpRequest}
                     />
 
                     {/* Delete Wallet Item */}
                     <DeleteWalletItem 
                         walletItemKey={walletItemKey}
-                        onSubmitMcpRequest={submitMcpRequest} 
+                        onSubmitHttpRequest={setHttpRequest} 
                     />
                 </div>
             </div>
 
             {/* List Wallet Items */}
-            <ListWalletItems onSubmitMcpRequest={submitMcpRequest} />
+            <ListWalletItems onSubmitHttpRequest={setHttpRequest} />
 
             {/* MCP Wallet Tools */}
-            <McpWalletTools onSubmitMcpRequest={submitMcpRequest} />
+            <McpWalletTools onSubmitHttpRequest={setHttpRequest} />
 
             {/* JsonRpcDebug Component */}
-            {mcpRequest && (
+            {httpRequest && (
                 <div className="mt-6">
                     <JsonRpcDebug
                         url={mcpEndpoint}
-                        request={mcpRequest}
-                        onFinalResult={handleMcpResult}
+                        httpRequest={httpRequest}
                         onClose={clearResults}
                     />
                 </div>

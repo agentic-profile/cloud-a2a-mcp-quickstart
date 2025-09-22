@@ -134,8 +134,10 @@ const PublishVentureToMcp = () => {
                 <div ref={mcpDebugRef}>
                     <JsonRpcDebug
                         url={mcpUrl || undefined}
-                        request={mcpRequest}
-                        onFinalResult={handleMcpResult}
+                        httpRequest={mcpRequest ? {
+                            requestInit: mcpRequest,
+                            onProgress: (progress) => progress.result && handleMcpResult(progress.result)
+                        } : null}
                         onClose={() => setShowMcpDebug(false)}
                         onClear={() => setMcpRequest(null)}
                     />

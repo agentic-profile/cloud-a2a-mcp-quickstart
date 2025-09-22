@@ -1,12 +1,16 @@
-import { Card, CardBody, Button } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
 import { PresentationChartLineIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface PresentWalletItemProps {
     walletItemKey: string;
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const PresentWalletItem = ({ walletItemKey, onSubmitMcpRequest }: PresentWalletItemProps) => {
+const PresentWalletItem = ({ walletItemKey, onSubmitHttpRequest }: PresentWalletItemProps) => {
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
+
     const handleWalletPresent = () => {
         const mcpRequest = {
             method: "tools/call",
@@ -24,7 +28,10 @@ const PresentWalletItem = ({ walletItemKey, onSubmitMcpRequest }: PresentWalletI
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -48,6 +55,8 @@ const PresentWalletItem = ({ walletItemKey, onSubmitMcpRequest }: PresentWalletI
                 >
                     Present Credential
                 </Button>
+
+                <HttpProgressSummary progress={httpProgress} />
             </CardBody>
         </Card>
     );

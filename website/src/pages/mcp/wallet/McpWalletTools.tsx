@@ -1,11 +1,15 @@
-import { Card, CardBody, Button } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
 import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface McpWalletToolsProps {
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const McpWalletTools = ({ onSubmitMcpRequest }: McpWalletToolsProps) => {
+const McpWalletTools = ({ onSubmitHttpRequest }: McpWalletToolsProps) => {
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
+
     const handleToolsList = () => {
         const mcpRequest = {
             method: "tools/list",
@@ -20,7 +24,10 @@ const McpWalletTools = ({ onSubmitMcpRequest }: McpWalletToolsProps) => {
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -45,6 +52,8 @@ const McpWalletTools = ({ onSubmitMcpRequest }: McpWalletToolsProps) => {
                     <WrenchScrewdriverIcon className="w-4 h-4 mr-2" />
                     List MCP Wallet Tools
                 </Button>
+
+                <HttpProgressSummary progress={httpProgress} />
             </CardBody>
         </Card>
     );

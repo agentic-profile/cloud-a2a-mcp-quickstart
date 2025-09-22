@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Card, CardBody, Button, LabelValue } from '@/components';
+import { Card, CardBody, Button, LabelValue, HttpProgressSummary } from '@/components';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface UpdateWalletItemProps {
     walletItemKey: string;
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const UpdateWalletItem = ({ walletItemKey, onSubmitMcpRequest }: UpdateWalletItemProps) => {
+const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletItemProps) => {
     const [credentialData, setCredentialData] = useState<string>('{\n  "type": "VerifiableCredential",\n  "credentialSubject": {\n    "id": "did:example:123",\n    "name": "Example Credential"\n  }\n}');
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
 
     const handleExampleClick = (exampleData: any) => {
         setCredentialData(JSON.stringify(exampleData, null, 2));
@@ -42,7 +44,10 @@ const UpdateWalletItem = ({ walletItemKey, onSubmitMcpRequest }: UpdateWalletIte
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -99,6 +104,8 @@ const UpdateWalletItem = ({ walletItemKey, onSubmitMcpRequest }: UpdateWalletIte
                     >
                         Create/Update Wallet Item
                     </Button>
+
+                    <HttpProgressSummary progress={httpProgress} />
                 </div>
             </CardBody>
         </Card>

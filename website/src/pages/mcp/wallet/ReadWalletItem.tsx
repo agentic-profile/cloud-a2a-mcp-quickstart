@@ -1,12 +1,16 @@
-import { Card, CardBody, Button } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
 import { EyeIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface ReadWalletItemProps {
     walletItemKey: string;
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const ReadWalletItem = ({ walletItemKey, onSubmitMcpRequest }: ReadWalletItemProps) => {
+const ReadWalletItem = ({ walletItemKey, onSubmitHttpRequest }: ReadWalletItemProps) => {
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
+
     const handleWalletRead = () => {
         const mcpRequest = {
             method: "tools/call",
@@ -24,7 +28,10 @@ const ReadWalletItem = ({ walletItemKey, onSubmitMcpRequest }: ReadWalletItemPro
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -48,6 +55,8 @@ const ReadWalletItem = ({ walletItemKey, onSubmitMcpRequest }: ReadWalletItemPro
                 >
                     Read Wallet Item
                 </Button>
+
+                <HttpProgressSummary progress={httpProgress} />
             </CardBody>
         </Card>
     );

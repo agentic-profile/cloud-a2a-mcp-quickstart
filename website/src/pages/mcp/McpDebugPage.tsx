@@ -157,8 +157,10 @@ const McpDebugPage = () => {
                 {rpcUrl && isValidUrl() && (
                     <JsonRpcDebug
                         url={rpcUrl}
-                        request={request}
-                        onFinalResult={handleResult}
+                        httpRequest={request ? {
+                            requestInit: request,
+                            onProgress: (progress) => progress.result && handleResult(progress.result)
+                        } : null}
                     />
                 )}
 

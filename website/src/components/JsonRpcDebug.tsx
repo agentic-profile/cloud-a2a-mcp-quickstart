@@ -15,10 +15,24 @@ interface Result {
     error: unknown;
 }
 
+export interface HttpStep {
+    kind: 'request' | 'response';
+    summary: string;
+}
+
+export interface HttpProgress {
+    steps: HttpStep[];
+    result?: Result
+}
+
+export interface HttpRequest {
+    requestInit: RequestInit;
+    onProgress?: (progress: HttpProgress) => void;
+}
+
 interface JsonRpcDebugProps {
     url: string | undefined;
-    request: RequestInit | null;
-    onFinalResult: (result: Result) => void;
+    httpRequest: HttpRequest | null;
     onClose?: () => void;
     onClear?: () => void;
     className?: string;
@@ -44,8 +58,7 @@ export interface JsonRpcResponse {
 
 export const JsonRpcDebug = ({ 
     url, 
-    request, 
-    onFinalResult,
+    httpRequest,
     onClose,
     onClear,
     className = '' 
@@ -55,6 +68,9 @@ export const JsonRpcDebug = ({
     const [requestInit, setRequestInit] = useState<RequestInit | null>(null);
     const [method, setMethod] = useState<string | null>(null);
     const [result, setResult] = useState<Result | null>(null);
+
+    // Extract request from httpRequest
+    const request = httpRequest?.requestInit || null;
 
     const [retrySpinner, setRetrySpinner] = useState(false);
     const [retryInit, setRetryInit] = useState<RequestInit | null>(null);
@@ -117,9 +133,9 @@ export const JsonRpcDebug = ({
             if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
                 setAuthToken(newAuthToken);
 
-            onFinalResult(retryResult);
+            httpRequest?.onProgress?.({ steps: [], result: retryResult });
         } else {
-            onFinalResult(result);
+            httpRequest?.onProgress?.({ steps: [], result });
         }
     };
 

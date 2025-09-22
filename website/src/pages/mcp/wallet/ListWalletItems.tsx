@@ -1,11 +1,15 @@
-import { Card, CardBody, Button } from '@/components';
+import { useState } from 'react';
+import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
 import { ListBulletIcon } from '@heroicons/react/24/outline';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface ListWalletItemsProps {
-    onSubmitMcpRequest: (request: RequestInit) => void;
+    onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
-const ListWalletItems = ({ onSubmitMcpRequest }: ListWalletItemsProps) => {
+const ListWalletItems = ({ onSubmitHttpRequest }: ListWalletItemsProps) => {
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
+
     const handleWalletList = () => {
         const mcpRequest = {
             method: "tools/call",
@@ -22,7 +26,10 @@ const ListWalletItems = ({ onSubmitMcpRequest }: ListWalletItemsProps) => {
             body: JSON.stringify(mcpRequest),
         };
 
-        onSubmitMcpRequest(request);
+        onSubmitHttpRequest({
+            requestInit: request,
+            onProgress: setHttpProgress
+        });
     };
 
     return (
@@ -47,6 +54,8 @@ const ListWalletItems = ({ onSubmitMcpRequest }: ListWalletItemsProps) => {
                     <ListBulletIcon className="w-4 h-4 mr-2" />
                     List My Wallet Items
                 </Button>
+
+                <HttpProgressSummary progress={httpProgress} />
             </CardBody>
         </Card>
     );
