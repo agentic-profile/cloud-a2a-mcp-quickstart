@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Page, Card, CardBody, Button, JsonRpcDebug, LabelValue } from '@/components';
+import { Page, Card, CardBody, Button, JsonRpcDebug, LabelValue, HttpProgressSummary } from '@/components';
 import { MapPinIcon, MagnifyingGlassIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
+import { type HttpProgress } from '@/components/JsonRpcDebug';
 
 interface LocationData {
     latitude: number;
@@ -24,6 +25,7 @@ const McpLocationPage = () => {
     });
 
     const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
 
     // Construct the MCP endpoint URL
     const mcpEndpoint = buildEndpoint(serverUrl, 'mcp/location');
@@ -76,6 +78,7 @@ const McpLocationPage = () => {
 
     const clearResults = () => {
         setMcpRequest(null);
+        setHttpProgress(undefined);
     };
 
     const handleMcpResult = (result: Result) => {
@@ -199,10 +202,14 @@ const McpLocationPage = () => {
                         url={mcpEndpoint}
                         httpRequest={{
                             requestInit: mcpRequest,
-                            onProgress: (progress) => progress.result && handleMcpResult(progress.result)
+                            onProgress: (progress) => {
+                                setHttpProgress(progress);
+                                progress.result && handleMcpResult(progress.result);
+                            }
                         }}
                         onClose={clearResults}
                     />
+                    <HttpProgressSummary progress={httpProgress} />
                 </div>
             )}
         </Page>

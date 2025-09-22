@@ -1,19 +1,41 @@
+import { useState, useEffect } from 'react';
 import { type HttpProgress } from '@/components/JsonRpcDebug';
 
 export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | undefined }) => {
-    if (!progress) return null;
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Show the component whenever progress changes
+    useEffect(() => {
+        if (progress) {
+            setIsVisible(true);
+        }
+    }, [progress]);
+
+    if (!progress || !isVisible) return null;
+    
     const { steps, result } = progress;
     const preview = result?.data ? JSON.stringify(result.data, null, 2) : result?.text;
     
     return (
-        <div>
-            <ol className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-3 relative">
+            {/* Close button */}
+            <button
+                onClick={() => setIsVisible(false)}
+                className="absolute top-0 right-0 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close progress summary"
+            >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <ol className="space-y-1 text-sm text-gray-600 dark:text-gray-400 pr-8">
                 {steps.map((step, index) => {
                     const isLastItem = index === steps.length - 1;
                     const showSpinner = step.kind === 'request' && isLastItem;
                     
                     return (
-                        <li key={step.kind} className="flex items-center">
+                        <li key={index} className="flex items-center">
                             <span className="mr-2 text-gray-500 dark:text-gray-400 font-mono text-xs">
                                 {index + 1}.
                             </span>

@@ -33,7 +33,7 @@ const ListWalletItems = ({ onSubmitHttpRequest }: ListWalletItemsProps) => {
     };
 
     return (
-        <Card className="mt-6">
+        <Card>
             <CardBody>
                 <div className="flex items-center space-x-3 mb-4">
                     <div className="w-10 h-10 bg-gradient-to-r from-teal-600 to-emerald-600 rounded-lg flex items-center justify-center">

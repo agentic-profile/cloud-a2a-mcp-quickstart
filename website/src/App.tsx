@@ -12,7 +12,7 @@ import CharityPage from './pages/agents/CharityPage';
 import A2ADebugPage from './pages/agents/A2ADebugPage';
 import MCPIndexPage from './pages/mcp/MCPIndexPage';
 import McpDebugPage from './pages/mcp/McpDebugPage';
-import McpLocationPage from './pages/mcp/McpLocationPage';
+import McpLocationPage from './pages/mcp/location/McpLocationPage';
 import McpVcMatchPage from './pages/mcp/McpVcMatchPage';
 import McpVolunteerMatchPage from './pages/mcp/McpVolunteerMatchPage';
 import McpVenturePage from './pages/mcp/McpVenturePage';

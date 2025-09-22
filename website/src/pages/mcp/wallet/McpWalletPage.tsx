@@ -76,23 +76,26 @@ const McpWalletPage = () => {
                 onWalletItemKeyChange={handleWalletItemKeyChange}
             />
 
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Create/Update Wallet Item */}
-                <UpdateWalletItem 
-                    walletItemKey={walletItemKey}
-                    onSubmitHttpRequest={setHttpRequest} 
-                />
-
-                {/* Wallet Operations */}
-                <div className="space-y-6">
-                    {/* Read Wallet Item */}
-                    <ReadWalletItem 
+            <div className="grid gap-6 lg:grid-cols-5 items-start">
+                {/* Left Column - Create/Update and Present */}
+                <div className="flex flex-col gap-6 lg:col-span-3">
+                    <UpdateWalletItem 
+                        walletItemKey={walletItemKey}
+                        onSubmitHttpRequest={setHttpRequest} 
+                    />
+                    <PresentWalletItem 
                         walletItemKey={walletItemKey}
                         onSubmitHttpRequest={setHttpRequest}
                     />
+                </div>
 
-                    {/* Present Wallet Item */}
-                    <PresentWalletItem 
+                {/* Right Column - Wallet Operations */}
+                <div className="flex flex-col gap-6 lg:col-span-2">
+                    {/* List Wallet Items */}
+                    <ListWalletItems onSubmitHttpRequest={setHttpRequest} />
+
+                    {/* Read Wallet Item */}
+                    <ReadWalletItem 
                         walletItemKey={walletItemKey}
                         onSubmitHttpRequest={setHttpRequest}
                     />
@@ -102,14 +105,11 @@ const McpWalletPage = () => {
                         walletItemKey={walletItemKey}
                         onSubmitHttpRequest={setHttpRequest} 
                     />
+
+                    {/* MCP Wallet Tools */}
+                    <McpWalletTools onSubmitHttpRequest={setHttpRequest} />
                 </div>
             </div>
-
-            {/* List Wallet Items */}
-            <ListWalletItems onSubmitHttpRequest={setHttpRequest} />
-
-            {/* MCP Wallet Tools */}
-            <McpWalletTools onSubmitHttpRequest={setHttpRequest} />
 
             {/* JsonRpcDebug Component */}
             {httpRequest && (

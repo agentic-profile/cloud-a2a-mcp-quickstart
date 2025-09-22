@@ -10,6 +10,7 @@ interface UpdateWalletItemProps {
 
 const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletItemProps) => {
     const [credentialData, setCredentialData] = useState<string>('{\n  "type": "VerifiableCredential",\n  "credentialSubject": {\n    "id": "did:example:123",\n    "name": "Example Credential"\n  }\n}');
+    const [isPublic, setIsPublic] = useState<boolean>(false);
     const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
 
     const handleExampleClick = (exampleData: any) => {
@@ -31,7 +32,8 @@ const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletIt
                 name: "update",
                 item: {
                     key: walletItemKey,
-                    credential: parsedCredential
+                    credential: parsedCredential,
+                    public: isPublic
                 }
             }
         };
@@ -95,6 +97,17 @@ const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletIt
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
                         />
                         <p className="text-xs text-gray-500 mt-1">JSON object containing the credential data</p>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="isPublic"
+                            checked={isPublic}
+                            onChange={(e) => setIsPublic(e.target.checked)}
+                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <span className="text-xs text-gray-500">Make this wallet item publicly accessible</span>
                     </div>
                     
                     <Button
