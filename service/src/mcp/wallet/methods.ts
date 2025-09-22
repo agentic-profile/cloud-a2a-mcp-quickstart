@@ -52,15 +52,18 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
     }
 }
 
-export async function handlePresent(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-    const { key } = request.params || {};
+export async function handlePresent(request: JSONRPCRequest, _session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
+    const { subjectDid, key } = request.params || {};
     
     if (!key) {
         return jrpcError(request.id!, -32602, 'Invalid params: key is required');
     }
+    if(!subjectDid) {
+        return jrpcError(request.id!, -32602, 'Invalid params: subjectDid is required');
+    }
 
     // Use the same ID resolver as the CRUD operations
-    const id = idResolver(undefined, session, { key });
+    const id = `${subjectDid}^${key}`;
     
     try {
         // Read the wallet item
@@ -69,17 +72,12 @@ export async function handlePresent(request: JSONRPCRequest, session: ClientAgen
         if (!walletItem) {
             return jrpcError(request.id!, -32604, `Wallet item with key '${key}' not found`);
         }
+        if( walletItem.public != true ) {
+            return jrpcError(request.id!, -32604, `Wallet item with key '${key}' is not public`);
+        }
 
-        /* Present the credential - return the credential data along with presentation metadata
-        const presentation = {
-            type: 'VerifiablePresentation',
-            presentedAt: new Date().toISOString(),
-            presentedBy: session.agentDid.split('#')[0],
-            credential: walletItem.credential,
-            walletKey: key
-        };*/
-
-        const presentation = await presentCredential( walletItem.credential );
+        const { credential } = walletItem;
+        const presentation = credential.proof ? credential : await presentCredential( credential );
 
         return mcpResultResponse(request.id!, { presentation });
     } catch (error) {

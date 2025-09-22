@@ -15,6 +15,10 @@ export const MCP_TOOLS = [
                         credential: {
                             type: 'object',
                             description: 'Credential data (JSON object)'
+                        },
+                        public: {
+                            type: 'boolean',
+                            description: 'Whether the wallet item is public'
                         }
                     },
                     required: ['key', 'credential']
@@ -57,6 +61,10 @@ export const MCP_TOOLS = [
         inputSchema: {
             type: 'object',
             properties: {
+                subjectDid: {
+                    type: 'string',
+                    description: 'The DID of the subject that owns the wallet to read'
+                },
                 key: {
                     type: 'string',
                     description: 'Key of the wallet item to present'
