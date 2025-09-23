@@ -1,5 +1,5 @@
 import type { MCPService } from './types';
-import { MapPinIcon, GlobeAltIcon, WalletIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, GlobeAltIcon, WalletIcon, StarIcon } from '@heroicons/react/24/outline';
 
 export const mcpServices: MCPService[] = [
     {
@@ -22,6 +22,13 @@ export const mcpServices: MCPService[] = [
         description: 'Manage verifiable credentials and digital wallet items',
         icon: WalletIcon,
         route: '/mcp/wallet'
+    },
+    {
+        id: '4',
+        name: 'Reputation',
+        description: 'Manage reputation items and reviews about others',
+        icon: StarIcon,
+        route: '/mcp/reputation'
     } /*,
     {
         id: '2',
@@ -36,12 +43,5 @@ export const mcpServices: MCPService[] = [
         description: 'Connect with similar people',
         icon: UserGroupIcon,
         route: '/mcp/volunteer-match'
-    },
-    {
-        id: '4',
-        name: 'Reputation',
-        description: 'Check on the reputation of people and businesses',
-        icon: ShieldCheckIcon,
-        route: '/mcp/reputation'
     }*/
 ];

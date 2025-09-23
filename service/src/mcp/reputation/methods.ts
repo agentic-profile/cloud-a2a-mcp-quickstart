@@ -6,7 +6,6 @@ import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { ReputationItem } from './types.js';
 import { mcpResultResponse, resolveAgentDid } from '../utils.js';
-//import { presentCredential } from './present.js';
 
 const TABLE_NAME = process.env.DYNAMODB_REPUTATIONS_TABLE_NAME || 'reputations';
 const store = itemStore<ReputationItem>({name: 'reputations', 'tableName': TABLE_NAME});

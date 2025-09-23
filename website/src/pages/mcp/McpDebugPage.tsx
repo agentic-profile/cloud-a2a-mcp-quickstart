@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor, HttpProgressSummary } from '@/components';
 import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/misc';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/mcp/location');
 
@@ -46,7 +47,8 @@ export interface McpRequest {
 
 const McpDebugPage = () => {
     const [customPayload, setCustomPayload] = useState<string>('{\n  "method": "tools/list",\n  "params": {\n    "name": "test"\n  }\n}');
-    const [request, setRequest] = useState<RequestInit | null>(null);
+    const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
     const queryRpcUrl = useRpcUrlFromWindow();
     const { serverUrl } = useSettingsStore();
 
@@ -55,10 +57,6 @@ const McpDebugPage = () => {
 
     const handlePayloadChange = (value: string) => {
         setCustomPayload(value);
-    };
-
-    const handleResult = (result: any) => {
-        console.log('JSON RPC Result:', result);
     };
 
     const getParsedPayload = () => {
@@ -110,7 +108,7 @@ const McpDebugPage = () => {
         });
 
         // Set the request - this will automatically trigger JsonRpcDebug to send it
-        setRequest({body});
+        setHttpRequest({requestInit: {body}, onProgress: setHttpProgress});
     };
 
     return (
@@ -150,6 +148,8 @@ const McpDebugPage = () => {
                         >
                             Send Request
                         </Button>
+
+                        <HttpProgressSummary progress={httpProgress} />
                     </CardBody>
                 </Card>
 
@@ -157,10 +157,7 @@ const McpDebugPage = () => {
                 {rpcUrl && isValidUrl() && (
                     <JsonRpcDebug
                         url={rpcUrl}
-                        httpRequest={request ? {
-                            requestInit: request,
-                            onProgress: (progress) => progress.result && handleResult(progress.result)
-                        } : null}
+                        httpRequest={httpRequest}
                     />
                 )}
 
