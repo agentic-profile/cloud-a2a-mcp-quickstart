@@ -6,19 +6,20 @@ import { StoreItem, ItemStore } from "../stores/types.js";
 import { JSONRPCResponse } from "@modelcontextprotocol/sdk/types.js";
 
 export type ResolveItemId<T> = (item: T | undefined, session: ClientAgentSession, params: any | undefined ) => string;
-export type ResolveOwner<T> = (item: T | undefined, session: ClientAgentSession, params: any | undefined ) => string | undefined;
+export type ResolveAuthor<T> = (item: T | undefined, session: ClientAgentSession, params: any | undefined ) => string | undefined;
 
 export type Options<T> = {
     itemKey?: string;
+    authorKey?: string
     idResolver: ResolveItemId<T>;
-    ownerResolver?: ResolveOwner<T>;
+    authorResolver?: ResolveAuthor<T>;
 }
 
 export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Options<T> ) {
     const debugLabel = store.name();
-    const { idResolver, itemKey = "item", ownerResolver } = options;
+    const { idResolver, itemKey = "item", authorKey = "authorDid", authorResolver } = options;
     return {
-        // Only the wallet owner can add/update wallet items
+        // Only the item owner can add/update items
         async handleUpdate(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
             const item = request.params?.[itemKey] as StoreItem | undefined;
             if (!item)
@@ -26,18 +27,18 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
 
             // I can only upload my own profile
             item.id = idResolver(item as T,session,request.params);
-            item.ownerDid = ownerResolver?.(item as T,session,request.params);
+            item[authorKey] = authorResolver?.(item as T,session,request.params);
             item.updated = new Date().toISOString();
 
             try {
                 await store.updateItem(item as T);
                 return mcpTextContentResponse(request.id!, `${debugLabel} item updated successfully`);
             } catch (error) {
-                return jrpcError(request.id!, -32603, 'Failed to update ${debugLabel} item:' + (error as Error).message);
+                return jrpcError(request.id!, -32603, `Failed to update ${debugLabel} item ${item.id}:` + (error as Error).message);
             }
         },
 
-        // Only the wallet owner can directly read their own wallet items
+        // Only the item owner can directly read their own items
         async handleRead(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
             const id = idResolver(undefined,session,request.params);
             try {
@@ -59,55 +60,3 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
         }
     }
 }
-
-
-
-
-
-
-/*
-
-export type ResolveItemId = (session: ClientAgentSession) => string;
-
-function resolveItemId(session: ClientAgentSession): string {
-    return session.agentDid.split('#')[0];
-}
-
-export function mcpCrud<T extends DatedItem>( store: ItemStore<T>, idResolver: ResolveItemId = resolveItemId ) {
-    return {
-        async handleUpdate(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-            const profile = request.params?.profile as DatedItem | undefined;
-            if (!profile)
-                return jrpcError(request.id!, -32602, 'Invalid params: profile is required');
-
-            // I can only upload my own profile
-            profile.id = idResolver(session);
-            profile.updated = new Date().toISOString();
-
-            try {
-                await store.updateItem(profile as T);
-                return mcpTextContentResponse(request.id!, `Venture profile updated successfully`);
-            } catch (error) {
-                return jrpcError(request.id!, -32603, 'Failed to update venture profile:' + (error as Error).message);
-            }
-        },
-
-        async handleRead(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-            try {
-                const result = await store.readItem(idResolver(session));
-                return mcpResultResponse(request.id!, { profile:result });
-            } catch (error) {
-                return jrpcError(request.id!, -32603, 'Failed to update venture profile:' + (error as Error).message);
-            }
-        },
-
-        async handleDelete(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-            try {
-                await store.deleteItem(idResolver(session));
-                return mcpTextContentResponse(request.id!, `Venture profile updated successfully`);
-            } catch (error) {
-                return jrpcError(request.id!, -32603, 'Failed to update venture profile:' + (error as Error).message);
-            }
-        }
-    }
-}*/

@@ -9,23 +9,19 @@ import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { WalletItem } from './types.js';
-import { mcpResultResponse } from '../utils.js';
+import { mcpResultResponse, resolveAgentDid } from '../utils.js';
 import { presentCredential } from './present.js';
 
 const TABLE_NAME = process.env.DYNAMODB_WALLETS_TABLE_NAME || 'wallets';
 const store = itemStore<WalletItem>({name: 'wallets', 'tableName': TABLE_NAME});
 function idResolver(item: WalletItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;
-    return `${resolveAgentDid(session)}^${key}`;
+    return `${resolveAgentDid(session).did}^${key}`;
 }
-function ownerResolver(_item: WalletItem | undefined, session: ClientAgentSession, _params: any | undefined ): string | undefined {
-    return resolveAgentDid(session);
+function authorResolver(_item: WalletItem | undefined, session: ClientAgentSession, _params: any | undefined ): string | undefined {
+    return resolveAgentDid(session).did;
 }
-const crud = mcpCrud(store, { idResolver, ownerResolver } );
-
-function resolveAgentDid(session: ClientAgentSession): string {
-    return session.agentDid.split('#')[0];
-}
+const crud = mcpCrud(store, { idResolver, authorResolver, authorKey: 'ownerDid' } );
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
@@ -88,7 +84,7 @@ export async function handlePresent(request: JSONRPCRequest, _session: ClientAge
 export async function handleList(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     try {
         // Get all MY wallet items
-        const ownerDid = resolveAgentDid(session);
+        const ownerDid = resolveAgentDid(session).did;
         const query = {
             KeyConditionExpression: "ownerDid = :ownerDid",
             ExpressionAttributeValues: { ":ownerDid": ownerDid }

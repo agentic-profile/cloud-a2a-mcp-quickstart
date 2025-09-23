@@ -1,7 +1,6 @@
 export interface StoreItem {
     id: string;
     updated: string;
-    owner?: string
     [key: string]: any;
 }
 

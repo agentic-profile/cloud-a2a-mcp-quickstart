@@ -128,7 +128,7 @@ export const UserProfileDisplay = () => {
                 <div className="flex justify-end">
                     <Button
                         onClick={clearUserProfile}
-                        variant="secondary"
+                        variant="danger"
                     >
                         Start Over with New Identity
                     </Button>
