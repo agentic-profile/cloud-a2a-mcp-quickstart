@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Card, CardBody, Button, LabelValue, HttpProgressSummary } from '@/components';
+import { McpToolCallCard, Button, LabelValue } from '@/components';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
+import { type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface UpdateWalletItemProps {
     walletItemKey: string;
@@ -11,22 +11,21 @@ interface UpdateWalletItemProps {
 const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletItemProps) => {
     const [credentialData, setCredentialData] = useState<string>('{\n  "type": "VerifiableCredential",\n  "credentialSubject": {\n    "id": "did:example:123",\n    "name": "Example Credential"\n  }\n}');
     const [isPublic, setIsPublic] = useState<boolean>(false);
-    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
 
     const handleExampleClick = (exampleData: any) => {
         setCredentialData(JSON.stringify(exampleData, null, 2));
     };
 
-    const handleWalletUpdate = () => {
+    const createMcpRequest = () => {
         let parsedCredential;
         try {
             parsedCredential = JSON.parse(credentialData);
         } catch (error) {
             alert('Invalid JSON in credential data');
-            return;
+            throw error;
         }
 
-        const mcpRequest = {
+        return {
             method: "tools/call",
             params: {
                 name: "update",
@@ -37,91 +36,64 @@ const UpdateWalletItem = ({ walletItemKey, onSubmitHttpRequest }: UpdateWalletIt
                 }
             }
         };
-
-        const request: RequestInit = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(mcpRequest),
-        };
-
-        onSubmitHttpRequest({
-            requestInit: request,
-            onProgress: setHttpProgress
-        });
     };
 
     return (
-        <Card className="lg:col-span-2">
-            <CardBody>
-                <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                        <PlusIcon className="w-5 h-5 text-white" />
+        <McpToolCallCard
+            title="Create/Update Wallet Item"
+            icon={<PlusIcon className="w-5 h-5 text-white" />}
+            description="Create or update a wallet item with credential data"
+            buttonText="Create/Update Wallet Item"
+            createMcpRequest={createMcpRequest}
+            onSubmitHttpRequest={onSubmitHttpRequest}
+        >
+            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border">
+                <LabelValue label="Using wallet key" value={walletItemKey} />
+                <p className="sm">This key is managed by the Wallet Item Key card above</p>
+            </div>
+            
+            <div>
+                <div className="mb-3">
+                    <p className="sm">Examples:</p>
+                    <div className="flex flex-wrap gap-2">
+                        {EXAMPLES.map((example, index) => (
+                            <Button
+                                key={index}
+                                onClick={() => handleExampleClick(example.data)}
+                                variant="secondary"
+                                size="sm"
+                                className="text-xs"
+                            >
+                                {example.name}
+                            </Button>
+                        ))}
                     </div>
-                    <h3>Create/Update Wallet Item</h3>
                 </div>
-                
-                <div className="space-y-4">
-                    <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border">
-                        <LabelValue label="Using wallet key" value={walletItemKey} />
-                        <p className="sm">This key is managed by the Wallet Item Key card above</p>
-                    </div>
-                    
-                    <div>
-                        <div className="mb-3">
-                            <p className="sm">Examples:</p>
-                            <div className="flex flex-wrap gap-2">
-                                {EXAMPLES.map((example, index) => (
-                                    <Button
-                                        key={index}
-                                        onClick={() => handleExampleClick(example.data)}
-                                        variant="secondary"
-                                        size="sm"
-                                        className="text-xs"
-                                    >
-                                        {example.name}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-                        <label htmlFor="credentialData" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Credential Data (JSON)
-                        </label>
-                        <textarea
-                            id="credentialData"
-                            value={credentialData}
-                            onChange={(e) => setCredentialData(e.target.value)}
-                            rows={10}
-                            placeholder='{"type": "VerifiableCredential", "credentialSubject": {...}}'
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">JSON object containing the credential data</p>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            id="isPublic"
-                            checked={isPublic}
-                            onChange={(e) => setIsPublic(e.target.checked)}
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        <span className="text-xs text-gray-500">Make this wallet item publicly accessible</span>
-                    </div>
-                    
-                    <Button
-                        onClick={handleWalletUpdate}
-                        className="w-full"
-                        color="primary"
-                    >
-                        Create/Update Wallet Item
-                    </Button>
-
-                    <HttpProgressSummary progress={httpProgress} />
-                </div>
-            </CardBody>
-        </Card>
+                <label htmlFor="credentialData" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Credential Data (JSON)
+                </label>
+                <textarea
+                    id="credentialData"
+                    value={credentialData}
+                    onChange={(e) => setCredentialData(e.target.value)}
+                    rows={10}
+                    placeholder='{"type": "VerifiableCredential", "credentialSubject": {...}}'
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">JSON object containing the credential data</p>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+                <input
+                    type="checkbox"
+                    id="isPublic"
+                    checked={isPublic}
+                    onChange={(e) => setIsPublic(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <span className="text-xs text-gray-500">Make this wallet item publicly accessible</span>
+            </div>
+        </McpToolCallCard>
     );
 };
 

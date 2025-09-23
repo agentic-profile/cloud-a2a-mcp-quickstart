@@ -33,7 +33,7 @@ export { LabelJson } from './LabelJson';
 export { RadioButton } from './RadioButton';
 export { RadioGroup } from './RadioGroup';
 export { EditableUrl } from './EditableUrl';
-export { EditableText } from './EditableText';
+export { EditableValue } from './EditableValue';
 export { default as JsonEditor } from './JsonEditor';
 export { EditableValueList } from './EditableValueList';
 export { TabbedEditableLists } from './TabbedEditableLists';

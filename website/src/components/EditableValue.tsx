@@ -3,7 +3,7 @@ import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from './Button';
 import { Card, CardBody } from './Card';
 
-interface EditableTextProps {
+interface EditableValueProps {
     card?: boolean;
     label: string;
     value: string | null | undefined;
@@ -13,6 +13,7 @@ interface EditableTextProps {
     validate?: (value: string | null | undefined) => boolean;
     validationMessage?: string;
     multiline?: boolean;
+    inputType?: "text" | "number";
 }
 
 // Simple text validation - can be overridden via props
@@ -20,7 +21,7 @@ const validateText = (_text: string | null | undefined): boolean => {
     return true; // All text is valid by default
 };
 
-export const EditableText = ({ 
+export const EditableValue = ({ 
     card = true, 
     label, 
     value, 
@@ -29,8 +30,9 @@ export const EditableText = ({
     onUpdate, 
     validate = validateText,
     validationMessage = "Invalid text format",
-    multiline = false
-}: EditableTextProps) => {
+    multiline = false,
+    inputType = "text"
+}: EditableValueProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableValue, setEditableValue] = useState('');
     const isValidValue = validate(value);
@@ -104,11 +106,11 @@ export const EditableText = ({
                             />
                         ) : (
                             <input
-                                type="text"
+                                type={inputType}
                                 value={editableValue}
                                 onChange={handleInputChange}
                                 onKeyDown={handleKeyDown}
-                                placeholder={placeholder || "Enter text..."}
+                                placeholder={placeholder || (inputType === "number" ? "Enter number..." : "Enter text...")}
                                 className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${
                                     !isValidEdit && editableValue.trim() 
                                         ? 'border-red-500 focus:ring-red-500' 
@@ -173,7 +175,7 @@ export const EditableText = ({
                         />
                     ) : (
                         <input
-                            type="text"
+                            type={inputType}
                             value={value || ''}
                             readOnly
                             onClick={handleEdit}

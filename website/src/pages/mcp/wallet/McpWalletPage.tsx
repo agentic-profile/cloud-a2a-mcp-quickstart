@@ -12,13 +12,6 @@ import McpWalletTools from './McpWalletTools';
 import WalletItemKey from './WalletItemKey';
 import { type HttpRequest } from '@/components/JsonRpcDebug';
 
-/*
-interface Result {
-    fetchResponse: Response | undefined;
-    text: string | undefined;
-    data: any | undefined;
-    error: unknown;
-}*/
 
 const McpWalletPage = () => {
     const { serverUrl } = useSettingsStore();

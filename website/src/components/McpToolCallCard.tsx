@@ -7,9 +7,14 @@ interface McpToolCallCardProps {
     icon: ReactNode;
     description?: string;
     buttonText: string;
-    children: ReactNode;
-    createMcpRequest: () => any;
+    children?: ReactNode;
+    createMcpRequest: () => McpRequest | undefined;
     onSubmitHttpRequest: (request: HttpRequest) => void;
+}
+
+interface McpRequest {
+    method: string;
+    params: any;
 }
 
 const McpToolCallCard = ({ 
@@ -25,7 +30,9 @@ const McpToolCallCard = ({
 
     const handleSubmit = () => {
         const mcpRequest = createMcpRequest();
-        
+        if (!mcpRequest)
+            return;
+
         const request: RequestInit = {
             method: 'POST',
             headers: {

@@ -1,108 +1,73 @@
 import { useState } from 'react';
-import { Card, CardBody, Button, HttpProgressSummary } from '@/components';
+import McpToolCallCard from '@/components/McpToolCallCard';
+import { EditableValue } from '@/components/EditableValue';
 import { ArrowUpIcon } from '@heroicons/react/24/outline';
-import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
+import { type HttpRequest } from '@/components/JsonRpcDebug';
 
 interface LocationData {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
 }
 
 interface UpdateLocationProps {
     onSubmitHttpRequest: (request: HttpRequest) => void;
 }
 
+// Validation function for numeric coordinates
+const validateCoordinate = (value: string | null | undefined): boolean => {
+    if (!value || value.trim() === '') return false;
+    const num = parseFloat(value);
+    return !isNaN(num) && isFinite(num);
+};
+
 const UpdateLocation: React.FC<UpdateLocationProps> = ({ onSubmitHttpRequest }) => {
     const [locationData, setLocationData] = useState<LocationData>({
-        latitude: 40.7128,
-        longitude: -74.0060
+        latitude: "40.7128",
+        longitude: "-74.0060"
     });
-    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
 
-    const handleLocationUpdate = () => {
-        const mcpRequest = {
-            //jsonrpc: "2.0",
-            //id: 1,
-            method: "tools/call",
-            params: {
-                name: "update",
-                coords: {
-                    latitude: locationData.latitude,
-                    longitude: locationData.longitude
-                }
+    const createMcpRequest = () => ({
+        method: "tools/call",
+        params: {
+            name: "update",
+            coords: {
+                latitude: parseFloat(locationData.latitude),
+                longitude: parseFloat(locationData.longitude)
             }
-        };
-
-        const request: RequestInit = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(mcpRequest),
-        };
-
-        onSubmitHttpRequest({
-            requestInit: request,
-            onProgress: setHttpProgress
-        });
-    };
+        }
+    });
 
     return (
-        <div>
-            <Card>
-                <CardBody>
-                    <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                            <ArrowUpIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold">Update Location</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="update-latitude" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Latitude
-                            </label>
-                            <input
-                                id="update-latitude"
-                                type="number"
-                                value={locationData.latitude}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocationData(prev => ({ ...prev, latitude: parseFloat(e.target.value) || 0 }))}
-                                step="any"
-                                placeholder="40.7128"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label htmlFor="update-longitude" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Longitude
-                            </label>
-                            <input
-                                id="update-longitude"
-                                type="number"
-                                value={locationData.longitude}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocationData(prev => ({ ...prev, longitude: parseFloat(e.target.value) || 0 }))}
-                                step="any"
-                                placeholder="-74.0060"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        
-                        <Button
-                            onClick={handleLocationUpdate}
-                            className="w-full"
-                            color="primary"
-                        >
-                            Update Location
-                        </Button>
-                        <HttpProgressSummary progress={httpProgress} />
-                    </div>
-                </CardBody>
-            </Card>
-
-
-        </div>
+        <McpToolCallCard
+            title="Update Location"
+            icon={<ArrowUpIcon className="w-5 h-5 text-white" />}
+            description="Enter latitude and longitude coordinates to update the location."
+            buttonText="Update Location"
+            createMcpRequest={createMcpRequest}
+            onSubmitHttpRequest={onSubmitHttpRequest}
+        >
+            <EditableValue
+                card={false}
+                label="Latitude"
+                value={locationData.latitude}
+                placeholder="40.7128"
+                inputType="number"
+                validate={validateCoordinate}
+                validationMessage="Please enter a valid latitude coordinate"
+                onUpdate={(newValue) => setLocationData(prev => ({ ...prev, latitude: newValue }))}
+            />
+            
+            <EditableValue
+                card={false}
+                label="Longitude"
+                value={locationData.longitude}
+                placeholder="-74.0060"
+                inputType="number"
+                validate={validateCoordinate}
+                validationMessage="Please enter a valid longitude coordinate"
+                onUpdate={(newValue) => setLocationData(prev => ({ ...prev, longitude: newValue }))}
+            />
+        </McpToolCallCard>
     );
 };
 

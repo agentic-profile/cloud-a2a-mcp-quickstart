@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { McpToolCallCard, EditableText } from '@/components';
+import { McpToolCallCard, EditableValue } from '@/components';
 import { PresentationChartLineIcon } from '@heroicons/react/24/outline';
 import { type HttpRequest } from '@/components/JsonRpcDebug';
 import { useUserProfileStore } from '@/stores/userProfileStore';
@@ -45,14 +45,14 @@ const PresentWalletItem = ({ walletItemKey, onSubmitHttpRequest }: PresentWallet
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         >
-            <EditableText
+            <EditableValue
                 card={false}
                 label="Subject DID"
                 value={subjectDid}
                 placeholder="Enter subject DID"
                 onUpdate={setSubjectDid}
             />
-            <EditableText
+            <EditableValue
                 card={false}
                 label="Key"
                 value={key}
