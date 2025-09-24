@@ -10,30 +10,29 @@ interface UpdateReputationItemProps {
 
 const UpdateReputationItem = ({ reputationItemKey, onSubmitHttpRequest }: UpdateReputationItemProps) => {
     const [subjectDid, setSubjectDid] = useState<string>('did:example:subject123');
-    const [kind, setKind] = useState<string>('review');
-    const [reputationData, setReputationData] = useState<string>('{\n  "rating": 5,\n  "comment": "Excellent service and professionalism",\n  "category": "service_quality"\n}');
+    const [reputationData, setReputationData] = useState<string>('');
 
     const handleExampleClick = (exampleData: any) => {
-        setReputationData(JSON.stringify(exampleData, null, 2));
+        setReputationData(JSON.stringify(exampleData, null, 4));
     };
 
     const createMcpRequest = () => {
-        let parsedReputation;
+        let reputation;
         try {
-            parsedReputation = JSON.parse(reputationData);
+            reputation = JSON.parse(reputationData);
         } catch (error) {
             alert('Invalid JSON in reputation data');
             throw error;
         }
+
+        reputation.subjectDid = subjectDid;
 
         return {
             method: "tools/call",
             params: {
                 name: "update",
                 key: reputationItemKey,
-                subjectDid: subjectDid,
-                kind: kind,
-                reputation: parsedReputation
+                reputation
             }
         };
     };
@@ -66,26 +65,6 @@ const UpdateReputationItem = ({ reputationItemKey, onSubmitHttpRequest }: Update
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                     />
                     <p className="text-xs text-gray-500 mt-1">DID of the person this reputation is about</p>
-                </div>
-
-                <div>
-                    <label htmlFor="kind" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Reputation Kind
-                    </label>
-                    <select
-                        id="kind"
-                        value={kind}
-                        onChange={(e) => setKind(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                    >
-                        <option value="review">Review</option>
-                        <option value="rating">Rating</option>
-                        <option value="recommendation">Recommendation</option>
-                        <option value="feedback">Feedback</option>
-                        <option value="testimonial">Testimonial</option>
-                        <option value="endorsement">Endorsement</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Type of reputation being created</p>
                 </div>
 
                 <div>

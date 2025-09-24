@@ -13,7 +13,7 @@ import { mcpResultResponse, resolveAgentDid } from '../utils.js';
 import { presentCredential } from './present.js';
 
 const TABLE_NAME = process.env.DYNAMODB_WALLETS_TABLE_NAME || 'wallets';
-const store = itemStore<WalletItem>({name: 'wallets', 'tableName': TABLE_NAME});
+const store = itemStore<WalletItem>({tableName: TABLE_NAME});
 function idResolver(item: WalletItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;
     return `${resolveAgentDid(session).did}^${key}`;
@@ -83,9 +83,10 @@ export async function handlePresent(request: JSONRPCRequest, _session: ClientAge
 
 export async function handleList(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     try {
-        // Get all MY wallet items
+        // Get all MY wallet items using the Global Secondary Index
         const ownerDid = resolveAgentDid(session).did;
         const query = {
+            IndexName: "TypeIndex",
             KeyConditionExpression: "ownerDid = :ownerDid",
             ExpressionAttributeValues: { ":ownerDid": ownerDid }
         };

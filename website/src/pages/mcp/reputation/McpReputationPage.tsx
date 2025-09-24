@@ -13,7 +13,7 @@ import { type HttpRequest } from '@/components/JsonRpcDebug';
 
 const McpReputationPage = () => {
     const { serverUrl } = useSettingsStore();
-    const [reputationItemKey, setReputationItemKey] = useState<string>('service-review-2024');
+    const [reputationItemKey, setReputationItemKey] = useState<string>('default');
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Construct the MCP endpoint URL

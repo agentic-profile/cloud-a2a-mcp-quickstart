@@ -8,7 +8,7 @@ import { ReputationItem } from './types.js';
 import { mcpResultResponse, resolveAgentDid } from '../utils.js';
 
 const TABLE_NAME = process.env.DYNAMODB_REPUTATIONS_TABLE_NAME || 'reputations';
-const store = itemStore<ReputationItem>({name: 'reputations', 'tableName': TABLE_NAME});
+const store = itemStore<ReputationItem>({tableName: TABLE_NAME});
 function idResolver(item: ReputationItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;
     return `${resolveAgentDid(session).did}^${key}`;
@@ -16,7 +16,7 @@ function idResolver(item: ReputationItem | undefined, session: ClientAgentSessio
 function authorResolver(_item: ReputationItem | undefined, session: ClientAgentSession, _params: any | undefined ): string | undefined {
     return resolveAgentDid(session).did;
 }
-const crud = mcpCrud(store, { idResolver, authorResolver, authorKey: 'reporterDid' } );
+const crud = mcpCrud(store, { idResolver, authorResolver, itemKey: "reputation", authorKey: 'reporterDid' } );
 
 export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCResponse> {
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
@@ -48,12 +48,13 @@ export async function handleListByReporter(request: JSONRPCRequest, session: Cli
     try {
         const reporterDid = resolveAgentDid(session).did;
         const query = {
+            IndexName: "ReporterIndex",
             KeyConditionExpression: "reporterDid = :reporterDid",
             ExpressionAttributeValues: { ":reporterDid": reporterDid }
         };
-        const items = await store.queryItems(query);
+        const reputations = await store.queryItems(query);
 
-        return mcpResultResponse(request.id!, { items });
+        return mcpResultResponse(request.id!, { reputations });
     } catch (error) {
         return jrpcError(request.id!, -32603, `Failed to list reputation items by reporter: ${(error as Error).message}`);
     }
@@ -64,12 +65,13 @@ export async function handleListBySubject(request: JSONRPCRequest, _session: Cli
     const { subjectDid } = request.params || {};
     try {
         const query = {
+            IndexName: "SubjectIndex",
             KeyConditionExpression: "subjectDid = :subjectDid",
             ExpressionAttributeValues: { ":subjectDid": subjectDid }
         };
-        const items = await store.queryItems(query);
+        const reputations = await store.queryItems(query);
 
-        return mcpResultResponse(request.id!, { items });
+        return mcpResultResponse(request.id!, { reputations });
     } catch (error) {
         return jrpcError(request.id!, -32603, `Failed to list reputation items by subject: ${(error as Error).message}`);
     }

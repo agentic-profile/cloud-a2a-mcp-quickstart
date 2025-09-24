@@ -59,6 +59,21 @@ aws dynamodb create-table \
 ```
 
 ```bash
+aws dynamodb create-table \
+  --table-name reputations \
+  --attribute-definitions \
+    AttributeName=id,AttributeType=S \
+    AttributeName=reporterDid,AttributeType=S \
+    AttributeName=subjectDid,AttributeType=S \
+  --key-schema \
+    AttributeName=id,KeyType=HASH \
+  --global-secondary-indexes \
+    'IndexName=TypeIndex,KeySchema=[{AttributeName=reporterDid,KeyType=HASH},{AttributeName=subjectDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+  --billing-mode PAY_PER_REQUEST \
+  --endpoint-url http://localhost:8000
+```
+
+```bash
 aws dynamodb scan \
     --endpoint-url http://localhost:8000 \
     --table-name wallets

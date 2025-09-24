@@ -9,6 +9,6 @@ export interface ItemStore<T extends StoreItem> {
     updateItem(item: T): Promise<void>;
     deleteItem(id: string): Promise<void>;
     queryItems(query:any): Promise<T[]>;
-    recentItems(since: string): Promise<T[]>;
+    recentItems( kind: string, since: string): Promise<T[]>;
     name(): string
 }

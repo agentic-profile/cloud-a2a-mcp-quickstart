@@ -16,10 +16,10 @@ const ListByReporter = ({ onSubmitHttpRequest }: ListByReporterProps) => {
 
     return (
         <McpToolCallCard
-            title="List My Reputations"
+            title="List Reputations I Reported"
             icon={<UserIcon className="w-5 h-5 text-white" />}
             description="List all reputation items that I have reported about others."
-            buttonText="List My Reputations"
+            buttonText="List Reputations"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         />

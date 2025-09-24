@@ -8,7 +8,7 @@ import { StoreItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
 
 const TABLE_NAME = process.env.DYNAMODB_VENTURES_TABLE_NAME || 'venture-profiles';
-const store = itemStore<StoreItem>({name: 'venture', 'tableName': TABLE_NAME, kind: 'venture'});
+const store = itemStore<StoreItem>({'tableName': TABLE_NAME});
 
 function idResolver(_item: StoreItem | undefined, session: ClientAgentSession, _params: any | undefined ): string {
     return session.agentDid.split('#')[0];
@@ -18,12 +18,15 @@ const crud = mcpCrud(store, { idResolver, itemKey: "profile" } );
 export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
 
-    console.log('🔍 handleToolsCall', name, session);
+    console.log('🔍 handleToolsCall', name, request, session);
     
     switch (name) {
         case 'read':
             return await crud.handleRead(request,session);
         case 'update':
+            console.log('🔍 update', request.params);
+            if(request.params!.profile)
+                (request.params!.profile as StoreItem).kind = 'venture';
             return await crud.handleUpdate(request,session);
         case 'delete':
             return await crud.handleDelete(request,session);
@@ -38,7 +41,7 @@ export async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSON
     try {
         const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
         const since = request.params?.since || new Date( twentyFourHoursAgo ).toISOString();
-        const items = await store.recentItems(since as string);
+        const items = await store.recentItems('venture', since as string);
         return mcpResultResponse(request.id!, { items, since });
     } catch (error) {
         console.log('Get recent updates failed for table:', TABLE_NAME, error);

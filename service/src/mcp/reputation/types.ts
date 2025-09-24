@@ -16,6 +16,5 @@ export interface ReputationItem extends StoreItem {
     key: string;    // keeps per-owner items separate, must be unique per reporter
     subjectDid: string;
     reporterDid: string
-    kind: string;
-    reputation: any;
+    //kind: string;
 }

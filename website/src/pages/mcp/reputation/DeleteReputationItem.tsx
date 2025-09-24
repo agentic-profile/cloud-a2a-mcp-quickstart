@@ -18,10 +18,10 @@ const DeleteReputationItem = ({ reputationItemKey, onSubmitHttpRequest }: Delete
 
     return (
         <McpToolCallCard
-            title="Delete Reputation Item"
+            title="Delete Reputation I Reported"
             icon={<TrashIcon className="w-5 h-5 text-white" />}
-            description="Delete the reputation item using the key from the update form above."
-            buttonText="Delete Reputation Item"
+            description="Delete a reputation I reported using the key from the update form above."
+            buttonText="Delete Reputation"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         />

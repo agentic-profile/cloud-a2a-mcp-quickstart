@@ -24,15 +24,12 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 export interface StoreOptions {
     tableName: string;
-    name: string;
-    kind?: string;
 }
 
-export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreOptions): ItemStore<T> {
-    const label = `${kind}${name} in ${tableName}`;
-    console.log(`DynamoDB itemStore of ${label}`);
+export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): ItemStore<T> {
+    console.log(`DynamoDB itemStore of ${tableName}`);
     return {
-        name: () => name,
+        name: () => tableName,
         async readItem(id: string): Promise<T | undefined> {
             try {
                 const result = await docClient.send(new GetCommand({
@@ -49,25 +46,20 @@ export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreO
                 // Convert DynamoDB item back to VentureProfile
                 return result.Item as T;
             } catch (error) {
-                console.error(`Error loading ${label}[${id}]:`, error);
-                throw new Error(`Failed to load ${label}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error loading ${tableName}[${id}]:`, error);
+                throw new Error(`Failed to load ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
         async updateItem(item: T): Promise<void> {
             try {
-                const itemToSave = kind ? {
-                    ...item,
-                    kind // usually needed for "updated" sort to work
-                } : item;
-
                 await docClient.send(new PutCommand({
                     TableName: tableName,
-                    Item: itemToSave
+                    Item: item
                 }));
             } catch (error) {
-                console.error(`Error saving ${label}[${item.id}]:`, error);
-                throw new Error(`Failed to save ${label}[${item.id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error saving ${tableName}[${item.id}]:`, error);
+                throw new Error(`Failed to save ${tableName}[${item.id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -78,8 +70,8 @@ export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreO
                     Key: { id }
                 }));
             } catch (error) {
-                console.error(`Error deleting ${label}[${id}]:`, error);
-                throw new Error(`Failed to delete ${label}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error deleting ${tableName}[${id}]:`, error);
+                throw new Error(`Failed to delete ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -87,36 +79,35 @@ export function itemStore<T extends StoreItem>({ tableName, name, kind }: StoreO
             try {
                 const result = await docClient.send(new QueryCommand({
                     TableName: tableName,
-                    IndexName: "TypeIndex",
                     ...query
-                    //KeyConditionExpression: "kind = :kind",
-                    //ExpressionAttributeValues: { ":kind": kind },
                 }));
 
                 return result.Items as T[];
             } catch (error) {
-                console.error(`Error querying ${kind} from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to query ${kind} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error querying ${JSON.stringify(query)} from DynamoDB ${tableName}:`, error);
+                throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
-        async recentItems(since: string, limit: number = 100): Promise<T[]> {
+        // Rrquires kind and updated fields
+        async recentItems( kind: string, since: string, limit: number = 100): Promise<T[]> {
+            const query = {
+                TableName: tableName,
+                IndexName: "TypeIndex",
+                KeyConditionExpression: "kind = :kind AND updated >= :since",
+                ExpressionAttributeValues: { 
+                    ":kind": kind,
+                    ":since": since
+                },
+                ScanIndexForward: false,
+                Limit: limit
+            };
             try {
-                const result = await docClient.send(new QueryCommand({
-                    TableName: tableName,
-                    IndexName: "TypeIndex",
-                    KeyConditionExpression: "kind = :kind AND updated >= :since",
-                    ExpressionAttributeValues: { 
-                        ":kind": kind,
-                        ":since": since
-                    },
-                    ScanIndexForward: false,
-                    Limit: limit
-                }));
+                const result = await docClient.send(new QueryCommand(query));
                 return result.Items as T[];
             } catch (error) {
-                console.error(`Error querying ${kind} from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to query ${kind} from  ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(`Error querying ${JSON.stringify(query)} from DynamoDB ${tableName}:`, error);
+                throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }
     }

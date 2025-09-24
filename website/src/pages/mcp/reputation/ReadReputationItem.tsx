@@ -18,10 +18,10 @@ const ReadReputationItem = ({ reputationItemKey, onSubmitHttpRequest }: ReadRepu
 
     return (
         <McpToolCallCard
-            title="Read Reputation Item"
+            title="Read One Reputation Report"
             icon={<EyeIcon className="w-5 h-5 text-white" />}
-            description="Read the reputation item using the key from the update form above."
-            buttonText="Read Reputation Item"
+            description="Read a reputation I reported using the key from the update form above."
+            buttonText="Read Reputation"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         />
