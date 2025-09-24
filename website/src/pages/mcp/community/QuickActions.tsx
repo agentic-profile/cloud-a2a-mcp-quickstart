@@ -27,7 +27,7 @@ function daysAgo(days: number) {
 const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
     const [activeAction, setActiveAction] = useState<string | null>(null);
     const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
-    const [kind, setKind] = useState<string>('venture');
+    const [kind, setKind] = useState<string>('volunteer');
 
     const actions: ActionButton[] = [
         {
@@ -91,8 +91,8 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
                 <EditableValue
                     label="Kind"
                     value={kind}
-                    placeholder="Enter kind (e.g., venture, capital, talent)"
-                    options={['venture', 'capital', 'talent']}
+                    placeholder="Enter kind (e.g., volunteer, charity, club, facility, provider)"
+                    options={['volunteer', 'charity', 'club', 'facility', 'provider']}
                     onUpdate={setKind}
                     card={false}
                 />

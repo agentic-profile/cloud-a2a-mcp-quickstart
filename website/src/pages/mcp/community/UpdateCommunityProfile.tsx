@@ -5,27 +5,11 @@ import type { JsonExample } from '@/components/JsonEditor';
 
 const EXAMPLE_PROFILES: JsonExample[] = [
     {
-        name: 'Venture Profile',
+        name: 'Volunteer',
         payload: {
-            "kind": "venture",
+            "kind": "volunteer",
             "name": "TechStart Inc.",
             "description": "A revolutionary AI-powered startup focused on sustainable technology solutions.",
-            "company": {
-                "name": "TechStart Inc.",
-                "founded": "2024",
-                "employees": 50,
-                "location": {
-                    "city": "San Francisco",
-                    "state": "CA",
-                    "country": "USA"
-                }
-            },
-            "funding": {
-                "stage": "Series A",
-                "amount": 5000000,
-                "investors": ["VC1", "VC2", "VC3"]
-            },
-            "technologies": ["AI", "Machine Learning", "Cloud"],
             "social": {
                 "website": "https://techstart.com",
                 "linkedin": "https://linkedin.com/company/techstart",
@@ -34,20 +18,20 @@ const EXAMPLE_PROFILES: JsonExample[] = [
         }
     },
     {
-        name: 'Capital Profile',
+        name: 'Charity',
         payload: {
-            "kind": "capital",
+            "kind": "charity",
             "name": "Unlimited Checks",
             "description": "We will write a check for you!!",
         }
     }
 ];
 
-interface UpdateVentureProfileProps {
+interface UpdateCommunityProfileProps {
     onSubmitHttpRequest: (request: any) => void;
 }
 
-const UpdateVentureProfile = ({ onSubmitHttpRequest }: UpdateVentureProfileProps) => {
+const UpdateCommunityProfile = ({ onSubmitHttpRequest }: UpdateCommunityProfileProps) => {
     const [profileJson, setProfileJson] = useState('');
 
     const createMcpRequest = () => {
@@ -72,9 +56,9 @@ const UpdateVentureProfile = ({ onSubmitHttpRequest }: UpdateVentureProfileProps
 
     return (
         <McpToolCallCard
-            title="Update Venture Profile"
+            title="Update Community Profile"
             icon={<ArrowUpIcon className="w-5 h-5 text-white" />}
-            buttonText="Update Venture Profile"
+            buttonText="Update Community Profile"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         >
@@ -89,4 +73,4 @@ const UpdateVentureProfile = ({ onSubmitHttpRequest }: UpdateVentureProfileProps
     );
 };
 
-export default UpdateVentureProfile;
+export default UpdateCommunityProfile;

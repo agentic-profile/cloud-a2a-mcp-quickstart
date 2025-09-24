@@ -4,13 +4,14 @@ import { useSettingsStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
 import { mcpServices } from '../mcp-list';
 import McpServiceDescription from '../util/McpServiceDescription';
-import UpdateVentureProfile from './UpdateVentureProfile';
-import QueryVentureProfiles from './QueryVentureProfiles';
+import UpdateCommunityProfile from './UpdateCommunityProfile';
+import QueryCommunityProfiles from './QueryCommunityProfiles';
 import QuickActions from './QuickActions';
 import type { HttpRequest } from '@/components/JsonRpcDebug';
 
-const ventureService = mcpServices.find(service => service.id === '2')!;
+const communityService = mcpServices.find(service => service.id === '5')!;
 
+/*
 export interface VentureProfile {
     uuid: string;
     did: string;
@@ -18,14 +19,14 @@ export interface VentureProfile {
     description: string;
     createdAt: string;
     updatedAt: string;
-}
+}*/
 
-const McpVenturePage = () => {
+const McpCommunityPage = () => {
     const { serverUrl } = useSettingsStore();
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Construct the MCP endpoint URL
-    const mcpEndpoint = buildEndpoint(serverUrl, 'mcp/venture');
+    const mcpEndpoint = buildEndpoint(serverUrl, 'mcp/community');
 
     const clearResults = () => {
         setHttpRequest(null);
@@ -33,21 +34,21 @@ const McpVenturePage = () => {
 
     return (
         <Page
-            title="Venture MCP Service"
-            subtitle="Manage your venture profile and list of others"
+            title="Community MCP Service"
+            subtitle="Manage your community members"
         >
             <div className="space-y-6">
                 {/* Service Information */}
                 <McpServiceDescription
-                    service={ventureService}
+                    service={communityService}
                     endpoint={mcpEndpoint}
                 />
 
                 {/* Profile Update Form */}
-                <UpdateVentureProfile onSubmitHttpRequest={setHttpRequest} />
+                <UpdateCommunityProfile onSubmitHttpRequest={setHttpRequest} />
 
                 {/* Profile Query Form */}
-                <QueryVentureProfiles onSubmitHttpRequest={setHttpRequest} />
+                <QueryCommunityProfiles onSubmitHttpRequest={setHttpRequest} />
 
                 {/* Quick Actions */}
                 <QuickActions onSubmitHttpRequest={setHttpRequest} />
@@ -65,4 +66,4 @@ const McpVenturePage = () => {
     );
 };
 
-export default McpVenturePage;
+export default McpCommunityPage;

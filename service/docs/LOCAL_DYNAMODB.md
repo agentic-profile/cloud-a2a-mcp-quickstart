@@ -36,10 +36,29 @@ aws dynamodb create-table \
     AttributeName=id,AttributeType=S \
     AttributeName=kind,AttributeType=S \
     AttributeName=updated,AttributeType=S \
+    AttributeName=subjectDid,AttributeType=S \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --global-secondary-indexes \
-    'IndexName=TypeIndex,KeySchema=[{AttributeName=kind,KeyType=HASH},{AttributeName=updated,KeyType=RANGE}],Projection={ProjectionType=ALL}' \
+    'IndexName=KindIndex,KeySchema=[{AttributeName=kind,KeyType=HASH},{AttributeName=updated,KeyType=RANGE}],Projection={ProjectionType=ALL}' \
+    'IndexName=SubjectIndex,KeySchema=[{AttributeName=subjectDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+  --billing-mode PAY_PER_REQUEST \
+  --endpoint-url http://localhost:8000
+```
+
+```bash
+aws dynamodb create-table \
+  --table-name community-profiles \
+  --attribute-definitions \
+    AttributeName=id,AttributeType=S \
+    AttributeName=kind,AttributeType=S \
+    AttributeName=updated,AttributeType=S \
+    AttributeName=subjectDid,AttributeType=S \
+  --key-schema \
+    AttributeName=id,KeyType=HASH \
+  --global-secondary-indexes \
+    'IndexName=KindIndex,KeySchema=[{AttributeName=kind,KeyType=HASH},{AttributeName=updated,KeyType=RANGE}],Projection={ProjectionType=ALL}' \
+    'IndexName=SubjectIndex,KeySchema=[{AttributeName=subjectDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
   --billing-mode PAY_PER_REQUEST \
   --endpoint-url http://localhost:8000
 ```
@@ -53,7 +72,7 @@ aws dynamodb create-table \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --global-secondary-indexes \
-    'IndexName=TypeIndex,KeySchema=[{AttributeName=ownerDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+    'IndexName=OwnerIndex,KeySchema=[{AttributeName=ownerDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
   --billing-mode PAY_PER_REQUEST \
   --endpoint-url http://localhost:8000
 ```
@@ -68,7 +87,8 @@ aws dynamodb create-table \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --global-secondary-indexes \
-    'IndexName=TypeIndex,KeySchema=[{AttributeName=reporterDid,KeyType=HASH},{AttributeName=subjectDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+    'IndexName=ReporterIndex,KeySchema=[{AttributeName=reporterDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
+    'IndexName=SubjectIndex,KeySchema=[{AttributeName=subjectDid,KeyType=HASH}],Projection={ProjectionType=ALL}' \
   --billing-mode PAY_PER_REQUEST \
   --endpoint-url http://localhost:8000
 ```
@@ -89,7 +109,7 @@ aws dynamodb delete-table \
 ```bash
 aws dynamodb scan \
     --endpoint-url http://localhost:8000 \
-    --table-name venture-profiles
+    --table-name reputations
 ```
 
 ## AWS CLI Commands Reference

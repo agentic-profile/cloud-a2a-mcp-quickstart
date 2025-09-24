@@ -1,17 +1,18 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
 import { jrpcError } from '../../json-rpc/index.js';
-import { resolveAgentId } from '../misc.js';
+import {resolveAgentId } from '../misc.js';
+import { handleAbout, handleRecentUpdates } from '../mcp-misc.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { StoreItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
-import { handleAbout, handleRecentUpdates } from '../mcp-misc.js';
 
-const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
-const store = itemStore<StoreItem>({'tableName': TABLE_NAME});
+// from https://opensessions.io/
+const KINDS = [ 'volunteer' , 'charity' , 'club' , 'facility' , 'provider' ]; // TODO refine this
 
-const KINDS = [ 'venture' , 'capital' ]; // TODO refine this
+const TABLE_NAME = process.env.DYNAMODB_COMMUNITY_PROFILES_TABLE_NAME || 'community-profiles';
+const store = itemStore<StoreItem>({tableName: TABLE_NAME});
 
 function idResolver(item: StoreItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const kind = item?.kind ?? params?.kind;
@@ -47,4 +48,15 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
     }
 }
 
-
+/* Helper function to calculate distance between two coordinates (Haversine formula)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}*/

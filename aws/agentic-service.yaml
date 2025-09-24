@@ -47,16 +47,24 @@ Resources:
           AttributeType: S
         - AttributeName: updated
           AttributeType: S
+        - AttributeName: subjectDid
+          AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: TypeIndex
+        - IndexName: KindIndex
           KeySchema:
             - AttributeName: kind
               KeyType: HASH
             - AttributeName: updated
               KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: SubjectIndex
+          KeySchema:
+            - AttributeName: subjectDid
+              KeyType: HASH
           Projection:
             ProjectionType: ALL
       PointInTimeRecoverySpecification:
@@ -82,9 +90,87 @@ Resources:
         - AttributeName: id
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: TypeIndex
+        - IndexName: OwnerIndex
           KeySchema:
             - AttributeName: ownerDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
+  # DynamoDB Table for Reputations
+  ReputationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'agentic-service-a2a-mcp-${Project}-${Environment}-reputations'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: reporterDid
+          AttributeType: S
+        - AttributeName: subjectDid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: ReporterIndex
+          KeySchema:
+            - AttributeName: reporterDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: SubjectIndex
+          KeySchema:
+            - AttributeName: subjectDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
+  # DynamoDB Table for Community profiles
+  CommunityTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'agentic-service-a2a-mcp-${Project}-${Environment}-community-profiles'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: kind
+          AttributeType: S
+        - AttributeName: updated
+          AttributeType: S
+        - AttributeName: subjectDid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: KindIndex
+          KeySchema:
+            - AttributeName: kind
+              KeyType: HASH
+            - AttributeName: updated
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: SubjectIndex
+          KeySchema:
+            - AttributeName: subjectDid
               KeyType: HASH
           Projection:
             ProjectionType: ALL
@@ -119,8 +205,10 @@ Resources:
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyCachePort'
           VALKEY_PASSWORD_SECRET_ARN: !ImportValue 
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeyPasswordSecretArn'
-          DYNAMODB_VENTURES_TABLE_NAME: !Ref VenturesTable
+          DYNAMODB_VENTURE_PROFILES_TABLE_NAME: !Ref VenturesTable
           DYNAMODB_WALLETS_TABLE_NAME: !Ref WalletsTable
+          DYNAMODB_REPUTATIONS_TABLE_NAME: !Ref ReputationsTable
+          DYNAMODB_COMMUNITY_PROFILES_TABLE_NAME: !Ref CommunityTable
           SERVICE_URL: !If 
             - HasCustomDomain
             - !Sub 'https://${DomainName}'
@@ -248,6 +336,10 @@ Resources:
                   - !Sub '${VenturesTable.Arn}/index/*'
                   - !GetAtt WalletsTable.Arn
                   - !Sub '${WalletsTable.Arn}/index/*'
+                  - !GetAtt ReputationsTable.Arn
+                  - !Sub '${ReputationsTable.Arn}/index/*'
+                  - !GetAtt CommunityTable.Arn
+                  - !Sub '${CommunityTable.Arn}/index/*'
 
   # HTTP API Gateway
   HttpApi:
@@ -419,6 +511,30 @@ Outputs:
     Value: !GetAtt WalletsTable.Arn
     Export:
       Name: !Sub '${AWS::StackName}-WalletsTableArn'
+
+  ReputationsTableName:
+    Description: 'Reputations DynamoDB Table Name'
+    Value: !Ref ReputationsTable
+    Export:
+      Name: !Sub '${AWS::StackName}-ReputationsTableName'
+
+  ReputationsTableArn:
+    Description: 'Reputations DynamoDB Table ARN'
+    Value: !GetAtt ReputationsTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ReputationsTableArn'
+
+  CommunityTableName:
+    Description: 'Community DynamoDB Table Name'
+    Value: !Ref CommunityTable
+    Export:
+      Name: !Sub '${AWS::StackName}-CommunityTableName'
+
+  CommunityTableArn:
+    Description: 'Community DynamoDB Table ARN'
+    Value: !GetAtt CommunityTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CommunityTableArn'
 
   ServiceUrl:
     Description: 'Service URL (API Gateway or Custom Domain)'

@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { EditableValue } from '@/components';
 import { useUserProfileStore } from '@/stores/userProfileStore';
 
-interface QueryVentureProfilesProps {
+interface QueryCommunityProfilesProps {
     onSubmitHttpRequest: (request: any) => void;
 }
 
-const QueryVentureProfiles = ({ onSubmitHttpRequest }: QueryVentureProfilesProps) => {
+const QueryCommunityProfiles = ({ onSubmitHttpRequest }: QueryCommunityProfilesProps) => {
     const { userProfile } = useUserProfileStore();
     const [did, setDid] = useState<string>('');
 
@@ -28,10 +28,10 @@ const QueryVentureProfiles = ({ onSubmitHttpRequest }: QueryVentureProfilesProps
 
     return (
         <McpToolCallCard
-            title="Query Venture Profiles"
+            title="Query Community Profiles"
             icon={<MagnifyingGlassIcon className="w-5 h-5 text-white" />}
-            description="Click the button below to query the current ventures."
-            buttonText="Query Ventures"
+            description="Click the button below to query the current communities."
+            buttonText="Query Communities"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         >
@@ -46,4 +46,4 @@ const QueryVentureProfiles = ({ onSubmitHttpRequest }: QueryVentureProfilesProps
     );
 };
 
-export default QueryVentureProfiles;
+export default QueryCommunityProfiles;

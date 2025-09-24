@@ -11,6 +11,7 @@ import VolunteerPage from './pages/agents/VolunteerPage';
 import CharityPage from './pages/agents/CharityPage';
 import A2ADebugPage from './pages/agents/A2ADebugPage';
 import MCPIndexPage from './pages/mcp/MCPIndexPage';
+import McpCommunityPage from './pages/mcp/community/McpCommunityPage';
 import McpDebugPage from './pages/mcp/McpDebugPage';
 import McpLocationPage from './pages/mcp/location/McpLocationPage';
 import McpVcMatchPage from './pages/mcp/McpVcMatchPage';
@@ -58,6 +59,7 @@ function App() {
                     <Route path="/mcp/reputation" element={<McpReputationPage />} />
                     <Route path="/mcp/venture" element={<McpVenturePage />} />
                     <Route path="/mcp/wallet" element={<McpWalletPage />} />
+                    <Route path="/mcp/community" element={<McpCommunityPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/identity" element={<IdentityPage />} />
                 </Routes>

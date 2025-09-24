@@ -28,10 +28,11 @@ export interface HttpProgress {
 export interface HttpRequest {
     requestInit: RequestInit;
     onProgress?: (progress: HttpProgress) => void;
+    url?: string;
 }
 
 interface JsonRpcDebugProps {
-    url: string | undefined;
+    url?: string | undefined;
     httpRequest: HttpRequest | null;
     onClose?: () => void;
     onClear?: () => void;
@@ -71,6 +72,7 @@ export const JsonRpcDebug = ({
 
     // Extract request from httpRequest
     const request = httpRequest?.requestInit || null;
+    url = httpRequest?.url ?? url;
 
     const [retrySpinner, setRetrySpinner] = useState(false);
     const [retryInit, setRetryInit] = useState<RequestInit | null>(null);
@@ -118,7 +120,10 @@ export const JsonRpcDebug = ({
             const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
             
             if (!userAgentDid || !verificationId) {
-                throw new Error('User agent DID and verification ID are required for authentication');
+                //throw new Error('User agent DID and verification ID are required for authentication');
+                steps.push({kind: 'response', summary: `Missing user agent DID and verification ID for authentication`});
+                httpRequest?.onProgress?.({ steps, result });
+                return;
             }
             const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile, userAgentDid, verificationId );
             const newAuthToken = await signChallenge({

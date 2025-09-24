@@ -5,16 +5,16 @@ import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { ReputationItem } from './types.js';
-import { mcpResultResponse, resolveAgentDid } from '../utils.js';
+import { mcpResultResponse, resolveAgentId } from '../misc.js';
 
 const TABLE_NAME = process.env.DYNAMODB_REPUTATIONS_TABLE_NAME || 'reputations';
 const store = itemStore<ReputationItem>({tableName: TABLE_NAME});
 function idResolver(item: ReputationItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const key = item?.key ?? params?.key;
-    return `${resolveAgentDid(session).did}^${key}`;
+    return `${resolveAgentId(session).did}^${key}`;
 }
 function authorResolver(_item: ReputationItem | undefined, session: ClientAgentSession, _params: any | undefined ): string | undefined {
-    return resolveAgentDid(session).did;
+    return resolveAgentId(session).did;
 }
 const crud = mcpCrud(store, { idResolver, authorResolver, itemKey: "reputation", authorKey: 'reporterDid' } );
 
@@ -46,7 +46,7 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
 // List all the reputations I've reported
 export async function handleListByReporter(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
     try {
-        const reporterDid = resolveAgentDid(session).did;
+        const reporterDid = resolveAgentId(session).did;
         const query = {
             IndexName: "ReporterIndex",
             KeyConditionExpression: "reporterDid = :reporterDid",

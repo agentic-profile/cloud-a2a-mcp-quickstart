@@ -1,14 +1,14 @@
 export const MCP_TOOLS = [
     {
         name: 'read',
-        description: 'Read venture profile of a specific kind and owned by the authenticating agent',
+        description: 'Read a community profile',
         inputSchema: {
             type: 'object',
             properties: {
                 kind: {
                     type: 'string',
-                    enum: ['venture', 'capital'],
-                    description: 'The kind of venture profile to read'
+                    enum: ['volunteer', 'charity', 'club', 'facility', 'provider'],
+                    description: 'The kind of community profile to read'
                 }
             },
             required: ['kind']
@@ -16,28 +16,33 @@ export const MCP_TOOLS = [
     },
     {
         name: 'update',
-        description: 'Update venture profile',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                profile: {
-                    type: 'object',
-                    description: 'The profile data to update'
-                }
-            },
-            required: ['profile']
-        }
-    },
-    {
-        name: 'delete',
-        description: 'Delete venture profile of a specific kind and owned by the authenticating agent',
+        description: 'Update a community profile',
         inputSchema: {
             type: 'object',
             properties: {
                 kind: {
                     type: 'string',
-                    enum: ['venture', 'capital'],
-                    description: 'The kind of venture profile to delete'
+                    enum: ['volunteer', 'charity', 'club', 'facility', 'provider'],
+                    description: 'The kind of community profile to update'
+                },
+                profile: {
+                    type: 'object',
+                    description: 'The profile data to update'
+                }
+            },
+            required: ['kind', 'profile']
+        }
+    },
+    {
+        name: 'delete',
+        description: 'Delete a community profile',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                kind: {
+                    type: 'string',
+                    enum: ['volunteer', 'charity', 'club', 'facility', 'provider'],
+                    description: 'The kind of community profile to delete'
                 }
             },
             required: ['kind']
@@ -45,13 +50,13 @@ export const MCP_TOOLS = [
     },
     {
         name: 'about',
-        description: 'Get information about all venture profiles for a specific DID',
+        description: 'Get information about all community profiles for a specific DID',
         inputSchema: {
             type: 'object',
             properties: {
                 did: {
                     type: 'string',
-                    description: 'The DID to get venture profiles for'
+                    description: 'The DID to get community profiles for'
                 }
             },
             required: ['did']
@@ -59,14 +64,14 @@ export const MCP_TOOLS = [
     },
     {
         name: 'recent-updates',
-        description: 'Get recent updates for a specific kind of venture profile',
+        description: 'Get recent updates for a specific kind of community profile',
         inputSchema: {
             type: 'object',
             properties: {
                 kind: {
                     type: 'string',
-                    enum: ['venture', 'capital'],
-                    description: 'The kind of venture profile to get recent updates for'
+                    enum: ['volunteer', 'charity', 'club', 'facility', 'provider'],
+                    description: 'The kind of community profile to get recent updates for'
                 },
                 since: {
                     type: 'string',

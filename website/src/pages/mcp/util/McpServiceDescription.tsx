@@ -1,23 +1,74 @@
+import { useEffect, useState } from 'react';
 import { Card, CardBody, LabelValue } from '@/components';
 import type { MCPService } from '../types';
 
 interface McpServiceDescriptionProps {
     service: MCPService;
     endpoint: string | undefined;
-    tools: Array<{
-        name: string;
-        description: string;
-    }>;
-    dataFormat: string;
+}
+
+interface MCPTool {
+    name: string;
+    description: string;
+    inputSchema?: any;
 }
 
 const McpServiceDescription = ({ 
     service, 
-    endpoint, 
-    tools, 
-    dataFormat 
+    endpoint
 }: McpServiceDescriptionProps) => {
     const IconComponent = service.icon;
+    const [tools, setTools] = useState<MCPTool[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchTools = async () => {
+            if (!endpoint) return;
+            
+            setLoading(true);
+            setError(null);
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: 'tools-list',
+                        method: 'tools/list',
+                        params: {}
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message || 'Failed to fetch tools');
+                }
+
+                if (data.result && data.result.tools) {
+                    setTools(data.result.tools);
+                } else {
+                    setTools([]);
+                }
+            } catch (err) {
+                console.error('Error fetching tools:', err);
+                setError(err instanceof Error ? err.message : 'Failed to fetch tools');
+                setTools([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTools();
+    }, [endpoint]);
 
     return (
         <Card className="mb-6">
@@ -34,16 +85,25 @@ const McpServiceDescription = ({
                     <p>
                         <strong>Available Tools:</strong>
                     </p>
-                    <ul className="list-disc list-inside space-y-1 ml-4">
-                        {tools.map((tool, index) => (
-                            <li key={index}>
-                                <strong>{tool.name}:</strong> {tool.description}
-                            </li>
-                        ))}
-                    </ul>
-                    <p>
-                        <strong>Data Format:</strong> {dataFormat}
-                    </p>
+                    {loading && (
+                        <p className="text-blue-600 dark:text-blue-400">Loading tools...</p>
+                    )}
+                    {error && (
+                        <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+                    )}
+                    {!loading && !error && (
+                        <ul className="list-disc list-inside space-y-1 ml-4">
+                            {tools.length > 0 ? (
+                                tools.map((tool, index) => (
+                                    <li key={index}>
+                                        <strong>{tool.name}:</strong> {tool.description}
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No tools available</li>
+                            )}
+                        </ul>
+                    )}
                 </div>
             </CardBody>
         </Card>

@@ -89,11 +89,11 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
             }
         },
 
-        // Rrquires kind and updated fields
+        // Requires kind and updated fields
         async recentItems( kind: string, since: string, limit: number = 100): Promise<T[]> {
             const query = {
                 TableName: tableName,
-                IndexName: "TypeIndex",
+                IndexName: "KindIndex",
                 KeyConditionExpression: "kind = :kind AND updated >= :since",
                 ExpressionAttributeValues: { 
                     ":kind": kind,

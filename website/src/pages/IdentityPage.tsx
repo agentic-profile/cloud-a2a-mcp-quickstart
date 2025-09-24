@@ -1,29 +1,11 @@
 import { useState, useEffect } from 'react';
+import clsx from 'clsx';
+
 import { Page } from '@/components';
 import { CreateIdentityForm, UserProfileDisplay, ImportIdentity } from '@/components';
 import { wantsFocus } from '@/components/ImportIdentity';
 import { useUserProfileStore } from '@/stores';
 
-import clsx from 'clsx';
-
-
-/*
-interface Service {
-    name: string;
-    type: string;
-    id: string;
-    url: string;
-}
-
-const [services] = useState<Service[]>([
-    {
-        name: "People connector",
-        type: "A2A/venture",
-        id: "venture",
-        url: "http://localhost:3000/a2a/venture"
-    }
-]);
-*/
 
 export default function IdentityPage() {
     const { userProfile } = useUserProfileStore();

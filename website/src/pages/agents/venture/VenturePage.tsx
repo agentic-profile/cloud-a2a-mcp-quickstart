@@ -9,7 +9,8 @@ import ImportVentureJson from './ImportVentureJson';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
 import { MarkdownGenerator } from './MarkdownGenerator';
 import PublishVentureToMcp from './PublishVentureToMcp';
-//import PublishVentureToIdentityHost from './PublishVentureToIdentityHost';
+import EnlistAgent from './EnlistAgent';
+import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 
 
 const POSITIONING_TABS = [
@@ -48,6 +49,7 @@ const VenturePage = () => {
     
     const [showImportModal, setShowImportModal] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(false);
+    const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Memoized callback functions to prevent infinite loops
     const handleProblemUpdate = useCallback((values: string[]) => {
@@ -217,7 +219,17 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <PublishVentureToMcp />
+                <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
+                <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+
+                {httpRequest && (
+                    <div className="mt-6">
+                        <JsonRpcDebug
+                            httpRequest={httpRequest}
+                            onClose={()=>setHttpRequest(null)}
+                        />
+                    </div>
+                )}
 
                 <CardTitleAndBody title="Advanced Features" collapsible={true}>
                     <div className="space-y-4">

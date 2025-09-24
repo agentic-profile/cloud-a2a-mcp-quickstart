@@ -1,7 +1,7 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { storeValue, getValue } from '../../cache/redis.js';
 import { jrpcResult, jrpcError } from '../../json-rpc/index.js';
-import { mcpTextContentResponse } from '../utils.js';
+import { mcpTextContentResponse } from '../misc.js';
 import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 

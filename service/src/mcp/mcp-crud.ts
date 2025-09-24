@@ -1,5 +1,5 @@
 import { JSONRPCError, JSONRPCRequest } from "@modelcontextprotocol/sdk/types.js";
-import { mcpTextContentResponse, mcpResultResponse } from "./utils.js";
+import { mcpTextContentResponse, mcpResultResponse } from "./misc.js";
 import { jrpcError } from "../json-rpc/index.js";
 import { ClientAgentSession } from "@agentic-profile/auth";
 import { StoreItem, ItemStore } from "../stores/types.js";
@@ -25,12 +25,12 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
             if (!item)
                 return jrpcError(request.id!, -32602, `Invalid ${debugLabel} params: item is required`);
 
-            // I can only upload my own profile
-            item.id = idResolver(item as T,session,request.params);
-            item[authorKey] = authorResolver?.(item as T,session,request.params);
-            item.updated = new Date().toISOString();
-
             try {
+                // I can only upload my own profile
+                item.id = idResolver(item as T,session,request.params);
+                item[authorKey] = authorResolver?.(item as T,session,request.params);
+                item.updated = new Date().toISOString();
+
                 await store.updateItem(item as T);
                 return mcpTextContentResponse(request.id!, `${debugLabel} item updated successfully`);
             } catch (error) {
@@ -40,8 +40,9 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
 
         // Only the item owner can directly read their own items
         async handleRead(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-            const id = idResolver(undefined,session,request.params);
+            let id;
             try {
+                id = idResolver(undefined,session,request.params);
                 const result = await store.readItem(id);
                 return mcpResultResponse(request.id!, { [itemKey]:result });
             } catch (error) {
@@ -50,8 +51,9 @@ export function mcpCrud<T extends StoreItem>( store: ItemStore<T>, options: Opti
         },
 
         async handleDelete(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
-            const id = idResolver(undefined,session,request.params);
+            let id;
             try {
+                id = idResolver(undefined,session,request.params);
                 await store.deleteItem(id);
                 return mcpTextContentResponse(request.id!, `${debugLabel} item ${id}deleted successfully`);
             } catch (error) {

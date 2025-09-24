@@ -26,7 +26,7 @@ export const useUserProfileStore = create<UserProfileState>()(
       setUserProfile: (profile) => set({ userProfile: profile }),
       setUserAgentDid: (did) => set({ userAgentDid: did }),
       setVerificationId: (id) => set({ verificationId: id }),
-      clearUserProfile: () => set({ userProfile: null }),
+      clearUserProfile: () => set({ userProfile: null, userAgentDid: null, verificationId: null }),
     }),
     {
       name: 'user-profile-storage',

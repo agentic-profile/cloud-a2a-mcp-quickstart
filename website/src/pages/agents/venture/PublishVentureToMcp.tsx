@@ -1,30 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { JsonRpcDebug, Button, EditableUrl, LabelValue } from '@/components';
+import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore, useVentureStore } from '@/stores';
 import { buildEndpoint } from '@/tools/misc';
 import agentsData from '../agents.json';
 import { MarkdownGenerator } from './MarkdownGenerator';
+import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
+import greenCheckmark from '@/assets/green_checkmark.svg';
 
 const DEFAULT_MCP_URLS = [
     'https://example-api.agenticprofile.ai/mcp/venture',
     'http://localhost:3000/mcp/venture'
 ];
 
-const PublishVentureToMcp = () => {
+const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpRequest: HttpRequest) => void }) => {
     const { prunedVentureData } = useVentureStore();
     const { serverUrl } = useSettingsStore();
     const { userAgentDid, verificationId } = useUserProfileStore();
+    const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
     const navigate = useNavigate();
     
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture')!
     
-    const [showMcpDebug, setShowMcpDebug] = useState(false);
-    const [mcpRequest, setMcpRequest] = useState<RequestInit | null>(null);
     const [mcpUrl, setMcpUrl] = useState<string>('');
-    const mcpDebugRef = useRef<HTMLDivElement>(null);
 
     // Set mcpUrl based on serverUrl and ventureAgent
     useEffect(() => {
@@ -48,7 +48,7 @@ const PublishVentureToMcp = () => {
         const markdown = MarkdownGenerator.generateMarkdownSummary(ventureData);
 
         // Create the JSON-RPC request
-        const jsonRpcRequest = {
+        const mcpRequest = {
             method: 'tools/call',
             params: {
                 name: 'update',
@@ -59,31 +59,16 @@ const PublishVentureToMcp = () => {
             }
         };
 
-        // Set up the request for JsonRpcDebug
         const request: RequestInit = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(jsonRpcRequest)
+            body: JSON.stringify(mcpRequest),
         };
 
-        setMcpRequest(request);
-        setShowMcpDebug(true);
-
-        // Scroll to the MCP debug card
-        setTimeout(() => {
-            mcpDebugRef.current?.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }, 100);
-    };
-
-    // Handle the result from JsonRpcDebug
-    const handleMcpResult = (result: any) => {
-        console.log('MCP Result:', result);
-        // You can add additional handling here if needed
+        // Set up the request for JsonRpcDebug
+        onSubmitHttpRequest({ url: mcpUrl, requestInit: request, onProgress: setHttpProgress });
     };
 
     // Handle updating the mcpUrl
@@ -95,6 +80,10 @@ const PublishVentureToMcp = () => {
     const handleManageIdentity = () => {
         navigate('/identity');
     };
+
+    const hasIdentity = !!userAgentDid && !!verificationId;
+    const spinner = httpProgress && !httpProgress.result;
+    const isPublished = httpProgress && httpProgress.result?.fetchResponse?.status === 200;
 
     return (
         <>
@@ -108,41 +97,38 @@ const PublishVentureToMcp = () => {
                         onUpdate={handleMcpUrlUpdate}
                         options={DEFAULT_MCP_URLS}
                     />
-                    <LabelValue
+                    { hasIdentity && <LabelValue
                         label="Publish as" 
-                        value={`${userAgentDid} (key ${verificationId})`} />
-                    <div className="flex justify-end space-x-3">
-                        <Button
-                            onClick={handlePublishToMcp}
-                            variant="primary"
-                            disabled={!userAgentDid || !verificationId}
-                        >
-                            Publish to MCP
-                        </Button>
+                        value={`${userAgentDid} (key ${verificationId})`} /> }
+                    <div className="flex justify-end items-center space-x-3">
                         <Button
                             onClick={handleManageIdentity}
-                            variant="secondary"
+                            variant={hasIdentity ? 'secondary' : 'primary'}
                         >
-                            Manage Identity
+                            { hasIdentity ? 'Manage Identity' : '1. Create Identity' }
                         </Button>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                onClick={handlePublishToMcp}
+                                variant={isPublished ? 'secondary' : hasIdentity ? 'success' : 'secondary'}
+                                loading={spinner}
+                                disabled={spinner ||!userAgentDid || !verificationId}
+                            >
+                                { hasIdentity ? 'Publish to MCP' : '2.Publish to MCP' }
+                            </Button>
+                            {isPublished && (
+                                <img 
+                                    src={greenCheckmark} 
+                                    alt="Success" 
+                                    className="h-8 w-8" 
+                                />
+                            )}
+                        </div>
                     </div>
+
+                    <HttpProgressSummary progress={httpProgress} />
                 </div>
             </CardTitleAndBody>
-
-            {/* MCP Debug Card */}
-            {showMcpDebug && (
-                <div ref={mcpDebugRef}>
-                    <JsonRpcDebug
-                        url={mcpUrl || undefined}
-                        httpRequest={mcpRequest ? {
-                            requestInit: mcpRequest,
-                            onProgress: (progress) => progress.result && handleMcpResult(progress.result)
-                        } : null}
-                        onClose={() => setShowMcpDebug(false)}
-                        onClear={() => setMcpRequest(null)}
-                    />
-                </div>
-            )}
         </>
     );
 };

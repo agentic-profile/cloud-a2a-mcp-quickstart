@@ -32,7 +32,7 @@ export function mcpResultResponse( id: string | number, result: MCPResult ): JSO
     };
 }
 
-export function resolveAgentDid(session: ClientAgentSession): { did: string, fragment: string } {
+export function resolveAgentId(session: ClientAgentSession): { did: string, fragment: string } {
     const [ did, fragment ] = session.agentDid.split('#');
     return { did, fragment };
 }
