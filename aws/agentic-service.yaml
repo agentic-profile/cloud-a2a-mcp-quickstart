@@ -376,14 +376,6 @@ Resources:
       RouteKey: 'ANY /{proxy+}'
       Target: !Sub 'integrations/${HttpApiIntegration}'
 
-  # HTTP API Route for root path
-  # HttpApiRootRoute:
-  #  Type: AWS::ApiGatewayV2::Route
-  #  Properties:
-  #    ApiId: !Ref HttpApi
-  #    RouteKey: 'ANY /'
-  #    Target: !Sub 'integrations/${HttpApiIntegration}'
-
   # HTTP API Stage
   HttpApiStage:
     Type: AWS::ApiGatewayV2::Stage

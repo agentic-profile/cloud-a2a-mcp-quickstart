@@ -1,11 +1,8 @@
 import { UserIcon } from '@heroicons/react/24/outline';
-import externalLinkIcon from "@iconify-icons/lucide/external-link";
-import { Button, Card, CardBody, CardHeader, LabelValue, RadioButton, RadioGroup } from '@/components';
+import { Button, Card, CardBody, CardHeader, LabelValue, LabelDid, RadioButton, RadioGroup } from '@/components';
 import { useUserProfileStore } from '@/stores';
-import { webDidToUrl } from "@agentic-profile/common";
 import { type AgentService } from '@agentic-profile/common/schema';
 import { type VerificationMethod } from 'did-resolver';
-import Icon from './Icon';
 import { useEffect } from 'react';
 import { firstAgentKey } from '@/tools/keyring';
 
@@ -40,17 +37,10 @@ export const UserProfileDisplay = () => {
                                     label="Name" 
                                     value={profile.name || 'Not specified'} 
                                 />
-                                <LabelValue 
+                                <LabelDid 
                                     label="DID" 
-                                    value={did}
-                                    className="font-mono break-all"
-                                >
-                                    <Icon
-                                        src={externalLinkIcon}
-                                        onClick={() => window.open(webDidToUrl(did), '_blank')}
-                                        className="inline-block ml-1"
-                                    />
-                                </LabelValue>
+                                    did={did}
+                                />
                                 <LabelValue
                                     label="userAgentDid"
                                     value={userAgentDid ?? 'none'}

@@ -54,7 +54,8 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
                 name: 'update',
                 profile: {
                     ...ventureData,
-                    markdown
+                    markdown,
+                    kind: 'venture'
                 }
             }
         };

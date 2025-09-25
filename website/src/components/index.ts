@@ -29,6 +29,7 @@ export { UserProfileDisplay } from './UserProfileDisplay';
 
 // Utility components
 export { LabelValue } from './LabelValue';
+export { LabelDid } from './LabelDid';
 export { LabelJson } from './LabelJson';
 export { RadioButton } from './RadioButton';
 export { RadioGroup } from './RadioGroup';

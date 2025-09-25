@@ -5,8 +5,8 @@ import {
     ArrowRightIcon,
     UserIcon
 } from '@heroicons/react/24/outline';
-import { Switch, Page, EditableUrl } from '@/components';
-import { useSettingsStore } from '@/stores';
+import { Switch, Page, EditableUrl, LabelValue, LabelDid } from '@/components';
+import { useSettingsStore, useUserProfileStore } from '@/stores';
 import { DEFAULT_SERVER_URLS } from '@/tools/misc';
 
 const ServerUrlSetting = () => {
@@ -27,6 +27,8 @@ const ServerUrlSetting = () => {
 
 const SettingsPage = () => {
     const { theme, setTheme } = useTheme();
+    const { userProfile } = useUserProfileStore();
+    const did = userProfile?.profile.id;
     const navigate = useNavigate();
 
     return (
@@ -80,14 +82,8 @@ const SettingsPage = () => {
                         {/* Digital Identity Setting */}
                         <div className="py-3">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Digital Identity
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        Create and manage your digital identity profile
-                                    </p>
-                                </div>
+                                { did ? <LabelDid label="Your Digital Id" did={did} /> 
+                                    : <p className="md">No identity configured. Please create and manage your digital identity...</p> }
                                 <button
                                     onClick={() => navigate('/identity')}
                                     className="flex items-center text-sm text-dodgerblue hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-md transition-colors"
