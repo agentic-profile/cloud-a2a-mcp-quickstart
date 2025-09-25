@@ -2,28 +2,24 @@ import { useState } from 'react';
 import { ArrowUpIcon } from '@heroicons/react/24/outline';
 import { JsonEditor, McpToolCallCard } from '@/components';
 import type { JsonExample } from '@/components/JsonEditor';
+import { CHARITY_EXAMPLE, VOLUNTEER_USER_EXAMPLE, VOLUNTEER_PROFILE_EXAMPLE, EVENT_EXAMPLE } from './examples';
 
 const EXAMPLE_PROFILES: JsonExample[] = [
     {
-        name: 'Volunteer',
-        payload: {
-            "kind": "volunteer",
-            "name": "TechStart Inc.",
-            "description": "A revolutionary AI-powered startup focused on sustainable technology solutions.",
-            "social": {
-                "website": "https://techstart.com",
-                "linkedin": "https://linkedin.com/company/techstart",
-                "twitter": "@techstart"
-            }
-        }
+        name: 'Charity',
+        payload: { ...CHARITY_EXAMPLE, kind: 'charity' }
     },
     {
-        name: 'Charity',
-        payload: {
-            "kind": "charity",
-            "name": "Unlimited Checks",
-            "description": "We will write a check for you!!",
-        }
+        name: "Volunteer User",
+        payload: { ...VOLUNTEER_USER_EXAMPLE, kind: 'volunteer' }
+    },
+    {
+        name: "Volunteer Profile",
+        payload: { ...VOLUNTEER_PROFILE_EXAMPLE, kind: 'volunteer' }
+    },
+    {
+        name: "Event",
+        payload: { ...EVENT_EXAMPLE, kind: 'event' }
     }
 ];
 

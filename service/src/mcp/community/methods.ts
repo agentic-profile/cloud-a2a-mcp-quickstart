@@ -9,7 +9,7 @@ import { StoreItem } from '../../stores/types.js';
 import { mcpCrud } from '../mcp-crud.js';
 
 // from https://opensessions.io/
-const KINDS = [ 'volunteer' , 'charity' , 'club' , 'facility' , 'provider' ]; // TODO refine this
+const KINDS = [ 'volunteer' , 'charity' , 'club' , 'facility' , 'provider', 'event' ]; // TODO refine this
 
 const TABLE_NAME = process.env.DYNAMODB_COMMUNITY_PROFILES_TABLE_NAME || 'community-profiles';
 const store = itemStore<StoreItem>({tableName: TABLE_NAME});

@@ -91,8 +91,8 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
                 <EditableValue
                     label="Kind"
                     value={kind}
-                    placeholder="Enter kind (e.g., volunteer, charity, club, facility, provider)"
-                    options={['volunteer', 'charity', 'club', 'facility', 'provider']}
+                    placeholder="Enter kind (e.g., volunteer, charity, event)"
+                    options={['volunteer', 'charity', 'event']}
                     onUpdate={setKind}
                     card={false}
                 />

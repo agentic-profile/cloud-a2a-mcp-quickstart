@@ -17,6 +17,10 @@ export interface VentureData {
     references: (string | number)[][] | undefined;
 }
 
+interface ArchivedVentureData extends VentureData {
+    name: string;
+}
+
 export interface VentureState {
     // Positioning data
     positioning: TabValues[];
@@ -30,6 +34,9 @@ export interface VentureState {
     milestones: (string | number)[][];
     team: (string | number)[][];
     references: (string | number)[][];
+    
+    // Archive data
+    archive: ArchivedVentureData[];
     
     // Actions for positioning data
     setPositioning: (positioning: TabValues[]) => void;
@@ -45,6 +52,11 @@ export interface VentureState {
     setMilestones: (milestones: (string | number)[][]) => void;
     setTeam: (team: (string | number)[][]) => void;
     setReferences: (references: (string | number)[][]) => void;
+    
+    // Actions for archive
+    addToArchive: (name: string) => void;
+    removeFromArchive: (index: number) => void;
+    clearArchive: () => void;
     
     // Bulk actions
     importVentureData: (data: Partial<VentureState>) => void;
@@ -85,6 +97,7 @@ export const useVentureStore = create<VentureState>()(
             milestones: [],
             team: [],
             references: [],
+            archive: [],
             
             // Positioning actions
             setPositioning: (positioning) => set({ positioning }),
@@ -127,33 +140,60 @@ export const useVentureStore = create<VentureState>()(
             setTeam: (team) => set({ team }),
             setReferences: (references) => set({ references }),
             
+            // Archive actions
+            addToArchive: (name) => {
+                const state = get();
+                const ventureData: VentureData = {
+                    problem: state.problem,
+                    solution: state.solution,
+                    team: state.team,
+                    positioning: state.positioning,
+                    marketOpportunity: state.marketOpportunity,
+                    milestones: state.milestones,
+                    references: state.references,
+                };
+                
+                const archivedVenture: ArchivedVentureData = {
+                    ...ventureData,
+                    name,
+                };
+                
+                set((state) => ({
+                    archive: [...state.archive, archivedVenture]
+                }));
+            },
+            
+            removeFromArchive: (index) => 
+                set((state) => ({
+                    archive: state.archive.filter((_, i) => i !== index)
+                })),
+            
+            clearArchive: () => set({ archive: [] }),
+            
             // Bulk actions
             importVentureData: (data) => {
-                console.log('Importing venture data:', data);
-                console.log('Positioning data from import:', data.positioning);
-                if (data.positioning) {
-                    console.log('Positioning tabs found:', data.positioning.map(tab => tab.id));
-                }
-                set(() => ({
+                set((prev) => ({
+                    ...prev,
                     positioning: data.positioning || createEmptyPositioning(),
                     problem: data.problem || [],
                     solution: data.solution || [],
                     marketOpportunity: data.marketOpportunity || [],
                     milestones: data.milestones || [],
                     team: data.team || [],
-                    references: data.references || [],
+                    references: data.references || []
                 }));
             },
             
-            clearVentureData: () => set({
+            clearVentureData: () => set((prev) => ({
+                ...prev,
                 positioning: createEmptyPositioning(),
                 problem: [],
                 solution: [],
                 marketOpportunity: [],
                 milestones: [],
                 team: [],
-                references: [],
-            }),
+                references: []
+            })),
 
             allVentureData: () => {
                 const state = get();
@@ -193,6 +233,7 @@ export const useVentureStore = create<VentureState>()(
                 milestones: state.milestones,
                 team: state.team,
                 references: state.references,
+                archive: state.archive,
             }),
         }
     )

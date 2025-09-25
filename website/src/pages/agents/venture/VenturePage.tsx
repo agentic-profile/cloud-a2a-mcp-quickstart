@@ -1,16 +1,14 @@
 import { useState, useCallback } from 'react';
-import { EditableValueList, Page, TabbedEditableLists, Button } from '@/components';
+import { EditableValueList, Page, TabbedEditableLists } from '@/components';
 import agentsData from '../agents.json';
 import { useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
-import { CardTitleAndBody, Card, CardHeader, CardBody } from '@/components/Card';
-import ShareVentureJson from './ShareVentureJson';
-import ImportVentureJson from './ImportVentureJson';
+import { CardTitleAndBody, Card, CardBody } from '@/components/Card';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
-import { MarkdownGenerator } from './MarkdownGenerator';
 import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
+import AdvancedFeatures from './AdvancedFeatures';
 
 
 const POSITIONING_TABS = [
@@ -47,8 +45,6 @@ const VenturePage = () => {
     // Find the venture agent from the agents data
     const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
     
-    const [showImportModal, setShowImportModal] = useState(false);
-    const [showMarkdown, setShowMarkdown] = useState(false);
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Memoized callback functions to prevent infinite loops
@@ -81,22 +77,6 @@ const VenturePage = () => {
         updatePositioningTab(tabId, values, selected);
     }, [updatePositioningTab]);
 
-    // Handle importing venture data from JSON
-    const handleImportData = (importedData: any) => {
-        importVentureData(importedData);
-        // Close the import modal
-        setShowImportModal(false);
-    };
-
-    // Handle clearing all venture data
-    const handleClearData = () => {
-        clearVentureData();
-    };
-
-    // Generate Markdown summary using the MarkdownGenerator
-    const generateMarkdownSummary = () => {
-        return MarkdownGenerator.generateMarkdownSummary(prunedVentureData());
-    };
 
 
     return (
@@ -231,86 +211,8 @@ const VenturePage = () => {
                     </div>
                 )}
 
-                <CardTitleAndBody title="Advanced Features" collapsible={true}>
-                    <div className="space-y-4">
-                        <div className="flex gap-3">
-                            <Button
-                                onClick={() => setShowImportModal(true)}
-                                variant="primary"
-                            >
-                                Import Venture JSON
-                            </Button>
-                            <Button
-                                onClick={() => setShowMarkdown(true)}
-                                variant="success"
-                            >
-                                Show Markdown
-                            </Button>
-                            <Button
-                                onClick={handleClearData}
-                                variant="danger"
-                            >
-                                Clear All Data
-                            </Button>
-                        </div>
-                        <ShareVentureJson
-                            values={prunedVentureData()}
-                        />
-                    </div>
-                </CardTitleAndBody>
-
-                {showMarkdown && (
-                    <Card>
-                        <CardHeader onClose={() => setShowMarkdown(false)}>
-                            <h3>Markdown Summary</h3>
-                        </CardHeader>
-                        <CardBody>
-                            <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                Generated Markdown summary of your venture data
-                            </p>
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                                <pre className="whitespace-pre-wrap text-sm font-mono overflow-x-auto">
-                                    {generateMarkdownSummary()}
-                                </pre>
-                                <div className="mt-4 flex justify-end">
-                                    <Button
-                                        onClick={() => navigator.clipboard.writeText(generateMarkdownSummary())}
-                                        variant="primary"
-                                        size="sm"
-                                    >
-                                        Copy Markdown
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardBody>
-                    </Card>
-                )}
+                <AdvancedFeatures />
             </div>
-
-            {/* Import Modal */}
-            {showImportModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                    Import Venture Data
-                                </h2>
-                                <Button
-                                    onClick={() => setShowImportModal(false)}
-                                    variant="ghost"
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </Button>
-                            </div>
-                            <ImportVentureJson onImport={handleImportData} />
-                        </div>
-                    </div>
-                </div>
-            )}
         </Page>
     );
 };
