@@ -3,14 +3,15 @@ import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
 import { useRef } from 'react';
+import { type AttributedString } from '@/stores/ventureStore';
 
 interface EditableValueListProps {
     placeholder?: string;
     className?: string;
-    values?: string[];
+    values?: AttributedString[];
     selectable?: boolean;
     selected?: number;
-    onUpdate?: (values: string[], selected: number) => void;
+    onUpdate?: (values: AttributedString[], selected: number) => void;
 }
 
 export const EditableValueList = ({ 
@@ -24,7 +25,7 @@ export const EditableValueList = ({
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const addValue = () => {
-        const newValues = [...values, ''];
+        const newValues = [...values, { text: '' }];
         const newIndex = newValues.length - 1;
         onUpdate?.(newValues, newIndex); // Select the newly added row
         
@@ -56,7 +57,7 @@ export const EditableValueList = ({
 
     const updateValue = (index: number, text: string) => {
         const newValues = values.map((value, i) => 
-            i === index ? text : value
+            i === index ? {text} : value
         );
         onUpdate?.(newValues, selected);
     };
@@ -92,7 +93,7 @@ export const EditableValueList = ({
                     <input
                         ref={(el) => { inputRefs.current[index] = el; }}
                         type="text"
-                        value={value}
+                        value={value.text}
                         onChange={(e) => updateValue(index, e.target.value)}
                         placeholder={placeholder}
                         className={clsx(

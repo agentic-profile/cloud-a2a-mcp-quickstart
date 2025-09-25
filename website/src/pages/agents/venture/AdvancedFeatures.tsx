@@ -6,7 +6,7 @@ import ShareVentureJson from './ShareVentureJson';
 import ImportVentureJson from './ImportVentureJson';
 import ArchiveVenture from './ArchiveVenture';
 import { MarkdownGenerator } from './MarkdownGenerator';
-import { type VentureData, useVentureStore } from '@/stores/ventureStore';
+import { useVentureStore } from '@/stores/ventureStore';
 
 const AdvancedFeatures = () => {
     const [showImportModal, setShowImportModal] = useState(false);

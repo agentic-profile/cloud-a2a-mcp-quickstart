@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components';
-import { useVentureStore, type VentureData } from '@/stores/ventureStore';
+import { useVentureStore } from '@/stores/ventureStore';
 import Icon from '@/components/Icon';
 import folderOpenIcon from '@iconify-icons/lucide/folder-open';
 import trashIcon from '@iconify-icons/lucide/trash';

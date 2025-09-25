@@ -37,9 +37,6 @@ const VenturePage = () => {
         setMilestones,
         setTeam,
         setReferences,
-        importVentureData,
-        clearVentureData,
-        prunedVentureData
     } = useVentureStore();
     
     // Find the venture agent from the agents data
@@ -76,8 +73,6 @@ const VenturePage = () => {
     const handleUpdate = useCallback((tabId: string, values: string[], selected: number) => {
         updatePositioningTab(tabId, values, selected);
     }, [updatePositioningTab]);
-
-
 
     return (
         <Page

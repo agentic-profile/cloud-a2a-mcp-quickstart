@@ -7,7 +7,22 @@ export interface TabValues {
     selected: number;
 }
 
+export interface AttributedString {
+    text: string;
+    hidden?: boolean;
+}
+
 export interface VentureData {
+    problem: AttributedString[] | undefined;
+    solution: AttributedString[] | undefined;
+    team: (string | number)[][] | undefined;
+    positioning: TabValues[] | undefined;
+    marketOpportunity: (string | number)[][] | undefined;
+    milestones: (string | number)[][] | undefined;
+    references: (string | number)[][] | undefined;
+}
+
+export interface PrunedVentureData {
     problem: string[] | undefined;
     solution: string[] | undefined;
     team: (string | number)[][] | undefined;
@@ -26,8 +41,8 @@ export interface VentureState {
     positioning: TabValues[];
     
     // Basic arrays
-    problem: string[];
-    solution: string[];
+    problem: AttributedString[];
+    solution: AttributedString[];
     
     // Table data (arrays of arrays with mixed string/number types)
     marketOpportunity: (string | number)[][];
@@ -44,8 +59,8 @@ export interface VentureState {
     resetPositioning: () => void;
     
     // Actions for basic arrays
-    setProblem: (problem: string[]) => void;
-    setSolution: (solution: string[]) => void;
+    setProblem: (problem: AttributedString[]) => void;
+    setSolution: (solution: AttributedString[]) => void;
     
     // Actions for table data
     setMarketOpportunity: (marketOpportunity: (string | number)[][]) => void;
@@ -64,7 +79,7 @@ export interface VentureState {
     
     // Utility actions
     allVentureData: () => VentureData;
-    prunedVentureData: () => VentureData;
+    prunedVentureData: () => PrunedVentureData;
 }
 
 // Default positioning tabs structure
@@ -212,8 +227,8 @@ export const useVentureStore = create<VentureState>()(
             prunedVentureData: () => {
                 const state = get();
                 return {
-                    problem: pruneArray(state.problem),
-                    solution: pruneArray(state.solution),
+                    problem: pruneAttributedStrings(state.problem),
+                    solution: pruneAttributedStrings(state.solution),
                     team: pruneTable(state.team),
                     positioning: prunePositioning(state.positioning),
                     marketOpportunity: pruneTable(state.marketOpportunity),
@@ -242,6 +257,10 @@ export const useVentureStore = create<VentureState>()(
 export function pruneArray(array: string[]) {
     const filtered = array.filter(item => item !== '');
     return filtered.length === 0 ? undefined : filtered;
+}
+
+export function pruneAttributedStrings(array: AttributedString[]) {
+    return array.map(e=>e.text).filter(e=>e!=='');
 }
 
 export function pruneTable(table: (string | number)[][]) {
