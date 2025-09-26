@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button, IconButton } from '@/components';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 import type { StringOrNumberTable } from '@/stores/ventureStore';
 
 // Common number handlers for reuse across number and currency columns
@@ -86,6 +87,8 @@ export interface EditableTableProps {
 
 export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate }: EditableTableProps) => {
     const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
     
     // Add a blank row if the values array is empty
@@ -174,11 +177,58 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
         }
     };
 
+    const handleDragStart = (e: React.DragEvent, index: number) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', '');
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverIndex(index);
+    };
+
+    const handleDragLeave = () => {
+        setDragOverIndex(null);
+    };
+
+    const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+
+        const newValues = [...values];
+        const draggedItem = newValues[draggedIndex];
+        
+        // Remove the dragged item
+        newValues.splice(draggedIndex, 1);
+        
+        // Insert at the new position
+        newValues.splice(dropIndex, 0, draggedItem);
+        
+        onUpdate?.(newValues, hiddenRows);
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full border-collapse">
                 <thead>
                     <tr>
+                        <th className="px-2 py-2 w-12">
+                            {/* Empty header for drag handle column - no border */}
+                        </th>
                         <th className="px-2 py-2 w-12">
                             {/* Empty header for eye icon column - no border */}
                         </th>
@@ -196,8 +246,30 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                     {values.map((row, rowIndex) => {
                         // Ensure row is an array
                         const rowArray = Array.isArray(row) ? row : [];
+                        const isDragging = draggedIndex === rowIndex;
+                        const isDragOver = dragOverIndex === rowIndex;
                         return (
-                        <tr key={rowIndex} className="group">
+                        <tr 
+                            key={rowIndex} 
+                            draggable={values.length > 1}
+                            onDragStart={(e) => handleDragStart(e, rowIndex)}
+                            onDragOver={(e) => handleDragOver(e, rowIndex)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, rowIndex)}
+                            onDragEnd={handleDragEnd}
+                            className={clsx(
+                                "group transition-all duration-200",
+                                isDragging && "opacity-50 scale-95",
+                                isDragOver && "border-t-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                            )}
+                        >
+                            <td className="px-2 py-2 w-12">
+                                {values.length > 1 && (
+                                    <div className="cursor-grab active:cursor-grabbing">
+                                        <Bars3Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                    </div>
+                                )}
+                            </td>
                             <td className="px-2 py-2 w-12">
                                 <IconButton
                                     icon={<EyeSlashIcon />}
@@ -263,6 +335,9 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                          <thead>
                              <tr>
                                  <th className="px-2 py-2 w-12">
+                                     {/* Empty header for drag handle column - no border */}
+                                 </th>
+                                 <th className="px-2 py-2 w-12">
                                      {/* Empty header for eye icon column - no border */}
                                  </th>
                                  {columns.map((column, index) => (
@@ -281,6 +356,9 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                                 const rowArray = Array.isArray(row) ? row : [];
                                 return (
                                      <tr key={rowIndex} className="group">
+                                         <td className="pl-2 py-2">
+                                             {/* No drag handle for hidden rows */}
+                                         </td>
                                          <td className="pl-2 py-2">
                                              <IconButton
                                                  icon={<EyeIcon />}

@@ -1,8 +1,8 @@
 import { Button, IconButton } from '@/components';
-import { PlusIcon, TrashIcon, StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, StarIcon, EyeIcon, EyeSlashIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { type AttributedString } from '@/stores/ventureStore';
 
 interface EditableValueListProps {
@@ -25,6 +25,8 @@ export const EditableValueList = ({
     onUpdate
 }: EditableValueListProps) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
     const addValue = () => {
         const newValues = [...values, { text: '' }];
@@ -75,6 +77,60 @@ export const EditableValueList = ({
         onUpdate?.(newValues, selected);
     };
 
+    const handleDragStart = (e: React.DragEvent, index: number) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', '');
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverIndex(index);
+    };
+
+    const handleDragLeave = () => {
+        setDragOverIndex(null);
+    };
+
+    const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+
+        const newValues = [...values];
+        const draggedItem = newValues[draggedIndex];
+        
+        // Remove the dragged item
+        newValues.splice(draggedIndex, 1);
+        
+        // Insert at the new position
+        newValues.splice(dropIndex, 0, draggedItem);
+        
+        // Update selected index if needed
+        let newSelected = selected;
+        if (selected === draggedIndex) {
+            newSelected = dropIndex;
+        } else if (draggedIndex < selected && dropIndex >= selected) {
+            newSelected = selected - 1;
+        } else if (draggedIndex > selected && dropIndex <= selected) {
+            newSelected = selected + 1;
+        }
+        
+        onUpdate?.(newValues, newSelected);
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
     // Separate visible and hidden values
     const visibleValues = values.filter(value => !value.hidden);
     const hiddenValues = values.filter(value => value.hidden);
@@ -94,17 +150,33 @@ export const EditableValueList = ({
             {visibleValues?.map((value) => {
                 // Find the original index in the full values array
                 const originalIndex = values.findIndex(v => v === value);
+                const isDragging = draggedIndex === originalIndex;
+                const isDragOver = dragOverIndex === originalIndex;
                 
                 return (
                 <div
                     key={originalIndex}
+                    draggable={visibleValues.length > 1}
+                    onDragStart={(e) => handleDragStart(e, originalIndex)}
+                    onDragOver={(e) => handleDragOver(e, originalIndex)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, originalIndex)}
+                    onDragEnd={handleDragEnd}
                     className={clsx(
-                        "flex items-center gap-3 p-2 transition-colors",
+                        "flex items-center gap-3 p-2 transition-all duration-200 cursor-move",
                         selectable && selected === originalIndex 
                             ? "bg-yellow-50 dark:bg-yellow-900/20" 
-                            : "" //bg-white dark:bg-transparent"
+                            : "",
+                        isDragging && "opacity-50 scale-95",
+                        isDragOver && "border-t-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                     )}
                 >
+                    {visibleValues.length > 1 && (
+                        <div className="cursor-grab active:cursor-grabbing">
+                            <Bars3Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        </div>
+                    )}
+
                     {eyes && <IconButton
                         icon={<EyeSlashIcon />}
                         onClick={() => toggleHidden(originalIndex)}
