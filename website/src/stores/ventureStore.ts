@@ -26,17 +26,7 @@ export interface VentureData {
     marketOpportunity: StringOrNumberTable | undefined;
     milestones: StringOrNumberTable | undefined;
     references: StringOrNumberTable | undefined;
-    hiddenRows: HiddenRows | undefined;
-}
-
-export interface PrunedVentureData {
-    problem: string[] | undefined;
-    solution: string[] | undefined;
-    team: StringOrNumberTable | undefined;
-    positioning: TabValues[] | undefined;
-    marketOpportunity: StringOrNumberTable | undefined;
-    milestones: StringOrNumberTable | undefined;
-    references: StringOrNumberTable | undefined;
+    hiddenRows?: HiddenRows | undefined;
 }
 
 interface ArchivedVentureData extends VentureData {
@@ -52,13 +42,14 @@ export interface VentureState {
     solution: AttributedString[];
     
     // Table data (arrays of arrays with mixed string/number types)
-    marketOpportunity: (string | number)[][];
-    milestones: (string | number)[][];
-    team: (string | number)[][];
-    references: (string | number)[][];
+    marketOpportunity: StringOrNumberTable;
+    milestones: StringOrNumberTable;
+    team: StringOrNumberTable;
+    references: StringOrNumberTable;
     hiddenRows: HiddenRows;
     
     // Archive data
+    archiveName: string;
     archive: ArchivedVentureData[];
     
     // Actions for positioning data
@@ -78,17 +69,15 @@ export interface VentureState {
     setHiddenRows: (hiddenRows: HiddenRows) => void;
     
     // Actions for archive
-    addToArchive: (name: string) => void;
+    setArchiveName: (name: string) => void;
+    archiveVenture: (name: string) => void;
     removeFromArchive: (index: number) => void;
     clearArchive: () => void;
     
     // Bulk actions
-    importVentureData: (data: Partial<VentureState>) => void;
+    setVentureData: (data: Partial<VentureState>) => void;
+    getVentureData: () => VentureData;
     clearVentureData: () => void;
-    
-    // Utility actions
-    allVentureData: () => VentureData;
-    prunedVentureData: () => PrunedVentureData;
 }
 
 // Default positioning tabs structure
@@ -123,6 +112,7 @@ export const useVentureStore = create<VentureState>()(
             references: [],
             hiddenRows: {},
             archive: [],
+            archiveName: '',
             
             // Positioning actions
             setPositioning: (positioning) => set({ positioning }),
@@ -167,9 +157,11 @@ export const useVentureStore = create<VentureState>()(
             setHiddenRows: (hiddenRows) => set({ hiddenRows }),
 
             // Archive actions
-            addToArchive: (name) => {
+            setArchiveName: (name) => set({ archiveName: name }),
+            archiveVenture: (name) => {
                 const state = get();
-                const ventureData: VentureData = {
+                const archivedVenture: ArchivedVentureData = {
+                    name,
                     problem: state.problem,
                     solution: state.solution,
                     team: state.team,
@@ -179,15 +171,12 @@ export const useVentureStore = create<VentureState>()(
                     references: state.references,
                     hiddenRows: state.hiddenRows,
                 };
-                
-                const archivedVenture: ArchivedVentureData = {
-                    ...ventureData,
-                    name,
-                };
-                
-                set((state) => ({
-                    archive: [...state.archive, archivedVenture]
-                }));
+                                
+                set((state) => {
+                    // Remove any existing venture with this name and add new one to first position
+                    const filteredArchive = state.archive.filter(item => item.name !== name);
+                    return { archive: [archivedVenture, ...filteredArchive] };
+                });
             },
             
             removeFromArchive: (index) => 
@@ -198,7 +187,7 @@ export const useVentureStore = create<VentureState>()(
             clearArchive: () => set({ archive: [] }),
             
             // Bulk actions
-            importVentureData: (data) => {
+            setVentureData: (data) => {
                 set((prev) => ({
                     ...prev,
                     positioning: data.positioning || createEmptyPositioning(),
@@ -224,7 +213,7 @@ export const useVentureStore = create<VentureState>()(
                 hiddenRows: {},
             })),
 
-            allVentureData: () => {
+            getVentureData: () => {
                 const state = get();
                 return {
                     positioning: state.positioning,
@@ -235,20 +224,6 @@ export const useVentureStore = create<VentureState>()(
                     team: state.team,
                     references: state.references,
                     hiddenRows: state.hiddenRows,
-                };
-            },
-            
-            // Utility action to get all venture data in the format expected by the page
-            prunedVentureData: () => {
-                const state = get();
-                return {
-                    problem: pruneAttributedStrings(state.problem),
-                    solution: pruneAttributedStrings(state.solution),
-                    team: pruneTable(state.team),
-                    positioning: prunePositioning(state.positioning),
-                    marketOpportunity: pruneTable(state.marketOpportunity),
-                    milestones: pruneTable(state.milestones),
-                    references: pruneTable(state.references),
                 };
             },
         }),
@@ -270,34 +245,98 @@ export const useVentureStore = create<VentureState>()(
     )
 );
 
+//
+// Pruning to eliminate empty values
+//
+
+export function pruneVentureData (venture: VentureData)  {
+    return {
+        problem: pruneAttributedStrings(venture.problem),
+        solution: pruneAttributedStrings(venture.solution),
+        team: pruneTable(venture.team),
+        positioning: prunePositioning(venture.positioning),
+        marketOpportunity: pruneTable(venture.marketOpportunity),
+        milestones: pruneTable(venture.milestones),
+        references: pruneTable(venture.references),
+        hiddenRows: venture.hiddenRows,
+    };
+}
+
 export function pruneArray(array: string[]) {
     const filtered = array.filter(item => item !== '');
     return filtered.length === 0 ? undefined : filtered;
 }
 
-export function pruneAttributedStrings(array: AttributedString[]) {
-    return array.map(e=>e.text).filter(e=>e!=='');
+export function pruneAttributedStrings(array: AttributedString[] | undefined) {
+    return array?.filter(e=>e.text!=='');
 }
 
-export function pruneTable(table: StringOrNumberTable) {
-    const filtered = table.filter(row => !row.every(item => item === ''));
-    return filtered.length === 0 ? undefined : filtered;
+export function pruneTable(table: StringOrNumberTable | undefined) {
+    const filtered = table?.filter(row => !row.every(item => item === ''));
+    return filtered?.length === 0 ? undefined : filtered;
 }
 
-export function prunePositioning(positioning: TabValues[]) {
-    const filtered = positioning
-        .map(tab => {
-            const nonEmptyValues = tab.values.filter(value => value !== '');
-            const selectedValue = tab.selected !== -1 ? tab.values[tab.selected] : '';
-            const newSelected = selectedValue !== '' ? nonEmptyValues.indexOf(selectedValue) : -1;
-            
-            return {
-                ...tab,
-                values: nonEmptyValues,
-                selected: newSelected
-            };
-        })
-        .filter(tab => tab.selected !== -1 && tab.values.length > 0);
+export function prunePositioning(positioning: TabValues[] | undefined) {
+    const filtered = positioning?.map(tab => {
+        const nonEmptyValues = tab.values.filter(value => value !== '');
+        const selectedValue = tab.selected !== -1 ? tab.values[tab.selected] : '';
+        const newSelected = selectedValue !== '' ? nonEmptyValues.indexOf(selectedValue) : -1;
+        
+        return {
+            ...tab,
+            values: nonEmptyValues,
+            selected: newSelected
+        };
+    })
+    .filter(tab => tab.selected !== -1 && tab.values.length > 0);
     
-    return filtered.length === 0 ? undefined : filtered;
+    return filtered?.length === 0 ? undefined : filtered;
+}
+
+//
+// Simplified to make it easier to parse
+//
+
+export interface SimplifiedPositioning {
+    forWho?: string | undefined;
+    whoNeed?: string | undefined;
+    name?: string | undefined;
+    productCategory?: string | undefined;
+    keyBenefit?: string | undefined;
+    unlike?: string | undefined;
+    primaryDifferentiator?: string | undefined;
+}
+
+export interface SimplifiedVentureData {
+    problem: string[] | undefined;
+    solution: string[] | undefined;
+    team: StringOrNumberTable | undefined;
+    positioning: SimplifiedPositioning | undefined;
+    marketOpportunity: StringOrNumberTable | undefined;
+    milestones: StringOrNumberTable | undefined;
+    references: StringOrNumberTable | undefined;
+}
+
+function simplifyAttributedStrings(attributedStrings: AttributedString[] | undefined) {
+    return attributedStrings?.filter(e=>e.hidden!==true).map(e=>e.text);
+}
+
+function simplifyPositioning(positioning: TabValues[] | undefined) {
+    return positioning?.reduce((acc, tab) => ({
+        ...acc,
+        [tab.id]: tab.values[tab.selected]
+    }), {} as SimplifiedPositioning);
+}
+
+export function simplifyVentureData(venture: VentureData) {
+    venture = pruneVentureData(venture);
+    return {
+        problem: simplifyAttributedStrings(venture.problem),
+        solution: simplifyAttributedStrings(venture.solution),
+        team: venture.team,
+        positioning: simplifyPositioning(venture.positioning),
+        marketOpportunity: venture.marketOpportunity,
+        milestones: venture.milestones,
+        references: venture.references,
+    } as SimplifiedVentureData;
 }

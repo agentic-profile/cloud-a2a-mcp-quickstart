@@ -6,30 +6,30 @@ import ShareVentureJson from './ShareVentureJson';
 import ImportVentureJson from './ImportVentureJson';
 import ArchiveVenture from './ArchiveVenture';
 import { MarkdownGenerator } from './MarkdownGenerator';
-import { useVentureStore } from '@/stores/ventureStore';
+import { useVentureStore, pruneVentureData, simplifyVentureData } from '@/stores/ventureStore';
 
 const AdvancedFeatures = () => {
     const [showImportModal, setShowImportModal] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(false);
 
     const {
-        importVentureData,
+        setVentureData,
         clearVentureData,
-        prunedVentureData
+        getVentureData
     } = useVentureStore();
 
-    const ventureData = prunedVentureData();
+    const ventureData = pruneVentureData(getVentureData());
 
     // Handle importing venture data from JSON
     const handleImportData = (importedData: any) => {
-        importVentureData(importedData);
+        setVentureData(importedData);
         // Close the import modal
         setShowImportModal(false);
     };
 
     // Generate Markdown summary using the MarkdownGenerator
     const generateMarkdownSummary = () => {
-        return MarkdownGenerator.generateMarkdownSummary(ventureData);
+        return MarkdownGenerator.generateMarkdownSummary(simplifyVentureData(ventureData));
     };
 
     return (

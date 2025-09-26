@@ -1,12 +1,11 @@
-import type { TabValues } from '@/components/TabbedEditableLists';
-import type { PrunedVentureData } from '@/stores/ventureStore';
+import type { SimplifiedPositioning, SimplifiedVentureData } from '@/stores/ventureStore';
 
 
 export class MarkdownGenerator {
     /**
      * Generate a complete Markdown summary from venture data
      */
-    static generateMarkdownSummary(data: PrunedVentureData): string {
+    static generateMarkdownSummary(data: SimplifiedVentureData): string {
         const {
             problem,
             solution,
@@ -17,16 +16,13 @@ export class MarkdownGenerator {
             references
         } = data;
 
-        // Extract positioning values
-        const positioningValues = this.extractPositioningValues(positioning);
+        let markdown = `# ${this.renderPositioning(positioning?.name)} - Venture Summary\n\n`;
         
         // Generate positioning statement
-        const positioningStatement = this.generatePositioningStatement(positioningValues);
-
-        let markdown = `# ${this.renderPositioning(positioningValues.name)} - Venture Summary\n\n`;
-        
-        // Positioning Statement
-        markdown += `${positioningStatement}\n\n`;
+        if( positioning ) {
+            const positioningStatement = this.generatePositioningStatement(positioning);
+            markdown += `${positioningStatement}\n\n`;
+        }
 
         // Problem
         if ( problem && problem.length > 0) {
@@ -101,7 +97,7 @@ export class MarkdownGenerator {
 
     /**
      * Extract positioning values from tab values array
-     */
+     *
     private static extractPositioningValues(positioning: TabValues[] | undefined): Record<string, string> {
         if (!positioning)
             return {};
@@ -109,12 +105,12 @@ export class MarkdownGenerator {
             acc[tab.id] = tab.values[tab.selected];
             return acc;
         }, {} as Record<string, string>);
-    }
+    }*/
 
     /**
      * Generate positioning statement from extracted values
      */
-    private static generatePositioningStatement(positioningValues: Record<string, string>): string {
+    private static generatePositioningStatement(positioningValues: SimplifiedPositioning): string {
         const { forWho, whoNeed, name, productCategory, keyBenefit, unlike, primaryDifferentiator } = positioningValues;
         
         return `For ${this.renderPositioning(forWho)} that need ${this.renderPositioning(whoNeed)}, ${this.renderPositioning(name)} is a ${this.renderPositioning(productCategory)} that ${this.renderPositioning(keyBenefit)}. Unlike ${this.renderPositioning(unlike)}, our product ${this.renderPositioning(primaryDifferentiator)}.`;

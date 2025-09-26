@@ -8,6 +8,7 @@ import agentsData from '../agents.json';
 import { MarkdownGenerator } from './MarkdownGenerator';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
+import { simplifyVentureData } from '@/stores/ventureStore';
 
 const DEFAULT_MCP_URLS = [
     'https://example-api.agenticprofile.ai/mcp/venture',
@@ -15,7 +16,7 @@ const DEFAULT_MCP_URLS = [
 ];
 
 const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpRequest: HttpRequest) => void }) => {
-    const { prunedVentureData } = useVentureStore();
+    const { getVentureData } = useVentureStore();
     const { serverUrl } = useSettingsStore();
     const { userAgentDid, verificationId } = useUserProfileStore();
     const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
@@ -44,8 +45,8 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
         }
 
         // Create the venture data payload
-        const ventureData = prunedVentureData();
-        const markdown = MarkdownGenerator.generateMarkdownSummary(ventureData);
+        const simplifiedVenture = simplifyVentureData(getVentureData());
+        const markdown = MarkdownGenerator.generateMarkdownSummary(simplifiedVenture);
 
         // Create the JSON-RPC request
         const mcpRequest = {
@@ -53,7 +54,7 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
             params: {
                 name: 'update',
                 profile: {
-                    ...ventureData,
+                    ...simplifiedVenture,
                     markdown,
                     kind: 'venture'
                 }
