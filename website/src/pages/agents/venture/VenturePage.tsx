@@ -9,7 +9,7 @@ import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
-import type { AttributedString } from '@/stores/ventureStore';
+import type { AttributedString, StringOrNumberTable } from '@/stores/ventureStore';
 
 
 const POSITIONING_TABS = [
@@ -31,7 +31,9 @@ const VenturePage = () => {
         milestones,
         team,
         references,
+        hiddenRows,
         updatePositioningTab,
+        setHiddenRows,
         setProblem,
         setSolution,
         setMarketOpportunity,
@@ -54,20 +56,28 @@ const VenturePage = () => {
         setSolution(values);
     }, [setSolution]);
 
-    const handleMarketOpportunityUpdate = useCallback((values: (string | number)[][]) => {
+    const handleMarketOpportunityUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
         setMarketOpportunity(values);
+        if( hidden !== undefined )
+            setHiddenRows({ ...hiddenRows, marketOpportunity: hidden });
     }, [setMarketOpportunity]);
 
-    const handleMilestonesUpdate = useCallback((values: (string | number)[][]) => {
+    const handleMilestonesUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
         setMilestones(values);
+        if( hidden !== undefined )
+            setHiddenRows({ ...hiddenRows, milestones: hidden });
     }, [setMilestones]);
 
-    const handleTeamUpdate = useCallback((values: (string | number)[][]) => {
+    const handleTeamUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
         setTeam(values);
+        if( hidden !== undefined )
+            setHiddenRows({ ...hiddenRows, team: hidden });
     }, [setTeam]);
 
-    const handleReferencesUpdate = useCallback((values: (string | number)[][]) => {
+    const handleReferencesUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
         setReferences(values);
+        if( hidden !== undefined )
+            setHiddenRows({ ...hiddenRows, references: hidden });
     }, [setReferences]);
 
     // Handle updates to tab values
@@ -133,6 +143,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Size (TAM)", "USD")
                         ]}
                         values={marketOpportunity}
+                        hiddenRows={hiddenRows?.marketOpportunity}
                         onUpdate={handleMarketOpportunityUpdate}
                     />
                 </CardTitleAndBody>
@@ -160,6 +171,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Funding Needed", "USD")
                         ]}
                         values={milestones}
+                        hiddenRows={hiddenRows?.milestones}
                         onUpdate={handleMilestonesUpdate}
                     />
                 </CardTitleAndBody>
@@ -176,6 +188,7 @@ const VenturePage = () => {
                             ])
                         ]}
                         values={team}
+                        hiddenRows={hiddenRows?.team}
                         onUpdate={handleTeamUpdate}
                     />
                 </CardTitleAndBody>

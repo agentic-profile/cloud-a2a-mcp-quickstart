@@ -12,24 +12,31 @@ export interface AttributedString {
     hidden?: boolean;
 }
 
+export type StringOrNumberTable = (string | number)[][];
+
+export interface HiddenRows {
+    [key: string]: StringOrNumberTable;
+}
+
 export interface VentureData {
     problem: AttributedString[] | undefined;
     solution: AttributedString[] | undefined;
-    team: (string | number)[][] | undefined;
+    team: StringOrNumberTable | undefined;
     positioning: TabValues[] | undefined;
-    marketOpportunity: (string | number)[][] | undefined;
-    milestones: (string | number)[][] | undefined;
-    references: (string | number)[][] | undefined;
+    marketOpportunity: StringOrNumberTable | undefined;
+    milestones: StringOrNumberTable | undefined;
+    references: StringOrNumberTable | undefined;
+    hiddenRows: HiddenRows | undefined;
 }
 
 export interface PrunedVentureData {
     problem: string[] | undefined;
     solution: string[] | undefined;
-    team: (string | number)[][] | undefined;
+    team: StringOrNumberTable | undefined;
     positioning: TabValues[] | undefined;
-    marketOpportunity: (string | number)[][] | undefined;
-    milestones: (string | number)[][] | undefined;
-    references: (string | number)[][] | undefined;
+    marketOpportunity: StringOrNumberTable | undefined;
+    milestones: StringOrNumberTable | undefined;
+    references: StringOrNumberTable | undefined;
 }
 
 interface ArchivedVentureData extends VentureData {
@@ -49,6 +56,7 @@ export interface VentureState {
     milestones: (string | number)[][];
     team: (string | number)[][];
     references: (string | number)[][];
+    hiddenRows: HiddenRows;
     
     // Archive data
     archive: ArchivedVentureData[];
@@ -63,10 +71,11 @@ export interface VentureState {
     setSolution: (solution: AttributedString[]) => void;
     
     // Actions for table data
-    setMarketOpportunity: (marketOpportunity: (string | number)[][]) => void;
-    setMilestones: (milestones: (string | number)[][]) => void;
-    setTeam: (team: (string | number)[][]) => void;
-    setReferences: (references: (string | number)[][]) => void;
+    setMarketOpportunity: (marketOpportunity: StringOrNumberTable) => void;
+    setMilestones: (milestones: StringOrNumberTable) => void;
+    setTeam: (team: StringOrNumberTable) => void;
+    setReferences: (references: StringOrNumberTable) => void;
+    setHiddenRows: (hiddenRows: HiddenRows) => void;
     
     // Actions for archive
     addToArchive: (name: string) => void;
@@ -112,6 +121,7 @@ export const useVentureStore = create<VentureState>()(
             milestones: [],
             team: [],
             references: [],
+            hiddenRows: {},
             archive: [],
             
             // Positioning actions
@@ -154,7 +164,8 @@ export const useVentureStore = create<VentureState>()(
             setMilestones: (milestones) => set({ milestones }),
             setTeam: (team) => set({ team }),
             setReferences: (references) => set({ references }),
-            
+            setHiddenRows: (hiddenRows) => set({ hiddenRows }),
+
             // Archive actions
             addToArchive: (name) => {
                 const state = get();
@@ -166,6 +177,7 @@ export const useVentureStore = create<VentureState>()(
                     marketOpportunity: state.marketOpportunity,
                     milestones: state.milestones,
                     references: state.references,
+                    hiddenRows: state.hiddenRows,
                 };
                 
                 const archivedVenture: ArchivedVentureData = {
@@ -195,7 +207,8 @@ export const useVentureStore = create<VentureState>()(
                     marketOpportunity: data.marketOpportunity || [],
                     milestones: data.milestones || [],
                     team: data.team || [],
-                    references: data.references || []
+                    references: data.references || [],
+                    hiddenRows: data.hiddenRows || {},
                 }));
             },
             
@@ -207,7 +220,8 @@ export const useVentureStore = create<VentureState>()(
                 marketOpportunity: [],
                 milestones: [],
                 team: [],
-                references: []
+                references: [],
+                hiddenRows: {},
             })),
 
             allVentureData: () => {
@@ -220,6 +234,7 @@ export const useVentureStore = create<VentureState>()(
                     milestones: state.milestones,
                     team: state.team,
                     references: state.references,
+                    hiddenRows: state.hiddenRows,
                 };
             },
             
@@ -248,6 +263,7 @@ export const useVentureStore = create<VentureState>()(
                 milestones: state.milestones,
                 team: state.team,
                 references: state.references,
+                hiddenRows: state.hiddenRows,
                 archive: state.archive,
             }),
         }
@@ -263,7 +279,7 @@ export function pruneAttributedStrings(array: AttributedString[]) {
     return array.map(e=>e.text).filter(e=>e!=='');
 }
 
-export function pruneTable(table: (string | number)[][]) {
+export function pruneTable(table: StringOrNumberTable) {
     const filtered = table.filter(row => !row.every(item => item === ''));
     return filtered.length === 0 ? undefined : filtered;
 }

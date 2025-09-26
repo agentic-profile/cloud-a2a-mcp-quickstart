@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import type { HiddenRows, StringOrNumberTable } from '@/stores/ventureStore';
 
 // Common number handlers for reuse across number and currency columns
 const renderNumberCell = (value: string | number, formatFunction?: (value: string | number) => string) => {
@@ -78,11 +79,12 @@ const asString = (value: string | number | undefined | null ): string => {
 export interface EditableTableProps {
     placeholders?: string[];
     columns: EditableTableColumn[];
-    values?: (string | number)[][];
-    onUpdate?: (values: (string | number)[][]) => void;
+    values?: StringOrNumberTable;
+    hiddenRows?: StringOrNumberTable;
+    onUpdate?: (values: StringOrNumberTable, hiddenRows?: StringOrNumberTable) => void;
 }
 
-export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableProps) => {
+export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate }: EditableTableProps) => {
     const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
     
@@ -216,6 +218,47 @@ export const EditableTable = ({ columns, values = [], onUpdate }: EditableTableP
                     Add Row
                 </Button>
             </div>
+            
+            {/* Hidden Rows Section */}
+            {hiddenRows && hiddenRows.length > 0 && (
+                <div className="mt-6">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Hidden Rows</h3>
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                        <table className="min-w-full border-collapse">
+                            <thead>
+                                <tr>
+                                    {columns.map((column, index) => (
+                                        <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left">
+                                            {column.header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {hiddenRows.map((row, rowIndex) => {
+                                    // Ensure row is an array
+                                    const rowArray = Array.isArray(row) ? row : [];
+                                    return (
+                                        <tr key={rowIndex} className="group">
+                                            {columns.map((column, colIndex) => (
+                                                <td 
+                                                    key={colIndex} 
+                                                    className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-white dark:bg-gray-900"
+                                                >
+                                                    {column.renderCell ? 
+                                                        column.renderCell(asNumberOrString(rowArray[colIndex])) : 
+                                                        asString(rowArray[colIndex])
+                                                    }
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
