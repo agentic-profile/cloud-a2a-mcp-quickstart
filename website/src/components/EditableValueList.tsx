@@ -1,5 +1,5 @@
 import { Button } from '@/components';
-import { PlusIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
 import { useRef } from 'react';
@@ -57,7 +57,7 @@ export const EditableValueList = ({
 
     const updateValue = (index: number, text: string) => {
         const newValues = values.map((value, i) => 
-            i === index ? {text} : value
+            i === index ? { ...value, text } : value
         );
         onUpdate?.(newValues, selected);
     };
@@ -66,24 +66,48 @@ export const EditableValueList = ({
         onUpdate?.(values, index);
     };
 
+    const toggleHidden = (index: number) => {
+        const newValues = values.map((value, i) => 
+            i === index ? { ...value, hidden: !value.hidden } : value
+        );
+        onUpdate?.(newValues, selected);
+    };
+
+    // Separate visible and hidden values
+    const visibleValues = values.filter(value => !value.hidden);
+    const hiddenValues = values.filter(value => value.hidden);
+
     return (
         <div className={className}>
-            {values?.map((value, index) => (
+            {/* Main list - only visible values */}
+            {visibleValues?.map((value) => {
+                // Find the original index in the full values array
+                const originalIndex = values.findIndex(v => v === value);
+                
+                return (
                 <div
-                    key={index}
+                    key={originalIndex}
                     className={clsx(
                         "flex items-center gap-3 p-3 transition-colors",
-                        selectable && selected === index 
+                        selectable && selected === originalIndex 
                             ? "bg-yellow-50 dark:bg-yellow-900/20" 
                             : "" //bg-white dark:bg-transparent"
                     )}
                 >
-                    {selectable && <button
-                        onClick={() => setSelectedValue(index)}
+                    <button
+                        onClick={() => toggleHidden(originalIndex)}
                         className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                        title={selected === index ? "Remove selection" : "Select this value"}
+                        title="Hide value"
                     >
-                        {selected === index ? (
+                        <EyeIcon className="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                    </button>
+
+                    {selectable && <button
+                        onClick={() => setSelectedValue(originalIndex)}
+                        className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                        title={selected === originalIndex ? "Remove selection" : "Select this value"}
+                    >
+                        {selected === originalIndex ? (
                             <StarIconSolid className="w-5 h-5 text-yellow-500" />
                         ) : (
                             <StarIcon className="w-5 h-5 text-gray-400 hover:text-yellow-500" />
@@ -91,10 +115,10 @@ export const EditableValueList = ({
                     </button>}
 
                     <input
-                        ref={(el) => { inputRefs.current[index] = el; }}
+                        ref={(el) => { inputRefs.current[originalIndex] = el; }}
                         type="text"
                         value={value.text}
-                        onChange={(e) => updateValue(index, e.target.value)}
+                        onChange={(e) => updateValue(originalIndex, e.target.value)}
                         placeholder={placeholder}
                         className={clsx(
                             "flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors",
@@ -105,7 +129,7 @@ export const EditableValueList = ({
 
                     {values.length > 1 && (
                         <button
-                            onClick={() => deleteValue(index)}
+                            onClick={() => deleteValue(originalIndex)}
                             className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
                             title="Delete value"
                         >
@@ -113,7 +137,8 @@ export const EditableValueList = ({
                         </button>
                     )}
                 </div>
-            ))}
+                );
+            })}
 
             <div className="flex items-center justify-end mt-3">
                 <Button
@@ -127,6 +152,57 @@ export const EditableValueList = ({
                     Add Value
                 </Button>
             </div>
+
+            {/* Hidden Values Section */}
+            {hiddenValues.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Hidden Values ({hiddenValues.length})
+                    </h3>
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                        {hiddenValues.map((value) => {
+                            // Find the original index in the full values array
+                            const originalIndex = values.findIndex(v => v === value);
+                            
+                            return (
+                                <div
+                                    key={originalIndex}
+                                    className="flex items-center gap-3 p-3 mb-2 last:mb-0"
+                                >
+                                    <button
+                                        onClick={() => toggleHidden(originalIndex)}
+                                        className="flex-shrink-0 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                        title="Show value"
+                                    >
+                                        <EyeSlashIcon className="w-5 h-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" />
+                                    </button>
+
+                                    <input
+                                        ref={(el) => { inputRefs.current[originalIndex] = el; }}
+                                        type="text"
+                                        value={value.text}
+                                        onChange={(e) => updateValue(originalIndex, e.target.value)}
+                                        placeholder={placeholder}
+                                        className={clsx(
+                                            "flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors",
+                                            "bg-transparent border-gray-300 dark:border-gray-500",
+                                            "text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                                        )}
+                                    />
+
+                                    <button
+                                        onClick={() => deleteValue(originalIndex)}
+                                        className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
+                                        title="Delete value"
+                                    >
+                                        <TrashIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
