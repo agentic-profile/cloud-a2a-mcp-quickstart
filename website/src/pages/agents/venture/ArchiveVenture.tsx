@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Button } from '@/components';
+import { Button, IconButton } from '@/components';
 import { useVentureStore } from '@/stores/ventureStore';
-import Icon from '@/components/Icon';
-import folderOpenIcon from '@iconify-icons/lucide/folder-open';
-import trashIcon from '@iconify-icons/lucide/trash';
+import { FolderOpenIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const ArchiveVenture = () => {
     const [archiveName, setArchiveName] = useState('');
@@ -56,19 +54,20 @@ const ArchiveVenture = () => {
                             className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                         >
                             <div className="flex items-center gap-2">
-                                <Icon
-                                    src={folderOpenIcon}
+                                <IconButton
+                                    icon={<FolderOpenIcon />}
                                     onClick={() => handleOpenArchive(item)}
-                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 cursor-pointer"
+                                    title="Open archive"
                                 />
                                 <span className="text-sm text-gray-900 dark:text-gray-100">
                                     {item.name}
                                 </span>
                             </div>
-                            <Icon
-                                src={trashIcon}
+                            <IconButton
+                                icon={<TrashIcon />}
                                 onClick={() => handleDeleteArchive(index)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 cursor-pointer"
+                                variant="danger"
+                                title="Delete archive"
                             />
                         </div>
                     ))}

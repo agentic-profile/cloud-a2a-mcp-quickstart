@@ -6,7 +6,7 @@ export function PositioningStatement({ tabValues }: { tabValues: TabValues[] }) 
         return acc;
     }, {} as Record<string, string>);
 
-    const positioningStatement = `"For ${render(forWho)} that need ${render(whoNeed)}, ${render(name)} is a ${render(productCategory)} that ${render(keyBenefit)}. Unlike ${render(unlike)}, our product ${render(primaryDifferentiator)}."`;
+    const positioningStatement = `"For ${render(forWho)} who ${render(whoNeed)}, ${render(name)} is a ${render(productCategory)} that ${render(keyBenefit)}. Unlike ${render(unlike)}, our product ${render(primaryDifferentiator)}."`;
     return (
         <div className="text-xl italic text-center my-6 max-w-2xl mx-auto">
             {positioningStatement}

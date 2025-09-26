@@ -14,7 +14,7 @@ import type { AttributedString, StringOrNumberTable } from '@/stores/ventureStor
 
 const POSITIONING_TABS = [
     { id: "forWho", title: "For who", placeholder: "Enter target market..." },
-    { id: "whoNeed", title: "Who needs", placeholder: "Enter customer needs or problems..." },
+    { id: "whoNeed", title: "Who (needs/wants)", placeholder: "Enter customer needs or problems..." },
     { id: "name", title: "Company name", placeholder: "Company or project name..." },
     { id: "productCategory", title: "Product Category", placeholder: "Enter product category..." },
     { id: "keyBenefit", title: "Key Benefit", placeholder: "Enter key benefit..." },

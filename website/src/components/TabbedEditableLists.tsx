@@ -72,6 +72,7 @@ export const TabbedEditableLists = ({
             <div>
                 <EditableValueList
                     placeholder={placeholder ?? "Enter option..."}
+                    eyes={false}
                     values={tabValues.length === 0 ? [{text: ''}] : tabValues.map(e=>({text: e}))}
                     selected={tabValues.length === 0 ? 0 : selected}
                     selectable={selectable}

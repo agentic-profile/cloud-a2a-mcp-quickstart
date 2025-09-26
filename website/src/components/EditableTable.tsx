@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components';
+import { Button, IconButton } from '@/components';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import type { HiddenRows, StringOrNumberTable } from '@/stores/ventureStore';
+import type { StringOrNumberTable } from '@/stores/ventureStore';
 
 // Common number handlers for reuse across number and currency columns
 const renderNumberCell = (value: string | number, formatFunction?: (value: string | number) => string) => {
@@ -149,11 +149,39 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
         }
     };
 
+    const hideRow = (rowIndex: number) => {
+        if (onUpdate) {
+            const rowToHide = values[rowIndex];
+            const newValues = values.filter((_, index) => index !== rowIndex);
+            const newHiddenRows = [...hiddenRows, rowToHide];
+            onUpdate(newValues, newHiddenRows);
+        }
+    };
+
+    const unhideRow = (rowIndex: number) => {
+        if (onUpdate) {
+            const rowToUnhide = hiddenRows[rowIndex];
+            const newHiddenRows = hiddenRows.filter((_, index) => index !== rowIndex);
+            const newValues = [...values, rowToUnhide];
+            onUpdate(newValues, newHiddenRows);
+        }
+    };
+
+    const deleteHiddenRow = (rowIndex: number) => {
+        if (onUpdate) {
+            const newHiddenRows = hiddenRows.filter((_, index) => index !== rowIndex);
+            onUpdate(values, newHiddenRows);
+        }
+    };
+
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full border-collapse">
                 <thead>
                     <tr>
+                        <th className="px-2 py-2 w-12">
+                            {/* Empty header for eye icon column - no border */}
+                        </th>
                         {columns.map((column, index) => (
                             <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 text-left">
                                 {column.header}
@@ -170,6 +198,13 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                         const rowArray = Array.isArray(row) ? row : [];
                         return (
                         <tr key={rowIndex} className="group">
+                            <td className="px-2 py-2 w-12">
+                                <IconButton
+                                    icon={<EyeSlashIcon />}
+                                    onClick={() => hideRow(rowIndex)}
+                                    title="Hide row"
+                                />
+                            </td>
                             {columns.map((column, colIndex) => (
                                 <td 
                                     key={colIndex} 
@@ -192,13 +227,12 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                             ))}
                             <td className="px-2 py-2 w-12">
                                 {values.length > 1 && (
-                                    <button
+                                    <IconButton
+                                        icon={<TrashIcon />}
                                         onClick={() => deleteRow(rowIndex)}
-                                        className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
+                                        variant="danger"
                                         title="Delete row"
-                                    >
-                                        <TrashIcon className="w-4 h-4" />
-                                    </button>
+                                    />
                                 )}
                             </td>
                         </tr>
@@ -221,42 +255,61 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
             
             {/* Hidden Rows Section */}
             {hiddenRows && hiddenRows.length > 0 && (
-                <div className="mt-6">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Hidden Rows</h3>
-                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                        <table className="min-w-full border-collapse">
-                            <thead>
-                                <tr>
-                                    {columns.map((column, index) => (
-                                        <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left">
-                                            {column.header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {hiddenRows.map((row, rowIndex) => {
-                                    // Ensure row is an array
-                                    const rowArray = Array.isArray(row) ? row : [];
-                                    return (
-                                        <tr key={rowIndex} className="group">
-                                            {columns.map((column, colIndex) => (
-                                                <td 
-                                                    key={colIndex} 
-                                                    className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-white dark:bg-gray-900"
-                                                >
-                                                    {column.renderCell ? 
-                                                        column.renderCell(asNumberOrString(rowArray[colIndex])) : 
-                                                        asString(rowArray[colIndex])
-                                                    }
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="mt-6 bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                    <h4>Hidden Rows</h4>
+                    <table className="mt-4 min-w-full border-collapse">
+                         <thead>
+                             <tr>
+                                 <th className="px-2 py-2 w-12">
+                                     {/* Empty header for eye icon column - no border */}
+                                 </th>
+                                 {columns.map((column, index) => (
+                                     <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left">
+                                         {column.header}
+                                     </th>
+                                 ))}
+                                 <th className="pl-2 py-2 w-8">
+                                     {/* Empty header for delete column - no border */}
+                                 </th>
+                             </tr>
+                         </thead>
+                        <tbody>
+                            {hiddenRows.map((row, rowIndex) => {
+                                // Ensure row is an array
+                                const rowArray = Array.isArray(row) ? row : [];
+                                return (
+                                     <tr key={rowIndex} className="group">
+                                         <td className="pl-2 py-2">
+                                             <IconButton
+                                                 icon={<EyeIcon />}
+                                                 onClick={() => unhideRow(rowIndex)}
+                                                 title="Show row"
+                                             />
+                                         </td>
+                                         {columns.map((column, colIndex) => (
+                                             <td 
+                                                 key={colIndex} 
+                                                 className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-white dark:bg-gray-900"
+                                             >
+                                                 {column.renderCell ? 
+                                                     column.renderCell(asNumberOrString(rowArray[colIndex])) : 
+                                                     asString(rowArray[colIndex])
+                                                 }
+                                             </td>
+                                         ))}
+                                         <td className="pl-2 py-2 w-8">
+                                             <IconButton
+                                                 icon={<TrashIcon />}
+                                                 onClick={() => deleteHiddenRow(rowIndex)}
+                                                 variant="danger"
+                                                 title="Delete row permanently"
+                                             />
+                                         </td>
+                                     </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             )}
         </div>

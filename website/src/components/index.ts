@@ -7,6 +7,7 @@ export { default as TopNavigation } from './TopNavigation';
 export { default as BottomNavigation } from './BottomNavigation';
 export { default as Sidebar } from './Sidebar';
 export { Button } from './Button';
+export { IconButton } from './IconButton';
 export { default as Icon } from './Icon';
 export { ThemeToggle } from './ThemeToggle';
 export { Switch } from './Switch';
