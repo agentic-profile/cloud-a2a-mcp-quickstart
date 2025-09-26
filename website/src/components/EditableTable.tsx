@@ -9,7 +9,7 @@ const renderNumberCell = (value: string | number, formatFunction?: (value: strin
     if (value === 0) {
         const displayValue = formatFunction ? formatFunction(0) : "0";
         return (
-            <span className="text-gray-900 text-right font-mono">
+            <span className="text-gray-900 dark:text-gray-100 text-right font-mono">
                 {displayValue}
             </span>
         );
@@ -18,8 +18,8 @@ const renderNumberCell = (value: string | number, formatFunction?: (value: strin
     const numValue = typeof value === 'number' ? value : parseFloat(String(value));
     const displayValue = isNaN(numValue) ? '' : (formatFunction ? formatFunction(numValue) : numValue.toLocaleString());
     return (
-        <span className="text-gray-900 text-right font-mono">
-            {displayValue !== '' ? displayValue : <span className="text-gray-400 italic font-sans">Click to edit</span>}
+        <span className="text-gray-900 dark:text-gray-100 text-right font-mono">
+            {displayValue !== '' ? displayValue : <span className="text-gray-400 dark:text-gray-500 italic font-sans">Click to edit</span>}
         </span>
     );
 };
@@ -58,7 +58,7 @@ const renderNumberEditCell = (
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         placeholder={placeholder}
-        className="w-full border-none outline-none bg-transparent text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="w-full border-none outline-none bg-transparent dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
     />
 );
 
@@ -208,7 +208,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                             {columns.map((column, colIndex) => (
                                 <td 
                                     key={colIndex} 
-                                    className="border border-gray-300 dark:border-gray-500 px-4 py-2 cursor-pointer hover:bg-gray-50"
+                                    className="border border-gray-300 dark:border-gray-500 px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                                     onClick={(e) => handleCellClick(rowIndex, colIndex, e)}
                                 >
                                     {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
@@ -221,7 +221,9 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                                     ) : (
                                         column.renderCell ? 
                                             column.renderCell(asNumberOrString(rowArray[colIndex])) : 
-                                            asString(rowArray[colIndex])
+                                            <span className="text-gray-900 dark:text-gray-100">
+                                                {asString(rowArray[colIndex]) || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>}
+                                            </span>
                                     )}
                                 </td>
                             ))}
@@ -255,8 +257,8 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
             
             {/* Hidden Rows Section */}
             {hiddenRows && hiddenRows.length > 0 && (
-                <div className="mt-6 bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                    <h4>Hidden Rows</h4>
+                <div className="mt-6 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <h4 className="text-gray-900 dark:text-gray-100">Hidden Rows</h4>
                     <table className="mt-4 min-w-full border-collapse">
                          <thead>
                              <tr>
@@ -264,7 +266,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                                      {/* Empty header for eye icon column - no border */}
                                  </th>
                                  {columns.map((column, index) => (
-                                     <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left">
+                                     <th key={index} className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 text-left">
                                          {column.header}
                                      </th>
                                  ))}
@@ -289,11 +291,13 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                                          {columns.map((column, colIndex) => (
                                              <td 
                                                  key={colIndex} 
-                                                 className="border border-gray-300 dark:border-gray-500 px-4 py-2 bg-white dark:bg-gray-900"
+                                                 className="border border-gray-300 dark:border-gray-500 px-4 py-2 text-gray-900 dark:text-gray-100"
                                              >
                                                  {column.renderCell ? 
                                                      column.renderCell(asNumberOrString(rowArray[colIndex])) : 
-                                                     asString(rowArray[colIndex])
+                                                     <span className="text-gray-900 dark:text-gray-100">
+                                                         {asString(rowArray[colIndex]) || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>}
+                                                     </span>
                                                  }
                                              </td>
                                          ))}
@@ -331,7 +335,7 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
     return {
         header,
         renderCell: (value: string | number) => (
-            <span className="text-gray-900">{String(value) || <span className="text-gray-400 italic">Click to edit</span>}</span>
+            <span className="text-gray-900 dark:text-gray-100">{String(value) || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>}</span>
         ),
         renderEditCell: (value: string | number, onChange: (value: string | number) => void, onExit: () => void, ref?: React.RefObject<HTMLInputElement | null>) => (
             <input
@@ -345,7 +349,7 @@ export function EditableTextColumn(header: string, inputType: 'text' | 'email' |
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="w-full border-none outline-none bg-transparent"
+                className="w-full border-none outline-none bg-transparent dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
         )
     };
@@ -393,8 +397,8 @@ export function EditableSelectColumn(header: string, options: SelectOption[]): E
             const selectedOption = options.find(option => option.key === stringValue);
             const displayValue = selectedOption ? selectedOption.label : stringValue;
             return (
-                <span className="text-gray-900">
-                    {displayValue || <span className="text-gray-400 italic">Click to edit</span>}
+                <span className="text-gray-900 dark:text-gray-100">
+                    {displayValue || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>}
                 </span>
             );
         },
@@ -409,7 +413,7 @@ export function EditableSelectColumn(header: string, options: SelectOption[]): E
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="w-full border-none outline-none bg-transparent cursor-pointer"
+                className="w-full border-none outline-none bg-transparent dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer"
             >
                 <option value="">Select an option...</option>
                 {options.map((option) => (
@@ -452,8 +456,8 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
             if (!stringValue.trim()) {
                 return (
                     <div className="flex items-center justify-between">
-                        <span className="text-gray-400 italic">Click to edit</span>
-                        <PencilIcon className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>
+                        <PencilIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </div>
                 );
             }
@@ -479,7 +483,7 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                     >
                         {displayText}
                     </a>
-                    <PencilIcon className="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" />
+                    <PencilIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0" />
                 </div>
             );
         },
@@ -501,12 +505,12 @@ export function EditableUrlColumn(header: string): EditableTableColumn {
                         onClick={(e) => e.stopPropagation()}
                         onMouseDown={(e) => e.stopPropagation()}
                         placeholder="https://example.com"
-                        className={`w-full border-none outline-none bg-transparent ${
-                            stringValue.trim() && !isValid ? 'text-red-500' : ''
+                        className={`w-full border-none outline-none bg-transparent dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                            stringValue.trim() && !isValid ? 'text-red-500 dark:text-red-400' : ''
                         }`}
                     />
                     {stringValue.trim() && !isValid && (
-                        <div className="text-xs text-red-500 mt-1">
+                        <div className="text-xs text-red-500 dark:text-red-400 mt-1">
                             Invalid URL format
                         </div>
                     )}

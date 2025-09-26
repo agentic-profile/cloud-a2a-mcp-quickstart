@@ -204,6 +204,7 @@ const VenturePage = () => {
                             EditableTextColumn("Description")
                         ]}
                         values={references}
+                        hiddenRows={hiddenRows?.references}
                         onUpdate={handleReferencesUpdate}
                     />
                 </CardTitleAndBody>
