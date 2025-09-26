@@ -2,7 +2,7 @@ import { Button } from '@/components';
 import { PlusIcon, TrashIcon, StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { type AttributedString } from '@/stores/ventureStore';
 
 interface EditableValueListProps {
@@ -76,6 +76,15 @@ export const EditableValueList = ({
     // Separate visible and hidden values
     const visibleValues = values.filter(value => !value.hidden);
     const hiddenValues = values.filter(value => value.hidden);
+    
+    // Ensure there's always at least one visible field
+    useEffect(() => {
+        if (visibleValues.length === 0) {
+            // If no visible fields, add a new empty visible field
+            const newValues = [...values, { text: '' }];
+            onUpdate?.(newValues, newValues.length - 1);
+        }
+    }, [visibleValues.length, values, onUpdate]);
 
     return (
         <div className={className}>
@@ -127,7 +136,7 @@ export const EditableValueList = ({
                         )}
                     />
 
-                    {values.length > 1 && (
+                    {visibleValues.length > 1 && (
                         <button
                             onClick={() => deleteValue(originalIndex)}
                             className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
