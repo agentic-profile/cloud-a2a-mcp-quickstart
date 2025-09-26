@@ -9,6 +9,7 @@ import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
+import type { AttributedString } from '@/stores/ventureStore';
 
 
 const POSITIONING_TABS = [
@@ -45,11 +46,11 @@ const VenturePage = () => {
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
     // Memoized callback functions to prevent infinite loops
-    const handleProblemUpdate = useCallback((values: string[]) => {
+    const handleProblemUpdate = useCallback((values: AttributedString[]) => {
         setProblem(values);
     }, [setProblem]);
 
-    const handleSolutionUpdate = useCallback((values: string[]) => {
+    const handleSolutionUpdate = useCallback((values: AttributedString[]) => {
         setSolution(values);
     }, [setSolution]);
 

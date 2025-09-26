@@ -1,12 +1,12 @@
 import type { TabValues } from '@/components/TabbedEditableLists';
-import type { VentureData } from '@/stores/ventureStore';
+import type { PrunedVentureData } from '@/stores/ventureStore';
 
 
 export class MarkdownGenerator {
     /**
      * Generate a complete Markdown summary from venture data
      */
-    static generateMarkdownSummary(data: VentureData): string {
+    static generateMarkdownSummary(data: PrunedVentureData): string {
         const {
             problem,
             solution,

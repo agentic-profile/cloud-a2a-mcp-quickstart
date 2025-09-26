@@ -72,10 +72,10 @@ export const TabbedEditableLists = ({
             <div>
                 <EditableValueList
                     placeholder={placeholder ?? "Enter option..."}
-                    values={tabValues.length === 0 ? [''] : tabValues}
+                    values={tabValues.length === 0 ? [{text: ''}] : tabValues.map(e=>({text: e}))}
                     selected={tabValues.length === 0 ? 0 : selected}
                     selectable={selectable}
-                    onUpdate={(values, selected) => onUpdate?.(id, values, selected)}
+                    onUpdate={(values, selected) => onUpdate?.(id, values.map(e=>e.text), selected)}
                 />
             </div>
         </div>
