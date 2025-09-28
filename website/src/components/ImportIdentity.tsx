@@ -79,10 +79,11 @@ export default function ImportIdentity() {
                 return;
             }
             
-            // Convert the publicKey to a string and encode it
+            // Convert the publicKey to a dated string and encode it
+            const sinceEpoch = Math.floor(new Date().getTime() / 1000);
             const json = JSON.stringify({
                 kind: "verificationMethod",
-                id: "#user-key",
+                id: `#user-key-${sinceEpoch}`,
                 jwk: exportKeyring.publicJwk
             });
 
