@@ -62,6 +62,10 @@ const ArchiveVenture = () => {
                     {saveLabel}
                 </Button>
             </div>
+            <p>
+                Save a copy of the venture you are working on to your local browser.  Saving does not copy any of the
+                data to the cloud.  Be careful not to clear the browser's storage!
+            </p>
 
             {archive.length > 0 && (
                 <div className="space-y-1">

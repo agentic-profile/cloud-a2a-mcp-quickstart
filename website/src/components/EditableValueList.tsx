@@ -156,14 +156,11 @@ export const EditableValueList = ({
                 return (
                 <div
                     key={originalIndex}
-                    draggable={visibleValues.length > 1}
-                    onDragStart={(e) => handleDragStart(e, originalIndex)}
                     onDragOver={(e) => handleDragOver(e, originalIndex)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, originalIndex)}
-                    onDragEnd={handleDragEnd}
                     className={clsx(
-                        "flex items-center gap-3 p-2 transition-all duration-200 cursor-move",
+                        "flex items-center gap-3 p-2 transition-all duration-200",
                         selectable && selected === originalIndex 
                             ? "bg-yellow-50 dark:bg-yellow-900/20" 
                             : "",
@@ -172,7 +169,12 @@ export const EditableValueList = ({
                     )}
                 >
                     {visibleValues.length > 1 && (
-                        <div className="cursor-grab active:cursor-grabbing">
+                        <div 
+                            className="cursor-grab active:cursor-grabbing"
+                            draggable={true}
+                            onDragStart={(e) => handleDragStart(e, originalIndex)}
+                            onDragEnd={handleDragEnd}
+                        >
                             <Bars3Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                         </div>
                     )}
