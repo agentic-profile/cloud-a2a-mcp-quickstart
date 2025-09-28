@@ -109,6 +109,10 @@ p.sm {
   @apply text-sm text-gray-600 dark:text-gray-400;
 }
 
+span.sm {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
 p.md {
   @apply text-base text-black dark:text-white;
 }

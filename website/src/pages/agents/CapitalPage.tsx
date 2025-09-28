@@ -3,7 +3,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, Page } from '@/components';
 import agentsData from './agents.json';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores';
 
 const CapitalPage = () => {

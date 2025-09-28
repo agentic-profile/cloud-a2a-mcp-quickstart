@@ -113,43 +113,46 @@ export const JsonRpcDebug = ({
             steps.push({kind: 'response', summary: `HTTP Response 401 ${authToken ? 'invalid auth token' : 'auth required'}`});
             httpRequest?.onProgress?.({ steps });
 
-            if( authToken )
-                deleteAuthToken(url); // authToken failed, so forget it
+            try { // Catch any unexpected errors from storage/processing functions
+                if( authToken )
+                    deleteAuthToken(url); // authToken failed, so forget it
 
-            const { headers } = result.fetchResponse;
-            const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
+                const { headers } = result.fetchResponse;
+                const { challenge } = parseChallengeFromWwwAuthenticate( headers?.get('WWW-Authenticate'), url );
+                
+                if (!userAgentDid || !verificationId) {
+                    steps.push({kind: 'response', summary: `Missing user agent DID and verification ID for authentication`});
+                    httpRequest?.onProgress?.({ steps, result });
+                    return;
+                }
+                const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile, userAgentDid, verificationId );
+                const newAuthToken = await signChallenge({
+                    challenge,
+                    attestation,
+                    privateJwk
+                });
             
-            if (!userAgentDid || !verificationId) {
-                //throw new Error('User agent DID and verification ID are required for authentication');
-                steps.push({kind: 'response', summary: `Missing user agent DID and verification ID for authentication`});
-                httpRequest?.onProgress?.({ steps, result });
-                return;
+                // 2nd try with auth new token - may throw an Error on response != ok
+                steps.push({kind: 'request', summary: `Second HTTP Request with new auth token`});
+                httpRequest?.onProgress?.({ steps });
+
+                const retryResult = await doFetch({
+                    url, 
+                    request, 
+                    setRequestInit: setRetryInit, 
+                    setSpinner: setRetrySpinner,
+                    setResult: setRetryResult,
+                    authToken: newAuthToken
+                });
+                
+                if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
+                    setAuthToken(newAuthToken);
+
+                steps.push({kind: 'response', summary: `HTTP Response ${retryResult.fetchResponse?.ok ? 'success' : retryResult.fetchResponse?.statusText}`});
+                httpRequest?.onProgress?.({ steps, result: retryResult });
+            } catch (error) {
+                httpRequest?.onProgress?.({ steps, result: { error, fetchResponse: undefined, text: undefined, data: undefined } });
             }
-            const { attestation, privateJwk } = resolveAttestationAndPrivateKey( userProfile, userAgentDid, verificationId );
-            const newAuthToken = await signChallenge({
-                challenge,
-                attestation,
-                privateJwk
-            });
-        
-            // 2nd try with auth new token - may throw an Error on response != ok
-            steps.push({kind: 'request', summary: `Second HTTP Request with new auth token`});
-            httpRequest?.onProgress?.({ steps });
-
-            const retryResult = await doFetch({
-                url, 
-                request, 
-                setRequestInit: setRetryInit, 
-                setSpinner: setRetrySpinner,
-                setResult: setRetryResult,
-                authToken: newAuthToken
-            });
-            
-            if( retryResult.fetchResponse && retryResult.fetchResponse.ok )
-                setAuthToken(newAuthToken);
-
-            steps.push({kind: 'response', summary: `HTTP Response ${retryResult.fetchResponse?.ok ? 'success' : retryResult.fetchResponse?.statusText}`});
-            httpRequest?.onProgress?.({ steps, result: retryResult });
         } else {
             steps.push({kind: 'response', summary: `HTTP Response ${result.fetchResponse?.ok ? 'success' : result.fetchResponse?.statusText}`});
             httpRequest?.onProgress?.({ steps, result });

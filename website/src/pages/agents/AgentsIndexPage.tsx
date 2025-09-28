@@ -2,7 +2,7 @@ import { Avatar } from '@heroui/react';
 import { Button, Card, CardBody, Page } from '@/components';
 import { Link } from 'react-router-dom';
 import agentsData from './agents.json';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores';
 import type { Agent } from './types';
 

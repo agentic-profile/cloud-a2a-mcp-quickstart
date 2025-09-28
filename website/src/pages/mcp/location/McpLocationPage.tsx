@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Page, Card, CardBody, LabelValue, JsonRpcDebug } from '@/components';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import { type HttpRequest } from '@/components/JsonRpcDebug';
 import QueryLocation from './QueryLocation';
 import UpdateLocation from './UpdateLocation';

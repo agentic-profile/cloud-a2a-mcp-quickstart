@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Page, Card, CardBody, JsonRpcDebug, LabelValue } from '@/components';
 import { StarIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import DeleteReputationItem from './DeleteReputationItem';
 import UpdateReputationItem from './UpdateReputationItem';
 import ReadReputationItem from './ReadReputationItem';

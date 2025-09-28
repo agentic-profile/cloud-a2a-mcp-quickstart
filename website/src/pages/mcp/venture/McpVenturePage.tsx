@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Page, JsonRpcDebug } from '@/components';
 import { useSettingsStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import { mcpServices } from '../mcp-list';
 import McpServiceDescription from '../util/McpServiceDescription';
 import UpdateVentureProfile from './UpdateVentureProfile';

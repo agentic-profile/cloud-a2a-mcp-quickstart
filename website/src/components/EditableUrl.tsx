@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from './Button';
 import { Card, CardBody } from './Card';
-import { validateHttpUrl } from '@/tools/misc';
+import { validateHttpUrl } from '@/tools/net';
 
 interface EditableUrlProps {
     card?: boolean;

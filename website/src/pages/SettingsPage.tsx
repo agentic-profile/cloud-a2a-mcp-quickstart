@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Switch, Page, EditableUrl, LabelDid } from '@/components';
 import { useSettingsStore, useUserProfileStore } from '@/stores';
-import { DEFAULT_SERVER_URLS } from '@/tools/misc';
+import { DEFAULT_SERVER_URLS } from '@/tools/net';
 
 const ServerUrlSetting = () => {
     const { serverUrl, setServerUrl } = useSettingsStore();

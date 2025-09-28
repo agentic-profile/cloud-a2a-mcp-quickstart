@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore, useVentureStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import agentsData from '../agents.json';
 import { MarkdownGenerator } from './MarkdownGenerator';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
@@ -89,7 +89,7 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
 
     return (
         <>
-            <CardTitleAndBody title="Publish Venture to MCP">
+            <CardTitleAndBody title="Publish to MCP">
                 <div className="space-y-4">
                     <EditableUrl
                         card={false}

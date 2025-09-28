@@ -15,6 +15,7 @@ export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | und
     
     const { steps, result } = progress;
     const preview = result?.data ? JSON.stringify(result.data, null, 2) : result?.text;
+    const error = result?.error ? String(result.error) : null;
     
     return (
         <div className="mt-3 relative">
@@ -51,6 +52,7 @@ export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | und
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     HTTP {result.fetchResponse?.status} {result.fetchResponse?.statusText}
                 </p>
+                {error && <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{error}</p>}
                 <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto">{preview}</pre>
             </div>}
         </div>

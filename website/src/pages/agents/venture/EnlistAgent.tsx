@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import agentsData from '../agents.json';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
 
 const DEFAULT_MCP_URLS = [
     'https://api.matchwise.ai/mcp/agents',
-    'http://localhost:3003/agents'
+    'http://localhost:3003/mcp/agents'
 ];
 
 const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpRequest: HttpRequest) => void }) => {

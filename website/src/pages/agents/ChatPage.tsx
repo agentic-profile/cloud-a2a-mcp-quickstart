@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { Page, Button, EditableUrl, JsonRpcDebug, Switch, Card, CardHeader, CardBody } from '@/components';
-import { resolveRpcUrlFromWindow, updateWindowRpcUrl } from '@/tools/misc';
+import { resolveRpcUrlFromWindow, updateWindowRpcUrl } from '@/tools/net';
 
 interface Message {
     id: string;

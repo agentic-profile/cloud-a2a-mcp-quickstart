@@ -31,6 +31,7 @@ export interface VentureData {
 
 interface ArchivedVentureData extends VentureData {
     name: string;
+    updated: string
 }
 
 export interface VentureState {
@@ -160,8 +161,10 @@ export const useVentureStore = create<VentureState>()(
             setArchiveName: (name) => set({ archiveName: name }),
             archiveVenture: (name) => {
                 const state = get();
+                const updated = new Date().toISOString();
                 const archivedVenture: ArchivedVentureData = {
                     name,
+                    updated,
                     problem: state.problem,
                     solution: state.solution,
                     team: state.team,

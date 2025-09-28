@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor, HttpProgressSummary } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/misc';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
@@ -15,24 +15,13 @@ const EXAMPLE_PAYLOADS = [
         }
     },
     {
-        name: 'Update Location',
+        name: 'Tools Call',
         payload: {
             "method": "tools/call",
             "params": {
-                "name": "update",
-                "coords": {
-                    "latitude": 40.7128,
-                    "longitude": -74.006
+                "name": "",
+                "x": {
                 }
-            }
-        }
-    },
-    {
-        name: 'Query Location',
-        payload: {
-            method: 'tools/call',
-            params: {
-                name: 'query'
             }
         }
     }

@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components';
 import { CardTitleAndBody, Card, CardHeader, CardBody } from '@/components/Card';
-import Modal from '@/components/Modal';
-import ShareVentureJson from './ShareVentureJson';
-import ImportVentureJson from './ImportVentureJson';
+import ShareJson from './ShareJson';
 import ArchiveVenture from './ArchiveVenture';
 import { MarkdownGenerator } from './MarkdownGenerator';
 import { useVentureStore, pruneVentureData, simplifyVentureData } from '@/stores/ventureStore';
 
 const AdvancedFeatures = () => {
-    const [showImportModal, setShowImportModal] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(false);
 
     const {
@@ -18,14 +15,7 @@ const AdvancedFeatures = () => {
         getVentureData
     } = useVentureStore();
 
-    const ventureData = pruneVentureData(getVentureData());
-
-    // Handle importing venture data from JSON
-    const handleImportData = (importedData: any) => {
-        setVentureData(importedData);
-        // Close the import modal
-        setShowImportModal(false);
-    };
+    const ventureData = pruneVentureData(getVentureData()); // remove empty values and blank lines
 
     // Generate Markdown summary using the MarkdownGenerator
     const generateMarkdownSummary = () => {
@@ -37,12 +27,6 @@ const AdvancedFeatures = () => {
             <CardTitleAndBody title="Advanced Features" collapsible={true}>
                 <div className="space-y-4">
                     <div className="flex gap-3">
-                        <Button
-                            onClick={() => setShowImportModal(true)}
-                            variant="primary"
-                        >
-                            Import Venture JSON
-                        </Button>
                         <Button
                             onClick={() => setShowMarkdown(true)}
                             variant="success"
@@ -56,8 +40,9 @@ const AdvancedFeatures = () => {
                             Clear All Data
                         </Button>
                     </div>
-                    <ShareVentureJson
+                    <ShareJson
                         values={ventureData}
+                        onDataImported={setVentureData}
                     />
                     <ArchiveVenture />
                 </div>
@@ -90,14 +75,6 @@ const AdvancedFeatures = () => {
                 </Card>
             )}
 
-            {/* Import Modal */}
-            <Modal
-                isOpen={showImportModal}
-                onClose={() => setShowImportModal(false)}
-                title="Import Venture Data"
-            >
-                <ImportVentureJson onImport={handleImportData} />
-            </Modal>
         </>
     );
 };

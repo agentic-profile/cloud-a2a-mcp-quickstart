@@ -80,10 +80,11 @@ interface CardTitleAndBodyProps {
     className?: string;
     title: string;
     collapsible?: boolean;
+    variant?: CardVariant;
     children?: React.ReactNode;
 }
 
-export function CardTitleAndBody({ className, title, collapsible = false, children }: CardTitleAndBodyProps ) {
+export function CardTitleAndBody({ className, title, collapsible = false, variant = "default", children }: CardTitleAndBodyProps ) {
     const [isCollapsed, setIsCollapsed] = useState(collapsible);
 
     const collapseIcon = collapsible ? (
@@ -94,7 +95,7 @@ export function CardTitleAndBody({ className, title, collapsible = false, childr
     ) : null;
 
     return (
-        <Card className={className}>
+        <Card className={className} variant={variant}>
             <CardHeader>
                 <div className="absolute flex top-3 right-3 gap-3">
                     {collapseIcon}

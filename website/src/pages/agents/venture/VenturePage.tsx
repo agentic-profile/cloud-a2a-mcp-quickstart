@@ -98,7 +98,8 @@ const VenturePage = () => {
                             Use this interactive tool to help summarize your business venture, generate an elevator
                             pitch, and set milestones.  This is not
                             a full <a href="https://www.slideshare.net/slideshow/sequoia-capital-pitchdecktemplate/46231251" target="_blank">Sequoia ready pitch deck</a>,
-                            but it does make sure you have covered the basics.  We will publish this summary with MCP so you can be found by 
+                            but it does make sure you have covered the basics.  You can publish this summary with our
+                            MCP service so you can be found by 
                             investors, technology providers, and talent.  It only takes a 
                             few minutes to finish!
                         </p>
@@ -209,8 +210,16 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
-                <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                <CardTitleAndBody title="Share With The World!" variant="success">
+                    <div className="space-y-4">
+                        <p className="mb-4">
+                            Share your venture with the world!  You can publish your venture to our MCP service so you can be found by 
+                            investors, technology providers, and talent.  You can also enlist an agent to help you build your venture.
+                        </p>
+                        <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
+                        <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                    </div>
+                </CardTitleAndBody>
 
                 {httpRequest && (
                     <div className="mt-6">

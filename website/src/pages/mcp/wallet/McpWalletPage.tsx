@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Page, Card, CardBody, JsonRpcDebug, LabelValue } from '@/components';
 import { WalletIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '@/stores';
-import { buildEndpoint } from '@/tools/misc';
+import { buildEndpoint } from '@/tools/net';
 import DeleteWalletItem from './DeleteWalletItem';
 import UpdateWalletItem from './UpdateWalletItem';
 import ReadWalletItem from './ReadWalletItem';

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/misc';
+import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
