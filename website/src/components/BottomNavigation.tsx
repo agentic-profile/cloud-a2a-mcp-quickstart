@@ -23,7 +23,7 @@ const BottomNavigation = () => {
                     <Link
                         key={item.name}
                         to={item.href}
-                        className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 transition-colors duration-200 ${
+                        className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 transition-colors duration-200 no-underline ${
                             item.current
                                 ? 'text-dodgerblue dark:text-dodgerblue'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'

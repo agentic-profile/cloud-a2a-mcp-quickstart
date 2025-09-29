@@ -20,7 +20,7 @@ import McpVenturePage from './pages/mcp/venture/McpVenturePage';
 import McpReputationPage from './pages/mcp/reputation/McpReputationPage';
 import McpWalletPage from './pages/mcp/wallet/McpWalletPage';
 import SettingsPage from './pages/SettingsPage';
-import IdentityPage from './pages/IdentityPage';
+import IdentityPage from './pages/identity/IdentityPage';
 import { useSettingsStore } from './stores/settingsStore';
 
 function App() {

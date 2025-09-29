@@ -4,11 +4,8 @@ import {
 } from "@agentic-profile/auth";
 import { webDidToUrl } from "@agentic-profile/common";
 
-import { EditableUrl } from './EditableUrl';
-import { Button } from './Button';
-import { useImportIdentityStore, useUserProfileStore } from '../stores';
-import { LabelValue } from './LabelValue';
-import { Card, CardBody } from './Card';
+import { Button, EditableUrl, LabelValue, Card, CardBody } from '@/components';
+import { useImportIdentityStore, useUserProfileStore } from '@/stores';
 import { resolveAgentAndVerificationId } from '@/tools/keyring';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
@@ -34,7 +31,7 @@ export const wantsFocus = () => {
     return kid && did ? true : false;
 }
 
-export default function ImportIdentity() {
+export function ConnectIdentity() {
     const { setUserProfile, setUserAgentDid, setVerificationId } = useUserProfileStore();
     const { exportKeyring, identityHostUrl, setExportKeyring, setIdentityHostUrl } = useImportIdentityStore();
     const [did,setDid] = useState<string|undefined>(undefined);
@@ -129,8 +126,8 @@ export default function ImportIdentity() {
     return (
         <div>
             <p className="mb-6">
-                Import your identity from Matchwise and use to authenticate with
-                A2A and MCP services.
+                Connect to an Identity Host such as <a href="https://matchwise.ai" target="_blank">Matchwise</a> and use
+                the keys generated below to authenticate with A2A and MCP services on the Agentic Web.
             </p>
             
             <EditableUrl
@@ -176,17 +173,15 @@ export default function ImportIdentity() {
                     Complete Import
                 </Button>
             </div>
-            
-            {exportKeyring && (
-                <div className="mt-6">
-                    <div className="mb-3">
-                        <h3 className="text-lg font-medium">Generated Local JWT Keyring</h3>
-                    </div>
-                    <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto text-sm">
-                        {JSON.stringify(exportKeyring, null, 2)}
-                    </pre>
+
+            <div className="mt-6">
+                <div className="mb-3">
+                    <h3 className="text-lg font-medium">Generated Local JWT Keyring</h3>
                 </div>
-            )}
+                <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto text-sm">
+                    {JSON.stringify(exportKeyring, null, 2)}
+                </pre>
+            </div>
         </div>
     );
 }

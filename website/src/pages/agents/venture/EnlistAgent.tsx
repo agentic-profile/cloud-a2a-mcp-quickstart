@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore } from '@/stores';
-import { buildEndpoint } from '@/tools/net';
-import agentsData from '../agents.json';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
 
@@ -13,6 +11,19 @@ const DEFAULT_MCP_URLS = [
     'http://localhost:3003/mcp/agents'
 ];
 
+function resolveMcpAgentManagerUrlFromDid(did: string) {
+    const [ method, web, host ] = did.toLowerCase().split(':');
+    if (method !== 'did' || web !== 'web')
+        return '';
+    let [ hostname, portnumber ] = decodeURIComponent(host).split(':');
+    if(hostname === 'iamagentic.ai')
+        hostname = 'api.matchwise.ai';
+    const port = portnumber ? `:${portnumber}` : '';
+    const schema = hostname === 'localhost' ? 'http' : 'https';
+
+    return `${schema}://${hostname}${port}/mcp/agents`;
+}
+
 const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpRequest: HttpRequest) => void }) => {
     const { serverUrl } = useSettingsStore();
     const { userAgentDid, verificationId } = useUserProfileStore();
@@ -20,18 +31,17 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
     const navigate = useNavigate();
     
     // Find the venture agent from the agents data
-    const ventureAgent = agentsData.find(agent => agent.id === 'venture')!
-    const [a2aUrl, setA2aUrl] = useState<string>('');
+    const [mcpAgentManagerUrl, setMcpAgentManagerUrl] = useState<string>('');
+    const [serviceEndpoint, setServiceEndpoint] = useState<string>('');
 
-    // Set mcpUrl based on serverUrl and ventureAgent
+    // Set mcpUrl based on userAgentDid
     useEffect(() => {
-        if (serverUrl && ventureAgent?.agentUrl) {
-            const url = buildEndpoint(serverUrl, ventureAgent.agentUrl);
-            setA2aUrl(url || '');
-        } else {
-            setA2aUrl('');
-        }
-    }, [serverUrl, ventureAgent]);
+        setMcpAgentManagerUrl(userAgentDid ? resolveMcpAgentManagerUrlFromDid(userAgentDid) : '');
+    }, [userAgentDid]);
+
+    useEffect(() => {
+        setServiceEndpoint(`${serverUrl}/a2a/venture`);
+    }, [serverUrl]);
 
     // Handle hiring agent
     const handleHireAgent = () => {
@@ -40,15 +50,16 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
             return;
         }
 
-        const { hostname, port} = new URL(serverUrl);
+        let { hostname, port} = new URL(serverUrl);
 
+        port = port && port != '443' ? `%3A${port}` : '';
         const service = {
             name: "Venture Agent",
             id: "#venture",
             type: "A2A/venture",
-            serviceEndpoint: `${serverUrl}/a2a/venture`,
+            serviceEndpoint,
             capabilityInvocation: [
-                `did:web:${hostname}${port != '443' ? `:${port}` : ''}#system-key`
+                `did:web:${hostname}${port}#system-key`
             ]
         };
 
@@ -70,12 +81,7 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
             body: JSON.stringify(jsonRpcRequest)
         };
 
-        onSubmitHttpRequest({ url: a2aUrl, requestInit: request, onProgress: setHttpProgress });
-    };
-
-    // Handle updating the mcpUrl
-    const handleMcpUrlUpdate = (newUrl: string) => {
-        setA2aUrl(newUrl);
+        onSubmitHttpRequest({ url: mcpAgentManagerUrl, requestInit: request, onProgress: setHttpProgress });
     };
 
     // Handle navigation to identity page
@@ -89,25 +95,37 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
 
     return (
         <>
-            <CardTitleAndBody title="Hire an Agent">
+            <CardTitleAndBody title="Enlist an AI Agent">
+                <p className="mb-4">
+                    This adds an AI agent to your personal <a href="https://agenticprofile.ai" target="_blank">Agentic Profile</a>.
+                    This agent can answer questions on your behalf about the venture you described above.
+                </p>
                 <div className="space-y-4">
+                    { hasIdentity && <LabelValue
+                        label="Add to your identity at" 
+                        value={`${userAgentDid} (key ${verificationId})`} /> }
                     <EditableUrl
                         card={false}
-                        label="A2A URL"
-                        value={a2aUrl}
+                        label="Identity Host Agent Manager URL"
+                        value={mcpAgentManagerUrl}
                         placeholder="Enter A2A server URL..."
-                        onUpdate={handleMcpUrlUpdate}
+                        onUpdate={setMcpAgentManagerUrl}
                         options={DEFAULT_MCP_URLS}
                     />
-                    { hasIdentity && <LabelValue
-                        label="Hire as" 
-                        value={`${userAgentDid} (key ${verificationId})`} /> }
+                    <EditableUrl
+                        card={false}
+                        label="Agent A2A Service Endpoint"
+                        value={serviceEndpoint}
+                        placeholder="Enter A2A server URL..."
+                        onUpdate={setServiceEndpoint}
+                        options={DEFAULT_MCP_URLS}
+                    />
                     <div className="flex justify-end space-x-3">
                         <Button
                             onClick={handleManageIdentity}
-                            variant={hasIdentity ? 'secondary' : 'primary'}
+                            variant={hasIdentity ? 'secondary' : 'success'}
                         >
-                            { hasIdentity ? 'Manage Identity' : '1. Create Identity' }
+                            { hasIdentity ? 'Setup Your Identity' : '1. Setup Your Identity' }
                         </Button>
                         <Button
                             onClick={handleHireAgent}
@@ -115,7 +133,7 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
                             loading={spinner}
                             disabled={spinner ||!userAgentDid || !verificationId}
                         >
-                            { hasIdentity ? 'Hire Agent' : '2. Hire Agent' }
+                            { hasIdentity ? 'Enlist Agent' : '2. Enlist Agent' }
                         </Button>
                         {isPublished && (
                             <img 

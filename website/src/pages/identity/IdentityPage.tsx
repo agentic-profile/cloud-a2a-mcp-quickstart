@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { Page } from '@/components';
-import { CreateIdentityForm, UserProfileDisplay, ImportIdentity } from '@/components';
-import { wantsFocus } from '@/components/ImportIdentity';
+import { CreateIdentityForm, UserProfileDisplay } from '@/components';
+import { ConnectIdentity, wantsFocus } from './ConnectIdentity';
+import SelfHostIdentity from './SelfHostIdentity';
 import { useUserProfileStore } from '@/stores';
 
 
@@ -35,14 +36,19 @@ const TabbedIdentitySources = () => {
 
     const tabs = [
         {
+            id: 'import',
+            title: 'Connect to Identity Host',
+            content: <ConnectIdentity />
+        },
+        {
+            id: 'self-host',
+            title: 'Self Host Identity',
+            content: <SelfHostIdentity />
+        },
+        {
             id: 'create',
             title: 'Create Test Identity',
             content: <CreateIdentityForm />
-        },
-        {
-            id: 'import',
-            title: 'Import from Matchwise',
-            content: <ImportIdentity />
         }
     ];
 

@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { PlusIcon, TrashIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components';
 import { useUserProfileStore } from '@/stores';
-import {
-    createAgenticProfile,
-    //webDidToUrl
-} from "@agentic-profile/common";
+import { createAgenticProfile } from "@agentic-profile/common";
 import {
     createEdDsaJwk
 } from "@agentic-profile/auth";

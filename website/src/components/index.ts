@@ -25,7 +25,7 @@ export { Spinner } from './Spinner';
 export { UserProfileStatus } from './UserProfileStatus';
 
 // Identity components
-export { CreateIdentityForm } from './CreateIdentityForm';
+export { CreateIdentityForm } from '../pages/identity/CreateIdentityForm';
 export { UserProfileDisplay } from './UserProfileDisplay';
 
 // Utility components
@@ -39,6 +39,5 @@ export { EditableValue } from './EditableValue';
 export { default as JsonEditor } from './JsonEditor';
 export { EditableValueList } from './EditableValueList';
 export { TabbedEditableLists } from './TabbedEditableLists';
-export { default as ImportIdentity } from './ImportIdentity';
 export { HttpProgressSummary } from './HttpProgressSummary';
 export { default as McpToolCallCard } from './McpToolCallCard';

@@ -5,7 +5,7 @@ import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore, useVentureStore } from '@/stores';
 import { buildEndpoint } from '@/tools/net';
 import agentsData from '../agents.json';
-import { MarkdownGenerator } from './MarkdownGenerator';
+import { generateMarkdownSummary } from './markdown-generator';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
 import { simplifyVentureData } from '@/stores/ventureStore';
@@ -46,7 +46,7 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
 
         // Create the venture data payload
         const simplifiedVenture = simplifyVentureData(getVentureData());
-        const markdown = MarkdownGenerator.generateMarkdownSummary(simplifiedVenture);
+        const markdown = generateMarkdownSummary(simplifiedVenture);
 
         // Create the JSON-RPC request
         const mcpRequest = {
@@ -88,50 +88,52 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
     const isPublished = httpProgress && httpProgress.result?.fetchResponse?.status === 200;
 
     return (
-        <>
-            <CardTitleAndBody title="Publish to MCP">
-                <div className="space-y-4">
-                    <EditableUrl
-                        card={false}
-                        label="MCP URL"
-                        value={mcpUrl}
-                        placeholder="Enter MCP server URL..."
-                        onUpdate={handleMcpUrlUpdate}
-                        options={DEFAULT_MCP_URLS}
-                    />
-                    { hasIdentity && <LabelValue
-                        label="Publish as" 
-                        value={`${userAgentDid} (key ${verificationId})`} /> }
-                    <div className="flex justify-end items-center space-x-3">
+        <CardTitleAndBody title="Publish to MCP">
+            <div className="space-y-4">
+                <p className="mb-4">
+                    Publish your venture to the Agentic Web using an MCP service.  This will make your venture
+                    publicly available to investors, technology providers, and talent.
+                </p>
+                <EditableUrl
+                    card={false}
+                    label="MCP URL"
+                    value={mcpUrl}
+                    placeholder="Enter MCP server URL..."
+                    onUpdate={handleMcpUrlUpdate}
+                    options={DEFAULT_MCP_URLS}
+                />
+                { hasIdentity && <LabelValue
+                    label="Publish as" 
+                    value={`${userAgentDid} (key ${verificationId})`} /> }
+                <div className="flex justify-end items-center space-x-3">
+                    <Button
+                        onClick={handleManageIdentity}
+                        variant={hasIdentity ? 'secondary' : 'success'}
+                    >
+                        { hasIdentity ? 'Setup Your Identity' : '1. Setup Your Identity' }
+                    </Button>
+                    <div className="flex items-center space-x-2">
                         <Button
-                            onClick={handleManageIdentity}
-                            variant={hasIdentity ? 'secondary' : 'primary'}
+                            onClick={handlePublishToMcp}
+                            variant={isPublished ? 'secondary' : hasIdentity ? 'success' : 'secondary'}
+                            loading={spinner}
+                            disabled={spinner ||!userAgentDid || !verificationId}
                         >
-                            { hasIdentity ? 'Manage Identity' : '1. Create Identity' }
+                            { hasIdentity ? 'Publish to MCP' : '2.Publish to MCP' }
                         </Button>
-                        <div className="flex items-center space-x-2">
-                            <Button
-                                onClick={handlePublishToMcp}
-                                variant={isPublished ? 'secondary' : hasIdentity ? 'success' : 'secondary'}
-                                loading={spinner}
-                                disabled={spinner ||!userAgentDid || !verificationId}
-                            >
-                                { hasIdentity ? 'Publish to MCP' : '2.Publish to MCP' }
-                            </Button>
-                            {isPublished && (
-                                <img 
-                                    src={greenCheckmark} 
-                                    alt="Success" 
-                                    className="h-8 w-8" 
-                                />
-                            )}
-                        </div>
+                        {isPublished && (
+                            <img 
+                                src={greenCheckmark} 
+                                alt="Success" 
+                                className="h-8 w-8" 
+                            />
+                        )}
                     </div>
-
-                    <HttpProgressSummary progress={httpProgress} />
                 </div>
-            </CardTitleAndBody>
-        </>
+
+                <HttpProgressSummary progress={httpProgress} />
+            </div>
+        </CardTitleAndBody>
     );
 };
 

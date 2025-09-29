@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { EditableValueList, Page, TabbedEditableLists } from '@/components';
-import agentsData from '../agents.json';
 import { useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody, Card, CardBody } from '@/components/Card';
@@ -10,6 +9,7 @@ import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
 import type { AttributedString, StringOrNumberTable } from '@/stores/ventureStore';
+import ShowMarkdown from './ShowMarkdown';
 
 
 const POSITIONING_TABS = [
@@ -41,9 +41,6 @@ const VenturePage = () => {
         setTeam,
         setReferences,
     } = useVentureStore();
-    
-    // Find the venture agent from the agents data
-    const ventureAgent = agentsData.find(agent => agent.id === 'venture')!;
     
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
 
@@ -87,22 +84,31 @@ const VenturePage = () => {
 
     return (
         <Page
-            title={ventureAgent.name}
+            title="Venture Agent/Northstar Worksheet"
             //subtitle="This AI-powered agent will help you find investors, technology providers, and talent"
             maxWidth="6xl"
         >
             <div className="space-y-4">
                 <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
                     <CardBody>
-                        <p className="text-lg text-gray-600 dark:text-gray-400 m-6">
-                            Use this interactive tool to help summarize your business venture, generate an elevator
-                            pitch, and set milestones.  This is not
-                            a full <a href="https://www.slideshare.net/slideshow/sequoia-capital-pitchdecktemplate/46231251" target="_blank">Sequoia ready pitch deck</a>,
-                            but it does make sure you have covered the basics.  You can publish this summary with our
-                            MCP service so you can be found by 
-                            investors, technology providers, and talent.  It only takes a 
-                            few minutes to finish!
-                        </p>
+                        <div className="space-y-4 p-6">
+                            <p className="lg">
+                                Use this interactive tool to help summarize your business venture, generate an elevator
+                                pitch, and set milestones.  This is not
+                                a full <a href="https://www.slideshare.net/slideshow/sequoia-capital-pitchdecktemplate/46231251" target="_blank">Sequoia ready pitch deck</a>,
+                                but it does make sure you have covered the basics.
+                            </p>
+                            <p className="lg">
+                                You can publish a summary on the Agentic Web with our
+                                MCP service so you can be found by 
+                                investors, technology providers, and talent (see Publish section below).  You can
+                                also use the generated markdown summary with your favorite generative AI tool (see Markdown Summary section below).
+                            </p>
+                            <p className="lg">
+                                <strong>NOTE:</strong> The information you type is only stored in your browser's local storage.
+                                If you want to publish your venture to the Agentic Web, please use the publish section below.
+                            </p>
+                        </div>
                     </CardBody>
                 </Card>
 
@@ -210,11 +216,12 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <CardTitleAndBody title="Share With The World!" variant="success">
+                <ShowMarkdown />
+
+                <CardTitleAndBody title="Share to the Agentic Web (and the World!)" variant="success">
                     <div className="space-y-4">
                         <p className="mb-4">
-                            Share your venture with the world!  You can publish your venture to our MCP service so you can be found by 
-                            investors, technology providers, and talent.  You can also enlist an agent to help you build your venture.
+                            <strong>NOTE:</strong> This section is for advanced users.
                         </p>
                         <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
                         <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
