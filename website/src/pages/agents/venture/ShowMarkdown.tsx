@@ -6,13 +6,15 @@ import { useEffect, useState } from 'react';
 
 const ShowMarkdown = () => {
     const [markdown, setMarkdown] = useState('');
-    const { getVentureData } = useVentureStore();
+    const { getVentureData, setPositioning, setProblem, setSolution, setMarketOpportunity, setMilestones, setTeam, setReferences, setHiddenRows } = useVentureStore();
+
+
 
     useEffect(()=>{
         const ventureData = pruneVentureData(getVentureData()); // remove empty values and blank lines
         const markdown = generateMarkdownSummary(simplifyVentureData(ventureData));
         setMarkdown(markdown);
-    },[getVentureData])
+    },[setPositioning, setProblem, setSolution, setMarketOpportunity, setMilestones, setTeam, setReferences, setHiddenRows])
 
     const handleCopyMarkdown = () => {
         navigator.clipboard.writeText(markdown);

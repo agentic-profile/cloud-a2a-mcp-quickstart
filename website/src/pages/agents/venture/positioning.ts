@@ -6,7 +6,7 @@ import type { SimplifiedPositioning } from "@/stores/ventureStore";
 export function generatePositioningStatement(positioningValues: SimplifiedPositioning): string {
     const { forWho, whoNeed, name, productCategory, keyBenefit, unlike, primaryDifferentiator } = positioningValues;
     const an = selectAorAn(productCategory);
-    return `For ${renderPositioning(forWho)} that need ${renderPositioning(whoNeed)}, ${renderPositioning(name)} is ${an} ${renderPositioning(productCategory)} that ${renderPositioning(keyBenefit)}. Unlike ${renderPositioning(unlike)}, our product ${renderPositioning(primaryDifferentiator)}.`;
+    return `For ${renderPositioning(forWho)} that ${renderPositioning(whoNeed)}, ${renderPositioning(name)} is ${an} ${renderPositioning(productCategory)} that ${renderPositioning(keyBenefit)}. Unlike ${renderPositioning(unlike)}, our product ${renderPositioning(primaryDifferentiator)}.`;
 }
 
 /**

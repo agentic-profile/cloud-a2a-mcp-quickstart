@@ -31,7 +31,7 @@ const TabbedIdentitySources = () => {
     useEffect(() => {
         // Check for kid and did query parameters
         if(wantsFocus())
-            setActiveTabIndex(1);
+            setActiveTabIndex(0);
     }, []);
 
     const tabs = [

@@ -10,8 +10,8 @@ import { resolveAgentAndVerificationId } from '@/tools/keyring';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
     'https://matchwise.ai/import',
-    'http://localhost:5174/import',
-    'https://lifepass.example.com/import'
+    'https://lifepass.ai/import',
+    'http://localhost:5174/import'
 ];
 
 // Base64web encoding function (URL-safe base64)
@@ -123,6 +123,8 @@ export function ConnectIdentity() {
         }
     }
 
+    const readyToComplete = !!(exportKeyring?.publicJwk && did);
+
     return (
         <div>
             <p className="mb-6">
@@ -150,27 +152,27 @@ export function ConnectIdentity() {
 
             <div className="mt-4 flex justify-end gap-3">
                 <Button
+                    onClick={sharePublicKey}
+                    disabled={!exportKeyring?.publicJwk || !!did}
+                    variant={!!did ? 'secondary' : 'success'}
+                    size="md"
+                >
+                    1. Upload Public Key
+                </Button>
+                <Button
+                    onClick={saveIdentity}
+                    disabled={!readyToComplete}
+                    variant={readyToComplete ? 'success' : 'secondary'}
+                    size="md"
+                >
+                    2. Complete Import
+                </Button>
+                <Button
                     onClick={startOver}
                     variant="secondary"
                     size="md"
                 >
                     Start Over
-                </Button>
-                <Button
-                    onClick={sharePublicKey}
-                    disabled={!exportKeyring?.publicJwk || !!did}
-                    variant="primary"
-                    size="md"
-                >
-                    Upload Public Key
-                </Button>
-                <Button
-                    onClick={saveIdentity}
-                    disabled={!exportKeyring?.publicJwk || !did}
-                    variant="success"
-                    size="md"
-                >
-                    Complete Import
                 </Button>
             </div>
 
