@@ -1,20 +1,21 @@
 import { Button } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
-import { pruneVentureData, simplifyVentureData, useVentureStore } from '@/stores/ventureStore';
+import { pruneVentureData, simplifyVentureData, type VentureData } from '@/stores/ventureStore';
 import { generateMarkdownSummary } from './markdown-generator';
 import { useEffect, useState } from 'react';
 
-const ShowMarkdown = () => {
+interface ShowMarkdownProps {
+    ventureData: VentureData;
+}
+
+const ShowMarkdown = ({ ventureData }: ShowMarkdownProps) => {
     const [markdown, setMarkdown] = useState('');
-    const { getVentureData, setPositioning, setProblem, setSolution, setMarketOpportunity, setMilestones, setTeam, setReferences, setHiddenRows } = useVentureStore();
-
-
 
     useEffect(()=>{
-        const ventureData = pruneVentureData(getVentureData()); // remove empty values and blank lines
-        const markdown = generateMarkdownSummary(simplifyVentureData(ventureData));
+        const pruned = pruneVentureData(ventureData); // remove empty values and blank lines
+        const markdown = generateMarkdownSummary(simplifyVentureData(pruned));
         setMarkdown(markdown);
-    },[setPositioning, setProblem, setSolution, setMarketOpportunity, setMilestones, setTeam, setReferences, setHiddenRows])
+    },[ventureData])
 
     const handleCopyMarkdown = () => {
         navigator.clipboard.writeText(markdown);

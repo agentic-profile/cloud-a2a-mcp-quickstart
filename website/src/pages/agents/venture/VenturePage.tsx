@@ -233,7 +233,7 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <ShowMarkdown />
+                <ShowMarkdown ventureData={{positioning, problem, solution, marketOpportunity, milestones, team, references, hiddenRows}} />
 
                 <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
                     variant="success"
