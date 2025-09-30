@@ -87,11 +87,27 @@ Resources:
             - HEAD
           Compress: true
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimized
+        CacheBehaviors:
+          - PathPattern: "index.html"
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # Managed-CachingDisabled
         CustomErrorResponses:
           - ErrorCode: 403
             ResponseCode: 200
             ResponsePagePath: /index.html
           - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 400
             ResponseCode: 200
             ResponsePagePath: /index.html
         PriceClass: PriceClass_100

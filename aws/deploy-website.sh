@@ -131,9 +131,17 @@ echo -e "${YELLOW}📦 Website bucket: ${WEBSITE_BUCKET}${NC}"
 echo -e "${YELLOW}📦 Uploading website assets to S3 bucket: ${WEBSITE_BUCKET}${NC}"
 
 # Sync the built website assets to S3
+# Upload all files with long cache except index.html
 aws s3 sync ../website/dist s3://${WEBSITE_BUCKET} \
     --delete \
     --cache-control "max-age=31536000,public" \
+    --exclude "index.html" \
+    --region ${REGION}
+
+# Upload index.html with no-cache to ensure SPA routing works
+aws s3 cp ../website/dist/index.html s3://${WEBSITE_BUCKET}/index.html \
+    --cache-control "no-cache, no-store, must-revalidate" \
+    --content-type "text/html" \
     --region ${REGION}
 
 if [ $? -ne 0 ]; then

@@ -125,13 +125,13 @@ const HomePage = () => {
                         <div className="mt-8 flex flex-row gap-4 justify-center">
                             <Link
                                 to="/agents"
-                                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+                                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200 no-underline"
                             >
                                 Agent Demos
                             </Link>
                             <Link
                                 to="/mcp"
-                                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+                                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 transition-colors duration-200 no-underline"
                             >
                                 MCP Demos
                             </Link>
