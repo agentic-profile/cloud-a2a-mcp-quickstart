@@ -79,15 +79,15 @@ export function CardBody({ className = "", ...props }: any ) {
 interface CardTitleAndBodyProps {
     className?: string;
     title: string;
-    collapsible?: boolean;
+    collapsed?: boolean | undefined;
     variant?: CardVariant;
     children?: React.ReactNode;
 }
 
-export function CardTitleAndBody({ className, title, collapsible = false, variant = "default", children }: CardTitleAndBodyProps ) {
-    const [isCollapsed, setIsCollapsed] = useState(collapsible);
+export function CardTitleAndBody({ className, title, collapsed, variant = "default", children }: CardTitleAndBodyProps ) {
+    const [isCollapsed, setIsCollapsed] = useState(collapsed ?? false);
 
-    const collapseIcon = collapsible ? (
+    const collapseIcon = collapsed !== undefined ? (
         <Icon 
             src={isCollapsed ? chevronDownIcon : chevronUpIcon} 
             onClick={() => setIsCollapsed(!isCollapsed)} 

@@ -51,7 +51,7 @@ export default function SelfHostIdentity() {
 
             <CardTitleAndBody
                 title="Generated Local JWT Keyring - Keep this secret!"
-                collapsible={true}
+                collapsed={true}
                 className="mt-6"
             >
                 <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto text-sm">

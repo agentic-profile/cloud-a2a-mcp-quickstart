@@ -15,7 +15,7 @@ const AdvancedFeatures = () => {
     const ventureData = pruneVentureData(getVentureData()); // remove empty values and blank lines
 
     return (
-        <CardTitleAndBody title="More Advanced Features..." collapsible={true}>
+        <CardTitleAndBody title="More Advanced Features..." collapsed={true}>
             <div className="space-y-4">
                 <div className="flex gap-3">
                     <Button

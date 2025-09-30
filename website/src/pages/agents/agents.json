@@ -2,9 +2,10 @@
     {
         "id": "venture",
         "name": "Venture Agent",
-        "description": "Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, new hires, and technology partners.",
+        "description": "Your AI-powered business development partner that learns your business model and strategically connects you with VCs, co-founders, talent, and technology partners.",
         "avatar": "VA",
         "route": "/agents/venture",
+        "buttonLabel": "Northstar Worksheet",
         "agentUrl": "/a2a/venture",
         "mcpUrl": "/mcp/venture"
     },

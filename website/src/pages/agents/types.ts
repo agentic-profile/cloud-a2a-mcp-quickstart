@@ -4,6 +4,7 @@ export interface Agent {
     description: string;
     avatar: string;
     route: string;
+    buttonLabel?: string;
     agentUrl: string;
     mcpUrl?: string;
 }

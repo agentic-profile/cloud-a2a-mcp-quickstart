@@ -43,6 +43,7 @@ const VenturePage = () => {
     } = useVentureStore();
     
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
+    const [isShareCollapsed, setIsShareCollapsed] = useState(true);
     const enlistAgentRef = useRef<HTMLDivElement>(null);
 
     // Handle fragment identifier scrolling
@@ -50,6 +51,7 @@ const VenturePage = () => {
         const hash = window.location.hash;
         if (hash === '#enlist-agent' && enlistAgentRef.current) {
             // Delay scroll slightly to ensure page is fully rendered
+            setIsShareCollapsed(false);
             setTimeout(() => {
                 enlistAgentRef.current?.scrollIntoView({ 
                     behavior: 'smooth',
@@ -233,7 +235,10 @@ const VenturePage = () => {
 
                 <ShowMarkdown />
 
-                <CardTitleAndBody title="Share to the Agentic Web (and the World!)" variant="success">
+                <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
+                    variant="success"
+                    collapsed={isShareCollapsed}
+                    >
                     <div className="space-y-4">
                         <p className="mb-4">
                             <strong>NOTE:</strong> This section is for advanced users.

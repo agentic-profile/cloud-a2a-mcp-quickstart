@@ -86,7 +86,7 @@ const AgentsPage = () => {
                                     size="sm"
                                     onClick={() => handleAgentAction(agent)}
                                 >
-                                    Sign Up
+                                    {agent.buttonLabel || 'Sign Up'}
                                 </Button>
                                 {serverUrl && <Button
                                     size="sm"
