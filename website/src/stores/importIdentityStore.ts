@@ -9,12 +9,18 @@ export interface ImportKeyring {
     [key: string]: any; // Allow for additional properties
 }*/
 
+interface OnSuccessAction {
+    page: string
+}
+
 interface ImportIdentityState {
     exportKeyring: JWKSet | null;
     identityHostUrl: string;
+    onSuccessAction: OnSuccessAction | null;
     setExportKeyring: (exportKeyring: JWKSet | null) => void;
     setIdentityHostUrl: (url: string) => void;
     clearExportKeyring: () => void;
+    setOnSuccessAction: (action: OnSuccessAction | null) => void;
 }
 
 export const useImportIdentityStore = create<ImportIdentityState>()(
@@ -22,9 +28,11 @@ export const useImportIdentityStore = create<ImportIdentityState>()(
         (set) => ({
             exportKeyring: null,
             identityHostUrl: 'https://matchwise.ai/import',
+            onSuccessAction: null,
             setExportKeyring: (exportKeyring) => set({ exportKeyring }),
             setIdentityHostUrl: (url) => set({ identityHostUrl: url }),
             clearExportKeyring: () => set({ exportKeyring: null }),
+            setOnSuccessAction: (action) => set({ onSuccessAction: action }),
         }),
         {
             name: 'import-identity-storage',

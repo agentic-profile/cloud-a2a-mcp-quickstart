@@ -7,6 +7,7 @@ import { webDidToUrl } from "@agentic-profile/common";
 import { Button, EditableUrl, LabelValue, Card, CardBody } from '@/components';
 import { useImportIdentityStore, useUserProfileStore } from '@/stores';
 import { resolveAgentAndVerificationId } from '@/tools/keyring';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
     'https://matchwise.ai/import',
@@ -33,8 +34,9 @@ export const wantsFocus = () => {
 
 export function ConnectIdentity() {
     const { setUserProfile, setUserAgentDid, setVerificationId } = useUserProfileStore();
-    const { exportKeyring, identityHostUrl, setExportKeyring, setIdentityHostUrl } = useImportIdentityStore();
+    const { exportKeyring, identityHostUrl, setExportKeyring, setIdentityHostUrl, onSuccessAction, setOnSuccessAction } = useImportIdentityStore();
     const [did,setDid] = useState<string|undefined>(undefined);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!exportKeyring) 
@@ -116,6 +118,11 @@ export function ConnectIdentity() {
                 const { agentDid, verificationId } = resolveAgentAndVerificationId( data, keyring );
                 setUserAgentDid(agentDid ?? null);
                 setVerificationId(verificationId ?? null);
+
+                if( onSuccessAction ) {
+                    navigate(onSuccessAction.page);
+                    setOnSuccessAction(null);
+                }
             }
         }
         catch (error) {
@@ -128,8 +135,8 @@ export function ConnectIdentity() {
     return (
         <div>
             <p className="mb-6">
-                Connect to an Identity Host such as <a href="https://matchwise.ai" target="_blank">Matchwise</a> and use
-                the keys generated below to authenticate with A2A and MCP services on the Agentic Web.
+                Connect to an Identity Host such as <a href="https://matchwise.ai" target="_blank">Matchwise</a> and register
+                the keys generated below.  The keys will allow this browser to authenticate with A2A and MCP services on the Agentic Web.
             </p>
             
             <EditableUrl

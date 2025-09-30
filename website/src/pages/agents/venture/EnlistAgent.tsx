@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
-import { useSettingsStore, useUserProfileStore } from '@/stores';
+import { useImportIdentityStore, useSettingsStore, useUserProfileStore } from '@/stores';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
 
@@ -27,6 +27,7 @@ function resolveMcpAgentManagerUrlFromDid(did: string) {
 const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpRequest: HttpRequest) => void }) => {
     const { serverUrl } = useSettingsStore();
     const { userAgentDid, verificationId } = useUserProfileStore();
+    const { setOnSuccessAction } = useImportIdentityStore();
     const [ httpProgress, setHttpProgress ] = useState<HttpProgress | undefined>(undefined);
     const navigate = useNavigate();
     
@@ -86,6 +87,7 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
 
     // Handle navigation to identity page
     const handleManageIdentity = () => {
+        setOnSuccessAction({ page: '/agents/venture#enlist-agent' });
         navigate('/identity');
     };
 
@@ -112,14 +114,21 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
                         onUpdate={setMcpAgentManagerUrl}
                         options={DEFAULT_MCP_URLS}
                     />
+                    <p className="sm !mb-8">
+                        This is the URL of the MCP service at your Identity Host that manages adding new agents. 
+                        We will use this MCP service to add the Venture Agent to your Agentic Profile.
+                    </p>
                     <EditableUrl
                         card={false}
-                        label="Agent A2A Service Endpoint"
+                        label="Venture Agent A2A Service Endpoint"
                         value={serviceEndpoint}
                         placeholder="Enter A2A server URL..."
                         onUpdate={setServiceEndpoint}
                         options={DEFAULT_MCP_URLS}
                     />
+                    <p className="sm">
+                        This is the URL of the A2A Venture Agent that will be added to your Agentic Profile.
+                    </p>
                     <div className="flex justify-end space-x-3">
                         <Button
                             onClick={handleManageIdentity}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { EditableValueList, Page, TabbedEditableLists } from '@/components';
 import { useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
@@ -43,6 +43,21 @@ const VenturePage = () => {
     } = useVentureStore();
     
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
+    const enlistAgentRef = useRef<HTMLDivElement>(null);
+
+    // Handle fragment identifier scrolling
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (hash === '#enlist-agent' && enlistAgentRef.current) {
+            // Delay scroll slightly to ensure page is fully rendered
+            setTimeout(() => {
+                enlistAgentRef.current?.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
+        }
+    }, []);
 
     // Memoized callback functions to prevent infinite loops
     const handleProblemUpdate = useCallback((values: AttributedString[]) => {
@@ -224,7 +239,9 @@ const VenturePage = () => {
                             <strong>NOTE:</strong> This section is for advanced users.
                         </p>
                         <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
-                        <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                        <div ref={enlistAgentRef}>
+                            <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                        </div>
                     </div>
                 </CardTitleAndBody>
 
