@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, CardBody, CardHeader, Spinner, LabelValue, LabelJson } from './index';
+import { Card, CardBody, Spinner, LabelValue, LabelJson, CardTitleAndBody } from './index';
 import { parseChallengeFromWwwAuthenticate, signChallenge } from '@agentic-profile/auth';
 import { useUserProfileStore, type UserProfile } from '@/stores';
 import { deleteAuthToken, useAuthToken } from '@/tools/AuthTokenManager';
@@ -60,8 +60,8 @@ export interface JsonRpcResponse {
 export const JsonRpcDebug = ({ 
     url, 
     httpRequest,
-    onClose,
-    onClear,
+    //onClose,
+    //onClear,
     className = '' 
 }: JsonRpcDebugProps) => {
     const [spinner, setSpinner] = useState(false);
@@ -79,7 +79,7 @@ export const JsonRpcDebug = ({
     const [retryResult, setRetryResult] = useState<Result | null>(null);
     const { authToken, setAuthToken, clearAuthToken } = useAuthToken(url);
 
-    // Clear all internal state
+    /* Clear all internal state
     const clearAllState = () => {
         setRequestInit(null);
         setMethod(null);
@@ -91,7 +91,7 @@ export const JsonRpcDebug = ({
         if (onClear) {
             onClear();
         }
-    };
+    };*/
 
     const handleSendRequest = async (request: RequestInit) => {
         if( !url )
@@ -167,12 +167,15 @@ export const JsonRpcDebug = ({
     }, [request]);
 
     return (
-        <Card className={className}>
-            <CardHeader onClose={onClose} onClear={clearAllState}>
-                <h2>JSON RPC Debug</h2>
-            </CardHeader>
-            <CardBody className="space-y-4">
-                <div>
+        <CardTitleAndBody
+            className={className}
+            title="JSON RPC Debug"
+            collapsed={true}
+            //onClose={onClose}
+            //onClear={clearAllState}
+        >
+            <div className="space-y-4">
+                <div className="space-y-4">
                     <LabelValue label="URL" value={url} />
                     <LabelValue label="RPC Method" value={method ?? 'unknown'} />
                     <JwtDetails jwt={authToken} onClear={() => clearAuthToken()} />
@@ -187,8 +190,9 @@ export const JsonRpcDebug = ({
                 <RequestCard title="Second HTTP Request with auth" request={retryInit} requestInit={retryInit} />
                 {retrySpinner && <Spinner size="md" color="primary" />}                   
                 <ResponseCard result={retryResult} />
-            </CardBody>
-        </Card>
+            </div>
+
+        </CardTitleAndBody>
     );
 };
 
