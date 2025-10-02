@@ -4,20 +4,21 @@ import { Button } from './Button';
 import { Card, CardBody } from './Card';
 import { validateHttpUrl } from '@/tools/net';
 
-interface EditableUrlProps {
+interface EditableUriProps {
     card?: boolean;
     label: string;
     value: string | null | undefined;
     placeholder?: string;
     options?: string[];
     onUpdate: (newValue: string) => void;
+    validateUri?: (value: string | null | undefined) => boolean;
 }
 
-export const EditableUrl = ({ card = true, label, value, placeholder, options, onUpdate }: EditableUrlProps) => {
+export const EditableUri = ({ card = true, label, value, placeholder, options, onUpdate, validateUri = validateHttpUrl }: EditableUriProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableValue, setEditableValue] = useState('');
-    const isValidValue = validateHttpUrl(value);
-    const isValidEdit = validateHttpUrl(editableValue);
+    const isValidValue = validateUri(value);
+    const isValidEdit = validateUri(editableValue);
     
     // Show error variant when editing invalid URL with content, or when saved value is invalid with content
     const shouldShowError = isEditing ? !isValidEdit : !isValidValue;

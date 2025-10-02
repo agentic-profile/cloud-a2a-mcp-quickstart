@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
+import { Button, EditableUri, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useSettingsStore, useUserProfileStore, useVentureStore } from '@/stores';
 import { buildEndpoint } from '@/tools/net';
@@ -94,7 +94,7 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
                     Publish your venture to the Agentic Web using an MCP service.  This will make your venture
                     publicly available to investors, technology providers, and talent.
                 </p>
-                <EditableUrl
+                <EditableUri
                     card={false}
                     label="MCP URL"
                     value={mcpUrl}

@@ -3,7 +3,7 @@ import { EditableValueList, Page, TabbedEditableLists } from '@/components';
 import { useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody, Card, CardBody } from '@/components/Card';
-import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUrlColumn } from '@/components/EditableTable';
+import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUriColumn } from '@/components/EditableTable';
 import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
@@ -204,7 +204,7 @@ const VenturePage = () => {
                     <EditableTable
                         columns={[
                             EditableTextColumn("Name"),
-                            EditableUrlColumn("LinkedIn Profile"),
+                            EditableUriColumn("LinkedIn Profile"),
                             EditableSelectColumn("Full or part-time?", [
                                 { key: "full", label: "Full-time" },
                                 { key: "part", label: "Part-time" },
@@ -224,7 +224,7 @@ const VenturePage = () => {
                     </p>
                     <EditableTable
                         columns={[
-                            EditableUrlColumn("Link URL"),
+                            EditableUriColumn("Link URL"),
                             EditableTextColumn("Description")
                         ]}
                         values={references}

@@ -504,7 +504,7 @@ export function EditableSelectColumn(header: string, options: SelectOption[]): E
     };
 }
 
-export function EditableUrlColumn(header: string): EditableTableColumn {
+export function EditableUriColumn(header: string): EditableTableColumn {
     const isValidUrl = (url: string): boolean => {
         if (!url.trim()) return true; // Empty URLs are valid
         try {

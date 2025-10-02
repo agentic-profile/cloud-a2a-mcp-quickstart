@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor } from '@/components';
 import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 
@@ -134,7 +134,7 @@ const A2ADebugPage = () => {
                 <Card>
                     <CardBody>
                         {/* A2A URL Input */}
-                        <EditableUrl
+                        <EditableUri
                             label="A2A Endpoint URL"
                             value={rpcUrl}
                             placeholder="https://api.matchwise.ai/agents/connect"

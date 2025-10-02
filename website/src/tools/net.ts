@@ -24,6 +24,17 @@ export function validateHttpUrl(url: string | null | undefined): boolean {
     }
 };
 
+export function validateDidWebUri(uri: string | null | undefined): boolean {
+    uri = uri?.trim().toLowerCase();
+    if (!uri) return true; // Empty is considered valid
+    try {
+        const [ did, method ] = uri.split(':');
+        return did === 'did' && method === 'web';
+    } catch {
+        return false;
+    }
+};
+
 export function resolveRpcUrl(serverUrl: string, path: string) {
     // Extract rpcUrl from URL query parameters
     const urlParams = new URLSearchParams(window.location.search);

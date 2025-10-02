@@ -4,7 +4,7 @@ import {
 } from "@agentic-profile/auth";
 import { webDidToUrl } from "@agentic-profile/common";
 
-import { Button, EditableUrl, LabelValue, Card, CardBody } from '@/components';
+import { Button, EditableUri, LabelValue, Card, CardBody } from '@/components';
 import { useImportIdentityStore, useUserProfileStore } from '@/stores';
 import { resolveAgentAndVerificationId } from '@/tools/keyring';
 import { useNavigate } from 'react-router-dom';
@@ -139,7 +139,7 @@ export function ConnectIdentity() {
                 the keys generated below.  The keys will allow this browser to authenticate with A2A and MCP services on the Agentic Web.
             </p>
             
-            <EditableUrl
+            <EditableUri
                 card={false}
                 label="Identity Host URL"
                 value={identityHostUrl}

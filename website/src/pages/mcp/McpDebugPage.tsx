@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUrl, JsonEditor, HttpProgressSummary } from '@/components';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor, HttpProgressSummary } from '@/components';
 import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
@@ -110,7 +110,7 @@ const McpDebugPage = () => {
                 <Card>
                     <CardBody>
                         {/* MCP URL Input */}
-                        <EditableUrl
+                        <EditableUri
                             label="MCP Endpoint URL"
                             value={rpcUrl}
                             placeholder="https://api.matchwise.ai/mcp/location"

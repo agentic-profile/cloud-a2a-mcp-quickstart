@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, EditableUrl, LabelValue, HttpProgressSummary } from '@/components';
+import { Button, EditableUri, LabelValue, HttpProgressSummary } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import { useImportIdentityStore, useSettingsStore, useUserProfileStore } from '@/stores';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
@@ -106,7 +106,7 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
                     { hasIdentity && <LabelValue
                         label="Add to your identity at" 
                         value={`${userAgentDid} (key ${verificationId})`} /> }
-                    <EditableUrl
+                    <EditableUri
                         card={false}
                         label="Identity Host Agent Manager URL"
                         value={mcpAgentManagerUrl}
@@ -118,7 +118,7 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
                         This is the URL of the MCP service at your Identity Host that manages adding new agents. 
                         We will use this MCP service to add the Venture Agent to your Agentic Profile.
                     </p>
-                    <EditableUrl
+                    <EditableUri
                         card={false}
                         label="Venture Agent A2A Service Endpoint"
                         value={serviceEndpoint}

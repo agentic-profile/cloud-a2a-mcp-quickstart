@@ -34,7 +34,7 @@ export { LabelDid } from './LabelDid';
 export { LabelJson } from './LabelJson';
 export { RadioButton } from './RadioButton';
 export { RadioGroup } from './RadioGroup';
-export { EditableUrl } from './EditableUrl';
+export { EditableUri } from './EditableUri';
 export { EditableValue } from './EditableValue';
 export { default as JsonEditor } from './JsonEditor';
 export { EditableValueList } from './EditableValueList';

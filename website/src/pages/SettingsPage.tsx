@@ -5,7 +5,7 @@ import {
     ArrowRightIcon,
     UserIcon
 } from '@heroicons/react/24/outline';
-import { Switch, Page, EditableUrl, LabelDid } from '@/components';
+import { Switch, Page, EditableUri, LabelDid } from '@/components';
 import { useSettingsStore, useUserProfileStore } from '@/stores';
 import { DEFAULT_SERVER_URLS } from '@/tools/net';
 
@@ -14,7 +14,7 @@ const ServerUrlSetting = () => {
 
     return (
         <div className="py-3 border-b border-gray-100 dark:border-gray-700">
-            <EditableUrl
+            <EditableUri
                 label="Server URL"
                 value={serverUrl}
                 placeholder="http://localhost:3000"

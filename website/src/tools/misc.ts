@@ -18,3 +18,8 @@ export function deepEqual(a: any, b: any): boolean {
     
     return true;
 };
+
+export function parseDid(s: string) {
+    const [ did, fragment ] = s.split('#');
+    return { did, fragment };
+}
