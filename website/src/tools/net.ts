@@ -61,15 +61,15 @@ export function resolveRpcUrl(serverUrl: string, path: string) {
 
 // Expects a full URL
 // Updates the current window's URL with an rpcUrl parameter
-export const updateWindowRpcUrl = (rpcUrl: string) => {
-    rpcUrl = rpcUrl.trim();
+export const updateWindowParam = (name:string, value: string) => {
+    value = value.trim();
 
     // Update the URL in browser history without page reload
     const urlParams = new URLSearchParams(window.location.search);
-    if( rpcUrl )
-        urlParams.set('rpcUrl', rpcUrl);
+    if( value )
+        urlParams.set(name, value);
     else
-        urlParams.delete('rpcUrl');
+        urlParams.delete(name);
     const newUrlString = `${window.location.pathname}?${urlParams.toString()}`;
     window.history.replaceState({}, '', newUrlString);
     
@@ -77,18 +77,18 @@ export const updateWindowRpcUrl = (rpcUrl: string) => {
     window.dispatchEvent(new CustomEvent('urlchange'));
 };
 
-export function resolveRpcUrlFromWindow() {
+export function resolveParamFromWindow(name:string) {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('rpcUrl');
+    return urlParams.get(name);
 }
 
 // Custom hook to reactively track rpcUrl from window URL parameters
-export function useRpcUrlFromWindow() {
-    const [rpcUrl, setRpcUrl] = React.useState<string | null>(resolveRpcUrlFromWindow());
+export function useParamFromWindow(name:string) {
+    const [param, setParam] = React.useState<string | null>(resolveParamFromWindow(name));
 
     React.useEffect(() => {
         const handleUrlChange = () => {
-            setRpcUrl(resolveRpcUrlFromWindow());
+            setParam(resolveParamFromWindow(name));
         };
 
         // Listen for popstate events (back/forward navigation)
@@ -103,5 +103,5 @@ export function useRpcUrlFromWindow() {
         };
     }, []);
 
-    return rpcUrl;
+    return param;
 }

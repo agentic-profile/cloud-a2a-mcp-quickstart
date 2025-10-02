@@ -7,6 +7,7 @@ import { webDidToUrl } from "@agentic-profile/common";
 import { Button, EditableUri, LabelValue, Card, CardBody } from '@/components';
 import { useImportIdentityStore, useUserProfileStore } from '@/stores';
 import { resolveAgentAndVerificationId } from '@/tools/keyring';
+import { resolveParamFromWindow } from '@/tools/net';
 import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
@@ -24,9 +25,8 @@ const base64webEncode = (str: string): string => {
 };
 
 export const wantsFocus = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const kid = urlParams.get('kid');
-    const did = urlParams.get('did');
+    const kid = resolveParamFromWindow('kid');
+    const did = resolveParamFromWindow('did');
     
     // If both parameters are present, focus on this component
     return kid && did ? true : false;
@@ -43,9 +43,8 @@ export function ConnectIdentity() {
             regenerateKeyring();
         
         // Extract query string parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const did = urlParams.get('did');
-        const kid = urlParams.get('kid');
+        const did = resolveParamFromWindow('did');
+        const kid = resolveParamFromWindow('kid');
         
         // Check if both did and kid are provided and kid matches exportKeyring.b64uPublicKey
         if (did && kid && exportKeyring && kid === exportKeyring.b64uPublicKey)

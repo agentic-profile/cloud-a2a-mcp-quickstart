@@ -1,6 +1,6 @@
 import { Avatar } from '@heroui/react';
 import { Button, Card, CardBody, Page } from '@/components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import agentsData from './agents.json';
 import { buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores';
@@ -8,6 +8,7 @@ import type { Agent } from './types';
 
 const AgentsPage = () => {
     const { serverUrl } = useSettingsStore();
+    const navigate = useNavigate();
     const agents: Agent[] = agentsData.filter(agent => !agent.id.startsWith('_'));
 
     const handleAgentAction = (agent: Agent) => {
@@ -23,7 +24,7 @@ const AgentsPage = () => {
     const handleChatClick = (agent: Agent) => {
         const rpcUrl = serverUrl ? buildEndpoint(serverUrl, agent.agentUrl ) : null;
         if( rpcUrl )
-            window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
+            navigate(`/chat?a2aUrl=${encodeURIComponent(rpcUrl)}`);
     };
 
     const handleAgentCardClick = (agent: Agent) => {

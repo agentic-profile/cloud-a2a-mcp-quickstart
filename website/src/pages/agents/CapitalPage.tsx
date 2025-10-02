@@ -2,19 +2,21 @@ import {
     ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, Page } from '@/components';
+import { useNavigate } from 'react-router-dom';
 import agentsData from './agents.json';
 import { buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores';
 
 const CapitalPage = () => {
     const { serverUrl } = useSettingsStore();
+    const navigate = useNavigate();
     // Find the venture agent from the agents data
     const agent = agentsData.find(agent => agent.id === 'capital');
     const rpcUrl = serverUrl && agent ? buildEndpoint(serverUrl, agent?.agentUrl ) : null;
     
     const handleChatClick = () => {
         if( rpcUrl )
-            window.location.href = `/chat?rpcUrl=${encodeURIComponent(rpcUrl)}`;
+            navigate(`/chat?a2aUrl=${encodeURIComponent(rpcUrl)}`);
     };
 
     if (!agent) {

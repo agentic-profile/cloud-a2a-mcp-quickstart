@@ -41,3 +41,5 @@ export { EditableValueList } from './EditableValueList';
 export { TabbedEditableLists } from './TabbedEditableLists';
 export { HttpProgressSummary } from './HttpProgressSummary';
 export { default as McpToolCallCard } from './McpToolCallCard';
+export { ErrorSubtext } from './ErrorSubtext';
+export { ErrorBoundary, useErrorHandler } from './ErrorBoundary';

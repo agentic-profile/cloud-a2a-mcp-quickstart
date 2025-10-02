@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { Page, Button, EditableUri, JsonRpcDebug, Switch, Card, CardHeader, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
-//import { resolveRpcUrlFromWindow, updateWindowRpcUrl } from '@/tools/net';
+import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Switch, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
+import { resolveParamFromWindow, updateWindowParam } from '@/tools/net';
 import type { HttpProgress } from '@/components/JsonRpcDebug';
 import { useUserProfileStore } from '@/stores';
 import { webDidToUrl } from "@agentic-profile/common";
 import { parseDid } from '@/tools/misc';
 import { validateDidWebUri } from '@/tools/net';
+
+const A2A_URL_PARAM = 'a2aUrl';
 
 interface Message {
     id: string;
@@ -39,9 +41,9 @@ export const ChatPage = () => {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [ loadingProfile, setLoadingProfile] = useState(false);
 
-    //const rpcUrl = resolveRpcUrlFromWindow();
+    const a2aUrl = resolveParamFromWindow(A2A_URL_PARAM);
     const [toAgentDid, setToAgentDid] = useState<string>('');
-    const [a2aUrl, setA2aUrl] = useState<string>('');
+    //const [a2aUrl, setA2aUrl] = useState<string>('');
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -95,20 +97,26 @@ export const ChatPage = () => {
             }
             
             const { fragment } = parseDid(agentDid);
+            if( !fragment ) {
+                setAgentDidError(`Invalid agent DID; missing fragment`);
+                return;
+            }
             const serviceId = "#" + fragment;
             const profile = await response.json();
             const service = profile.service?.find((service: any) => service.id === serviceId);
             if( !service ) {
-                setAgentDidError(`Service not found for ${agentDid}: ${serviceId}`);
+                setAgentDidError(`Agent service ${serviceId} not found for ${agentDid}`);
             } else if( service.type.toLowerCase().startsWith("a2a/") !== true) {
                 setAgentDidError(`Service is not an A2A service for ${agentDid}: ${serviceId}`);
             } else if( !service.serviceEndpoint ) {
                 setAgentDidError(`Service endpoint not found for ${agentDid}: ${serviceId}`);
             } else { 
-                setA2aUrl(service.serviceEndpoint);
+                //setA2aUrl(service.serviceEndpoint);
+                updateWindowParam(A2A_URL_PARAM, service.serviceEndpoint);
             }
         } catch (error) {
-            console.error('Error fetching agent data:', error);
+            const msg = error instanceof Error ? error.message : `Failed to fetch agent profile data ${error}`;
+            setAgentDidError(msg);
         } finally {
             setLoadingProfile(false);
         }
@@ -116,7 +124,7 @@ export const ChatPage = () => {
 
     /*
     const handleUrlUpdate = (newUrl: string) => {
-        updateWindowRpcUrl(newUrl);
+        updateWindowParam('rpcUrl', newUrl);
     };*/
 
     const handleSendMessage = () => {
@@ -200,6 +208,10 @@ export const ChatPage = () => {
         }
     };
 
+    const handleA2aUrlUpdate = (a2aUrl: string) => {
+        updateWindowParam(A2A_URL_PARAM, a2aUrl);
+    };
+
     return (
         <Page
             title="Chat with AI Agent"
@@ -211,7 +223,7 @@ export const ChatPage = () => {
                 {/* Agent URL Display */}
                 <Card>
                     <CardBody>
-                        <p>To:</p>
+                        <p>To</p>
                         <div className="ml-6">
                             <EditableUri
                                 card={false}
@@ -222,13 +234,13 @@ export const ChatPage = () => {
                                 onUpdate={handleToAgentDidUpdate}
                             />
                             { loadingProfile && <Spinner /> }
-                            { agentDidError && <ErrorMessage message={agentDidError} /> }
+                            { agentDidError && <ErrorSubtext message={agentDidError} /> }
                             <EditableUri
                                 card={false}
                                 label="A2A Service Endpoint"
                                 value={a2aUrl}
                                 placeholder="Enter peer agent DID including fragment"
-                                onUpdate={setA2aUrl}
+                                onUpdate={handleA2aUrlUpdate}
                             />
                         </div>
 
@@ -304,7 +316,7 @@ export const ChatPage = () => {
                                 <span className="hidden sm:inline">Send</span>
                             </Button>
                         </div>
-                        { sendMessageError && <ErrorMessage message={sendMessageError} /> }
+                        { sendMessageError && <ErrorSubtext message={sendMessageError} /> }
 
                         {/* Debug Toggle */}
                         <div className="flex items-center space-x-3 mt-4">
@@ -324,7 +336,7 @@ export const ChatPage = () => {
                 {/* JSON-RPC Debug Card */}
                 <JsonRpcDebug
                     httpRequest={currentRequest ? {
-                        url: a2aUrl,
+                        url: a2aUrl ?? undefined,
                         requestInit: currentRequest,
                         onProgress: (progress) => {
                             if( progress.result )
@@ -342,10 +354,4 @@ export const ChatPage = () => {
     );
 };
 
-function ErrorMessage({ message }: { message: string }) {
-    return (
-        <p className="sm font-semibold !text-red-600 ml-4 mb-4">
-            Error: {message}
-        </p>
-    );
-}
+

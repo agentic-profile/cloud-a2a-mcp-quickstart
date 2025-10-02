@@ -15,24 +15,23 @@ export async function deleteAuthToken(url:string): Promise<void> {
 }
 
 export function useAuthToken(url: string | undefined) {
-    if( !url )
-        return {
-            authToken: null,
-            setAuthToken: () => {},
-            clearAuthToken: () => {},
-            hasAuthToken: false
-        };
-
-    const [ authToken, setTokenState] = useState<string | null>(() => tokenStore.get(url) || null);
+    // Always call hooks at the top level, regardless of conditions
+    const [ authToken, setTokenState] = useState<string | null>(() => {
+        return url ? (tokenStore.get(url) || null) : null;
+    });
 
     const setAuthToken = useCallback(async (token: string) => {
-        tokenStore.set(url, token);
-        setTokenState(token);
+        if (url) {
+            tokenStore.set(url, token);
+            setTokenState(token);
+        }
     }, [url]);
 
     const clearAuthToken = useCallback(async () => {
-        tokenStore.delete(url);
-        setTokenState(null);
+        if (url) {
+            tokenStore.delete(url);
+            setTokenState(null);
+        }
     }, [url]);
 
     /*
@@ -42,6 +41,16 @@ export function useAuthToken(url: string | undefined) {
         return currentToken;
     }, [url]);
     */
+
+    // Handle the case where url is undefined after hooks are called
+    if( !url ) {
+        return {
+            authToken: null,
+            setAuthToken: () => {},
+            clearAuthToken: () => {},
+            hasAuthToken: false
+        };
+    }
 
     return {
         authToken,

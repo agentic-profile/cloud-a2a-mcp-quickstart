@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor, HttpProgressSummary } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
+import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor, HttpProgressSummary, ErrorBoundary } from '@/components';
+import { useParamFromWindow, updateWindowParam, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 
@@ -38,7 +38,7 @@ const McpDebugPage = () => {
     const [customPayload, setCustomPayload] = useState<string>('{\n  "method": "tools/list",\n  "params": {\n    "name": "test"\n  }\n}');
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
     const [httpProgress, setHttpProgress] = useState<HttpProgress | undefined>(undefined);
-    const queryRpcUrl = useRpcUrlFromWindow();
+    const queryRpcUrl = useParamFromWindow('rpcUrl');
     const { serverUrl } = useSettingsStore();
 
     // Use queryRpcUrl if available, otherwise fallback to serverUrl + "/mcp/location"
@@ -115,7 +115,7 @@ const McpDebugPage = () => {
                             value={rpcUrl}
                             placeholder="https://api.matchwise.ai/mcp/location"
                             options={URL_OPTIONS}
-                            onUpdate={updateWindowRpcUrl}
+                            onUpdate={(url) => updateWindowParam('rpcUrl', url)}
                         />
 
                         <h3>Payload</h3>
@@ -144,10 +144,12 @@ const McpDebugPage = () => {
 
                 {/* JSON RPC Debug Component */}
                 {rpcUrl && isValidUrl() && (
-                    <JsonRpcDebug
-                        url={rpcUrl}
-                        httpRequest={httpRequest}
-                    />
+                    <ErrorBoundary>
+                        <JsonRpcDebug
+                            url={rpcUrl}
+                            httpRequest={httpRequest}
+                        />
+                    </ErrorBoundary>
                 )}
 
                 {(!rpcUrl || !isValidUrl()) && (

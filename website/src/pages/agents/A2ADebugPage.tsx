@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor } from '@/components';
-import { useRpcUrlFromWindow, updateWindowRpcUrl, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
+import { useParamFromWindow, updateWindowParam, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
@@ -15,7 +15,7 @@ export interface A2ARequest {
 const A2ADebugPage = () => {
     const [customPayload, setCustomPayload] = useState<string>('');
     const [request, setRequest] = useState<RequestInit | null>(null);
-    const queryRpcUrl = useRpcUrlFromWindow();
+    const queryRpcUrl = useParamFromWindow('rpcUrl');
     const { serverUrl } = useSettingsStore();
     const sendButtonRef = useRef<HTMLButtonElement>(null);
     const jsonRpcDebugRef = useRef<HTMLDivElement>(null);
@@ -139,7 +139,7 @@ const A2ADebugPage = () => {
                             value={rpcUrl}
                             placeholder="https://api.matchwise.ai/agents/connect"
                             options={URL_OPTIONS}
-                            onUpdate={updateWindowRpcUrl}
+                            onUpdate={(url) => updateWindowParam('rpcUrl', url)}
                         />
 
                         <h3>
