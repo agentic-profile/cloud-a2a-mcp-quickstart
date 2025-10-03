@@ -24,11 +24,12 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
         const { params, id } = jrpcRequest;
         const { contextId = uuidv4(), includeAllUpdates = false } = req.body
         const sendParams = params as unknown as MessageSendParams;
-        const requestContext: RequestContext = {
+        const requestContext = {
             taskId: id ? `${id}` : '', // RequestContext doesn't support null/undefined, even though A2A allows it
             contextId,
-            userMessage: sendParams.message
-        };
+            userMessage: sendParams.message,
+            session
+        } as RequestContext;
 
         // Create an event bus to collect updates
         const updates: AgentExecutionEvent[] = [];
@@ -87,22 +88,6 @@ export async function handleA2ARequest( req: Request, res: Response, executor: A
     });
 }
 
-/*    } catch (error) {
-        console.error(`Error processing A2A request:`, error);
-        res.status(500).json({
-            jsonrpc: '2.0',
-            id: 'error',
-            error: {
-                code: -32603,
-                message: 'Internal error',
-                data: error instanceof Error ? error.message : 'Unknown error'
-            }
-        });
-    }
-}*/
-
-export interface AgentCardProps {
-    url: string;
+export function resolveSession(requestContext: RequestContext): ClientAgentSession | undefined {
+    return (requestContext as any)?.session as ClientAgentSession | undefined;
 }
-
-export type AgentCardBuilder = (props: AgentCardProps) => any;

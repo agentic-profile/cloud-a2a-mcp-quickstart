@@ -9,19 +9,34 @@ const bedrockClient = new BedrockRuntimeClient({
 // Claude 3.5 Haiku model identifier
 const CLAUDE_3_5_HAIKU_MODEL_ID = 'anthropic.claude-3-5-haiku-20241022-v1:0';
 
-export async function completion(prompt: string): Promise<string> {
+export interface TextContent {
+    type: "text";
+    text: string;
+}
+
+export interface ClaudeMessage {
+    role: "user" | "assistant";
+    content: string | TextContent;
+}
+
+export async function promptCompletion(prompt: string): Promise<string> {
+    const messages = [
+        {
+            role: "user",
+            content: prompt
+        } as ClaudeMessage
+    ];
+    return await chatCompletion(messages);
+}
+
+export async function chatCompletion(messages: ClaudeMessage[]): Promise<string> {
     try {
         // Prepare the request payload for Claude 3.5 Haiku
         const requestBody = {
             anthropic_version: "bedrock-2023-05-31",
             max_tokens: 4000,
             temperature: 0.7,
-            messages: [
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ]
+            messages
         };
 
         // Create the invoke model command
@@ -36,15 +51,27 @@ export async function completion(prompt: string): Promise<string> {
         const response = await bedrockClient.send(command);
         
         // Parse the response
-        console.log('🤖 Claude 3.5 Haiku Response:', JSON.stringify(response, null, 4));
-        const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+        //console.log('🤖 Claude 3.5 Haiku Response:', JSON.stringify(response, null, 4));
+        const { body, contentType, ...rest } = response;
+        if( contentType !== 'application/json' )
+            throw new Error(`Unexpected content type: ${contentType}`);
+        if( !body )
+            throw new Error('No body received from Claude 3.5 Haiku');
+
+        const responseBody = JSON.parse(new TextDecoder().decode(body));
+        console.log('🤖 Claude 3.5 Haiku Response:', JSON.stringify({ responseBody, ...rest }, null, 4));
+        const { type, content } = responseBody;
+        if( type !== 'message' )
+            throw new Error(`Unexpected type: ${type}`);
+        if( !content )
+            throw new Error('No content received from Claude 3.5 Haiku');
         
         // Extract the text content from Claude's response
-        if (responseBody.content && responseBody.content.length > 0) {
-            return responseBody.content[0].text;
-        } else {
-            throw new Error('No content received from Claude 3.5 Haiku');
-        }
+        const text = content.find((part: any) => part.type === 'text')?.text;
+        if( !text )
+            throw new Error('No text content received from Claude 3.5 Haiku');
+        else
+            return text;
 
     } catch (error) {
         console.error('Error calling Claude 3.5 Haiku via Bedrock:', error);

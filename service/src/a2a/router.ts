@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { AgentExecutor } from '@a2a-js/sdk/server';
-import { AgentCardBuilder, handleA2ARequest } from './utils.js';
+import { handleA2ARequest } from './handle-a2a-request.js';
+import { AgentCardBuilder } from './types.js';
 
 
 export function A2AServiceRouter( executor: AgentExecutor, cardBuilder: AgentCardBuilder ) {

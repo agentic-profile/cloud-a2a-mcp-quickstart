@@ -11,6 +11,9 @@ import { validateDidWebUri } from '@/tools/net';
 
 const A2A_URL_PARAM = 'a2aUrl';
 
+const TO_AGENT_OPTIONS = [ 'did:web:iamagentic.ai:1#venture' ];
+
+
 interface Message {
     id: string;
     text: string;
@@ -32,7 +35,6 @@ export const ChatPage = () => {
     ]);*/
     const [inputText, setInputText] = useState('');
     const [currentRequest, setCurrentRequest] = useState<RequestInit | null>(null);
-    const [showJsonRpcDebug, setShowJsonRpcDebug] = useState(false);
 
     //const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [agentDidError, setAgentDidError] = useState<string | null>(null);
@@ -122,11 +124,6 @@ export const ChatPage = () => {
         }
     };
 
-    /*
-    const handleUrlUpdate = (newUrl: string) => {
-        updateWindowParam('rpcUrl', newUrl);
-    };*/
-
     const handleSendMessage = () => {
         const text = inputText.trim();
         if ( !text )
@@ -156,11 +153,11 @@ export const ChatPage = () => {
                                 kind: 'text',
                                 text
                             }
-                        ]
-                    },
-                    metadata: {
-                        envelope: {
-                            toDid: toAgentDid
+                        ],
+                        metadata: {
+                            envelope: {
+                                toAgentDid
+                            }
                         }
                     }
                 }
@@ -168,12 +165,11 @@ export const ChatPage = () => {
         };
         
         setCurrentRequest(rpcRequest);
-        setShowJsonRpcDebug(true);
         setInputText('');
     };
 
     const handleJsonRpcResult = (result: any) => {
-        const { kind, parts} = result.data.result;
+        const { kind, parts } = result?.data?.result ?? {};
         if ( parts ) {
             if( kind !== "message" ) {
                 setSendMessageError(`Unknown A2A response kind: ${kind}`);
@@ -192,12 +188,6 @@ export const ChatPage = () => {
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, message]);
-        } else if (result.data && result.data.error) {
-            // Handle JSON-RPC error
-            setSendMessageError(`JSON-RPC Error: ${result.data.error.message || 'Unknown error occurred'}`);
-        } else if (result.error) {
-            // Handle network or other errors
-            setSendMessageError(`Connection Error: ${String(result.error)}`);
         }
     };
 
@@ -232,6 +222,7 @@ export const ChatPage = () => {
                                 placeholder="Enter peer agent DID including fragment"
                                 validateUri={validateDidWebUri}
                                 onUpdate={handleToAgentDidUpdate}
+                                options={TO_AGENT_OPTIONS}
                             />
                             { loadingProfile && <Spinner /> }
                             { agentDidError && <ErrorSubtext message={agentDidError} /> }
@@ -318,17 +309,6 @@ export const ChatPage = () => {
                         </div>
                         { sendMessageError && <ErrorSubtext message={sendMessageError} /> }
 
-                        {/* Debug Toggle */}
-                        <div className="flex items-center space-x-3 mt-4">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Show JSON RPC Debug</span>
-                            <Switch
-                                isSelected={showJsonRpcDebug}
-                                onValueChange={setShowJsonRpcDebug}
-                                color="primary"
-                                size="md"
-                            />
-                        </div>
-
                         <HttpProgressSummary progress={httpProgress} />
                     </CardBody>
                 </Card>
@@ -344,10 +324,6 @@ export const ChatPage = () => {
                             setHttpProgress(progress)
                         }
                     } : null}
-                    onClose={() => {
-                        setShowJsonRpcDebug(false);
-                        setCurrentRequest(null);
-                    }}
                 />
             </div>
         </Page>

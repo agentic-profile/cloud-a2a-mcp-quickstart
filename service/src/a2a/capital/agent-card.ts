@@ -1,4 +1,4 @@
-import { AgentCardProps } from '../utils.js';
+import { AgentCardProps } from '../types.js';
 
 export function agentCard({url}: AgentCardProps) {
     return {
