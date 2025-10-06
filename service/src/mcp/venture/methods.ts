@@ -1,7 +1,7 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
 import { jrpcError } from '../../json-rpc/index.js';
-import { resolveAgentId } from '../misc.js';
+import { resolveAgentId } from '../../json-rpc/utils.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { StoreItem } from '../../stores/types.js';
@@ -11,7 +11,7 @@ import { handleAbout, handleRecentUpdates } from '../mcp-misc.js';
 const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
 const store = itemStore<StoreItem>({'tableName': TABLE_NAME});
 
-const KINDS = [ 'venture' , 'capital' ]; // TODO refine this
+const KINDS = [ 'venture' , 'capital', 'venture-strategy' ]; // TODO refine this
 
 function idResolver(item: StoreItem | undefined, session: ClientAgentSession, params: any | undefined ): string {
     const kind = item?.kind ?? params?.kind;

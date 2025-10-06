@@ -1,4 +1,6 @@
+import { ClientAgentSession } from "@agentic-profile/auth";
 import { AGENTIC_AUTH_REQUIRED_JSON_RPC_CODE, JsonRpcResponse } from "./types.js";
+import { parseDid } from "../utils/did.js";
 
 // Create RPC response with direct result
 export function jrpcResult(id: string | number, result: any): JsonRpcResponse {
@@ -39,4 +41,8 @@ export function describeJsonRpcRequestError(req: any): string | null | undefined
         return 'Missing JSON RPCrequest method';
     else
         return null;  // null=success
+}
+
+export function resolveAgentId(session: ClientAgentSession): { did: string, fragment: string } {
+    return parseDid(session.agentDid);
 }

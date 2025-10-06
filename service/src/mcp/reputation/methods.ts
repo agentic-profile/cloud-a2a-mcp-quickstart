@@ -5,7 +5,8 @@ import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { ReputationItem } from './types.js';
-import { mcpResultResponse, resolveAgentId } from '../misc.js';
+import { mcpResultResponse } from '../misc.js';
+import { resolveAgentId } from '../../json-rpc/utils.js';
 
 const TABLE_NAME = process.env.DYNAMODB_REPUTATIONS_TABLE_NAME || 'reputations';
 const store = itemStore<ReputationItem>({tableName: TABLE_NAME});

@@ -1,7 +1,7 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
 import { jrpcError } from '../../json-rpc/index.js';
-import {resolveAgentId } from '../misc.js';
+import { resolveAgentId } from '../../json-rpc/utils.js';
 import { handleAbout, handleRecentUpdates } from '../mcp-misc.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';

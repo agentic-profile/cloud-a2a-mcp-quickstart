@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+code {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+img[src*="#aboutwide"] {
+    width: 100%;
+    max-width:600px;
+    height: auto;
+}
+
+.markdown-content h1 {
+    @apply text-3xl font-bold mt-6 mb-2;
+}
+
+.markdown-content h2 {
+    @apply text-2xl font-bold mt-4 mb-2;
+}
+
+.markdown-content p {
+    @apply my-2;
+}
+
+.markdown-content ul {
+    @apply list-disc pl-6;
+}
+
+.markdown-content ol {
+    @apply list-decimal pl-6;
+}

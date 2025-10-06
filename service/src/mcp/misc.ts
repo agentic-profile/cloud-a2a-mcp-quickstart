@@ -1,4 +1,3 @@
-import { ClientAgentSession } from '@agentic-profile/auth';
 import {
     ContentBlock,
     JSONRPCResponse,
@@ -30,9 +29,4 @@ export function mcpResultResponse( id: string | number, result: MCPResult ): JSO
         id,
         result
     };
-}
-
-export function resolveAgentId(session: ClientAgentSession): { did: string, fragment: string } {
-    const [ did, fragment ] = session.agentDid.split('#');
-    return { did, fragment };
 }

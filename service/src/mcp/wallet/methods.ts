@@ -9,7 +9,8 @@ import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { mcpCrud } from '../mcp-crud.js';
 import { WalletItem } from './types.js';
-import { mcpResultResponse, resolveAgentId } from '../misc.js';
+import { mcpResultResponse } from '../misc.js';
+import { resolveAgentId } from '../../json-rpc/utils.js';
 import { presentCredential } from './present.js';
 
 const TABLE_NAME = process.env.DYNAMODB_WALLETS_TABLE_NAME || 'wallets';

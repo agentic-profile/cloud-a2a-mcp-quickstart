@@ -26,18 +26,32 @@ export async function promptCompletion(prompt: string): Promise<string> {
             content: prompt
         } as ClaudeMessage
     ];
-    return await chatCompletion(messages);
+    return await chatCompletion({messages});
 }
 
-export async function chatCompletion(messages: ClaudeMessage[]): Promise<string> {
+export interface ClaudeOptions {
+    messages: ClaudeMessage[],
+    system?: string,
+    max_tokens?: number,
+    temperature?: number,
+}
+
+const DEFAULT_CLAUDE_OPTIONS = {
+    system: "You are a helpful assistant.",
+    max_tokens: 4000,
+    temperature: 0.7,
+} as ClaudeOptions;
+
+export async function chatCompletion(options: ClaudeOptions): Promise<string> {
     try {
         // Prepare the request payload for Claude 3.5 Haiku
         const requestBody = {
-            anthropic_version: "bedrock-2023-05-31",
-            max_tokens: 4000,
-            temperature: 0.7,
-            messages
+            ...DEFAULT_CLAUDE_OPTIONS,
+            ...options,
+            anthropic_version: "bedrock-2023-05-31"
         };
+
+        console.log('🤖 Claude 3.5 Haiku Request:', JSON.stringify(requestBody, null, 4));
 
         // Create the invoke model command
         const command = new InvokeModelCommand({

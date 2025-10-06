@@ -44,3 +44,4 @@ export { default as McpToolCallCard } from './McpToolCallCard';
 export { ErrorSubtext } from './ErrorSubtext';
 export { ErrorBoundary, useErrorHandler } from './ErrorBoundary';
 export { CardTitleAndBody } from './Card';
+export { default as Markdown } from './Markdown';

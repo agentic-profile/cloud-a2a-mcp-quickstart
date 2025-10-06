@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Switch, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
+import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Markdown, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
 import { resolveParamFromWindow, updateWindowParam } from '@/tools/net';
 import type { HttpProgress } from '@/components/JsonRpcDebug';
 import { useUserProfileStore } from '@/stores';
@@ -45,7 +45,6 @@ export const ChatPage = () => {
 
     const a2aUrl = resolveParamFromWindow(A2A_URL_PARAM);
     const [toAgentDid, setToAgentDid] = useState<string>('');
-    //const [a2aUrl, setA2aUrl] = useState<string>('');
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -271,7 +270,7 @@ export const ChatPage = () => {
                                                         : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
                                         }`}
                                     >
-                                        <p className="text-sm">{message.text}</p>
+                                        <Markdown>{message.text}</Markdown>
                                         <p                                         className={`text-xs mt-1 ${
                                                     message.sender === 'user' 
                                                         ? 'text-blue-200' 
