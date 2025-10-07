@@ -144,6 +144,7 @@ function SelectVerificationMethod({ methods }: SelectVerificationMethodProps) {
         }
     }) ?? [];
 
+    // if a verification id can be setm then set it...
     useEffect(() => {
         // Get all available verification IDs
         const availableIds = options.map((option) => option.id);
@@ -157,7 +158,7 @@ function SelectVerificationMethod({ methods }: SelectVerificationMethodProps) {
                 setVerificationId(null);
             }
         }
-    }, [verificationId, options, setVerificationId]);
+    }, []); //verificationId, options, setVerificationId]);
 
     return (
         <RadioGroup

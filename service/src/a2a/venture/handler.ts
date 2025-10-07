@@ -17,9 +17,6 @@ import { createSystemPrompt } from './prompt-templates.js';
 // For Venture profiles
 const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
 const ventureProfileStore = itemStore<StoreItem>({tableName: TABLE_NAME});
-//function idResolver(session: ClientAgentSession, kind: string): string {
-//    return `${resolveAgentId(session).did}^${kind}`;
-//}
 
 // For agent-to-agent context
 interface VentureContext {

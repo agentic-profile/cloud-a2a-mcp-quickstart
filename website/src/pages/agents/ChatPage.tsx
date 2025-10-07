@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Markdown, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
 import { resolveParamFromWindow, updateWindowParam } from '@/tools/net';
 import type { HttpProgress } from '@/components/JsonRpcDebug';
@@ -249,45 +249,53 @@ export const ChatPage = () => {
                 <Card 
                     ref={messagesContainerRef} 
                     className={`overflow-y-auto mb-6 transition-all duration-300 ease-in-out ${
-                        messages.length <= 1 
-                            ? 'h-32' // Collapsed height for 1 or fewer messages
-                            : messages.length <= 3 
-                                ? 'h-64' // Medium height for 2-3 messages
-                                : 'h-96 sm:h-[500px]' // Full height for 4+ messages
+                        messages.length === 0
+                            ? 'h-64' // Taller height for empty state to avoid scrollbar
+                            : messages.length <= 2 
+                                ? 'h-64' // Medium height for 1-2 messages
+                                : 'h-96 sm:h-[500px]' // Full height for 3+ messages
                     }`}
                 >
                     <CardBody>
-                        <div className="space-y-4">
-                            {messages.map((message) => (
-                                <div
-                                    key={message.id}
-                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
+                        {messages.length === 0 ? (
+                            // Empty state with chat icon
+                            <div className="flex flex-col items-center justify-center h-full py-12">
+                                <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400 text-lg">Start a conversation</p>
+                                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Send a message below to begin chatting</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {messages.map((message) => (
                                     <div
-                                        className={`max-w-xs sm:max-w-sm lg:max-w-md px-4 py-2 rounded-lg ${
-                                                                                        message.sender === 'user'
-                                                        ? 'bg-dodgerblue text-white'
-                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
-                                        }`}
+                                        key={message.id}
+                                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <Markdown>{message.text}</Markdown>
-                                        <p                                         className={`text-xs mt-1 ${
-                                                    message.sender === 'user' 
-                                                        ? 'text-blue-200' 
-                                                        : 'text-gray-500 dark:text-gray-400'
-                                                }`}>
-                                            {message.timestamp.toLocaleTimeString()}
-                                        </p>
+                                        <div
+                                            className={`max-w-xs sm:max-w-lg lg:max-w-2xl xl:max-w-4xl px-4 py-2 rounded-lg ${
+                                                                                            message.sender === 'user'
+                                                            ? 'bg-dodgerblue text-white'
+                                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                            }`}
+                                        >
+                                            <Markdown>{message.text}</Markdown>
+                                            <p className={`text-xs mt-1 ${
+                                                        message.sender === 'user' 
+                                                            ? 'text-blue-200' 
+                                                            : 'text-gray-500 dark:text-gray-400'
+                                                    }`}>
+                                                {message.timestamp.toLocaleTimeString()}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </CardBody>
                 </Card>
-
-                {/* Input Area */}
                 <Card>
                     <CardBody>
+
                         <div className="flex space-x-3">
                             <input
                                 type="text"
