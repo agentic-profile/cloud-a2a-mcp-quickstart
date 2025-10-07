@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PaperAirplaneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Markdown, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
 import { resolveParamFromWindow, updateWindowParam } from '@/tools/net';
 import type { HttpProgress } from '@/components/JsonRpcDebug';
@@ -19,6 +20,7 @@ interface Message {
     text: string;
     sender: 'user' | 'agent';
     timestamp: Date;
+    metadata?: any;
 }
 
 export const ChatPage = () => {
@@ -168,7 +170,7 @@ export const ChatPage = () => {
     };
 
     const handleJsonRpcResult = (result: any) => {
-        const { kind, parts } = result?.data?.result ?? {};
+        const { kind, parts, metadata } = result?.data?.result ?? {};
         if ( parts ) {
             if( kind !== "message" ) {
                 setSendMessageError(`Unknown A2A response kind: ${kind}`);
@@ -184,7 +186,8 @@ export const ChatPage = () => {
                 id: Date.now().toString(),
                 text,
                 sender: 'agent',
-                timestamp: new Date()
+                timestamp: new Date(),
+                metadata
             };
             setMessages(prev => [...prev, message]);
         }
@@ -279,13 +282,21 @@ export const ChatPage = () => {
                                             }`}
                                         >
                                             <Markdown>{message.text}</Markdown>
-                                            <p className={`text-xs mt-1 ${
-                                                        message.sender === 'user' 
-                                                            ? 'text-blue-200' 
-                                                            : 'text-gray-500 dark:text-gray-400'
-                                                    }`}>
-                                                {message.timestamp.toLocaleTimeString()}
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <p className={`text-xs mt-1 ${
+                                                            message.sender === 'user' 
+                                                                ? 'text-blue-200' 
+                                                                : 'text-gray-500 dark:text-gray-400'
+                                                        }`}>
+                                                    {message.timestamp.toLocaleTimeString()}
+                                                </p>
+                                                {message.metadata?.resolution?.like === true && (
+                                                    <StarSolidIcon className="h-4 w-4 text-yellow-500" />
+                                                )}
+                                                {message.metadata?.resolution?.like === false && (
+                                                    <StarOutlineIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

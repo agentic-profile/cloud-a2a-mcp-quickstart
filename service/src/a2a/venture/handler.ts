@@ -13,6 +13,7 @@ import { a2aContextStore } from './context-store.js';
 import { chatCompletion, ClaudeMessage } from '../../inference/claude-bedrock.js';
 import { parseDid } from '../../utils/did.js';
 import { createSystemPrompt } from './prompt-templates.js';
+import { extractJson } from '../../utils/json.js';
 
 // For Venture profiles
 const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
@@ -96,6 +97,17 @@ export class VentureExecutor implements AgentExecutor {
             text = await chatCompletion(options);
         }
 
+        // any JSON resolution?
+        let metadata = undefined;
+        const { jsonObjects, textWithoutJson } = extractJson(text);
+        jsonObjects?.forEach((json: any) => {
+            console.log('💼 JSON object:', json);
+            if( json.metadata?.resolution ) {
+                metadata = json.metadata;
+                text = textWithoutJson;
+            }
+        });
+
         messageHistory.push( userMessage, { role: "assistant", content: text } as ClaudeMessage);
         await contextStore.updateContext(contextId, { messageHistory });
         console.log('💼 Update message history:', messageHistory);
@@ -111,7 +123,7 @@ export class VentureExecutor implements AgentExecutor {
                     text
                 }
             ],
-            metadata: {}
+            metadata
         };
 
         eventBus.publish(a2aAgentMessage);

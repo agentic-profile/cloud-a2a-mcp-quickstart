@@ -24,7 +24,7 @@ If there is very good synergy or compatibility, then do three things:
 
 1. If you have not provided a summary yet, then summarize our synergies and compatibilities
 2. If they asked a question, then answer it, or otherwise ask a new question that will make them want to meet with me
-3. Add the following JSON: { "metadata": {"resolution": { "like": true } } }
+3. Add the following exact JSON with no changes to it: { "metadata": {"resolution": { "like": true } } }
 
 <VentureProfile>
 \${ventureProfile.markdown}
