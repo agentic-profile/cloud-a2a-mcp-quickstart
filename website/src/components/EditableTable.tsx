@@ -91,7 +91,7 @@ export const EditableTable = ({ columns, values: table = [], onUpdate }: Editabl
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const values = Array.isArray(table) ? table : table.values;
+    const values = Array.isArray(table) ? table : table.values ?? [];
     const hidden = typeof table === 'object' && 'hidden' in table && table.hidden ? table.hidden : [];
     
     // Add a blank row if the values array is empty

@@ -15,8 +15,8 @@ export interface AttributedString {
 export type StringOrNumberTable = (string | number)[][];
 
 export interface CellTable {
-    values: StringOrNumberTable;
-    hidden?: StringOrNumberTable;
+    values: StringOrNumberTable | undefined;
+    hidden?: StringOrNumberTable | undefined;
 }
 
 export type Table = CellTable | StringOrNumberTable | undefined;
@@ -263,7 +263,7 @@ export const useVentureStore = create<VentureState>()(
 );
 
 //
-// Pruning to eliminate empty values
+// Pruning to eliminate empty values.  Does not remove any data like hidden rows.
 //
 
 export function pruneVentureData (venture: VentureData)  {
@@ -288,22 +288,39 @@ export function pruneAttributedStrings(array: AttributedString[] | undefined) {
     return array?.filter(e=>e.text!=='');
 }
 
+function isEmpty(item: string | number) {
+    if( typeof item === 'number' )
+        return !!item;
+    else if( typeof item === 'string' )
+        return item.trim() === '';
+    else
+        return false;  // unhandled type, so fail safe to "not empty"
+}
+
+function pruneStringOrNumberTable(table: StringOrNumberTable | undefined) {
+    if( !table )
+        return undefined;
+
+    const filtered = table.filter(row => !row.every(isEmpty));
+    return filtered?.length === 0 ? undefined : filtered;
+}
+
 export function pruneTable(table: Table) {
 
     if( !table )
         return undefined;
 
-    if( Array.isArray(table) ) {
-        const filtered = table?.filter(row => !row.every(item => item === ''));
-        return filtered?.length === 0 ? undefined : filtered;
-    }
+    if( Array.isArray(table) )
+        return pruneStringOrNumberTable(table);
 
     if( typeof table === 'object' && 'values' in table ) {
-        const filtered = table.values?.filter(row => !row.every(item => item === ''));
-        return filtered?.length === 0 ? undefined : filtered;
+        const values = pruneStringOrNumberTable(table.values);
+        const hidden = pruneStringOrNumberTable(table.hidden as any);
+        return { values, hidden };
     }
 
-    console.error('pruneTable() found unknown table type:', table);
+    console.error(`pruneTable() found unknown table type ${typeof table}: ${table}`);
+    return undefined;
 }
 
 export function prunePositioning(positioning: TabValues[] | undefined) {
