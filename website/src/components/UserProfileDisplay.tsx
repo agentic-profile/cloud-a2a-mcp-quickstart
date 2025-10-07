@@ -1,10 +1,10 @@
 import { UserIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader, LabelValue, LabelDid, RadioButton, RadioGroup } from '@/components';
-import { useUserProfileStore } from '@/stores';
+import { useUserProfileStore, type UserProfile } from '@/stores';
 import { type AgentService } from '@agentic-profile/common/schema';
 import { type VerificationMethod } from 'did-resolver';
 import { useEffect } from 'react';
-import { firstAgentKey } from '@/tools/keyring';
+import { firstAgentKey, hasPublicKey } from '@/tools/keyring';
 
 export const UserProfileDisplay = () => {
     const { userProfile, userAgentDid, verificationId, setUserAgentDid, clearUserProfile } = useUserProfileStore();
@@ -132,22 +132,36 @@ interface SelectVerificationMethodProps {
     methods: (string | VerificationMethod)[] | undefined;
 }
 
+function hasVerificationMethodKey( userProfile: UserProfile | null, verificationId: string ) {
+    if( !userProfile )
+        return false;
+
+    const { profile, keyring } = userProfile;
+    const verificationMethod = profile.verificationMethod?.find((vm: VerificationMethod) => vm.id === verificationId);
+    if( !verificationMethod )
+        return false;
+
+    return hasPublicKey( verificationMethod.publicKeyJwk?.x ?? '', keyring );
+}
+
 function SelectVerificationMethod({ methods }: SelectVerificationMethodProps) {
-    const { verificationId, setVerificationId } = useUserProfileStore();
+    const { verificationId, setVerificationId, userProfile } = useUserProfileStore();
 
     const options = methods?.map((e: any) => {
         if (typeof e === 'string') {
-            return { id: e, label: e };
+            const disabled = !hasVerificationMethodKey( userProfile, e );
+            return { id: e, label: e, disabled };
         } else {
             const vm = e as VerificationMethod;
-            return { id: vm.id, label: vm.id };
+            const disabled = !hasPublicKey( vm.publicKeyJwk?.x ?? '', userProfile?.keyring ?? [] );
+            return { id: vm.id, label: vm.id, disabled };
         }
     }) ?? [];
 
-    // if a verification id can be setm then set it...
+    // if a verification id can be set then set it...
     useEffect(() => {
         // Get all available verification IDs
-        const availableIds = options.map((option) => option.id);
+        const availableIds = options.filter((option) => !option.disabled).map((option) => option.id);
 
         // Check if verificationId is not set or not in the available IDs
         if (!verificationId || !availableIds.includes(verificationId)) {

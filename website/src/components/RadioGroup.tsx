@@ -4,6 +4,7 @@ import { RadioButton } from './RadioButton';
 interface RadioOption {
     id: string;
     label: string;
+    disabled?: boolean;
 }
 
 interface RadioGroupProps {
@@ -29,6 +30,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
                         name={name}
                         value={option.id}
                         checked={selectedValue === option.id}
+                        disabled={option.disabled}
                         onChange={onChange}
                     />
                     <span className="text-sm">{option.label}</span>
