@@ -14,19 +14,26 @@ export interface AttributedString {
 
 export type StringOrNumberTable = (string | number)[][];
 
-export interface HiddenRows {
-    [key: string]: StringOrNumberTable;
+export interface CellTable {
+    values: StringOrNumberTable;
+    hidden?: StringOrNumberTable;
 }
+
+export type Table = CellTable | StringOrNumberTable | undefined;
+
+//export interface HiddenRows {
+//    [key: string]: StringOrNumberTable;
+//}
 
 export interface VentureData {
     problem: AttributedString[] | undefined;
     solution: AttributedString[] | undefined;
-    team: StringOrNumberTable | undefined;
+    team: Table;
     positioning: TabValues[] | undefined;
-    marketOpportunity: StringOrNumberTable | undefined;
-    milestones: StringOrNumberTable | undefined;
-    references: StringOrNumberTable | undefined;
-    hiddenRows?: HiddenRows | undefined;
+    marketOpportunity: Table;
+    milestones: Table;
+    references: Table;
+    //hiddenRows?: HiddenRows | undefined;
 }
 
 interface ArchivedVentureData extends VentureData {
@@ -43,11 +50,11 @@ export interface VentureState {
     solution: AttributedString[];
     
     // Table data (arrays of arrays with mixed string/number types)
-    marketOpportunity: StringOrNumberTable;
-    milestones: StringOrNumberTable;
-    team: StringOrNumberTable;
-    references: StringOrNumberTable;
-    hiddenRows: HiddenRows;
+    marketOpportunity: CellTable;
+    milestones: CellTable;
+    team: CellTable;
+    references: CellTable;
+    //hiddenRows: HiddenRows;
     
     // Archive data
     archiveName: string;
@@ -63,11 +70,11 @@ export interface VentureState {
     setSolution: (solution: AttributedString[]) => void;
     
     // Actions for table data
-    setMarketOpportunity: (marketOpportunity: StringOrNumberTable) => void;
-    setMilestones: (milestones: StringOrNumberTable) => void;
-    setTeam: (team: StringOrNumberTable) => void;
-    setReferences: (references: StringOrNumberTable) => void;
-    setHiddenRows: (hiddenRows: HiddenRows) => void;
+    setMarketOpportunity: (marketOpportunity: CellTable) => void;
+    setMilestones: (milestones: CellTable) => void;
+    setTeam: (team: CellTable) => void;
+    setReferences: (references: CellTable) => void;
+    //setHiddenRows: (hiddenRows: HiddenRows) => void;
     
     // Actions for archive
     setArchiveName: (name: string) => void;
@@ -107,11 +114,11 @@ export const useVentureStore = create<VentureState>()(
             positioning: createEmptyPositioning(),
             problem: [],
             solution: [],
-            marketOpportunity: [],
-            milestones: [],
-            team: [],
-            references: [],
-            hiddenRows: {},
+            marketOpportunity: { values: [] },
+            milestones: { values: [] },
+            team: { values: [] },
+            references: { values: [] },
+            //hiddenRows: {},
             archive: [],
             archiveName: '',
             
@@ -155,7 +162,7 @@ export const useVentureStore = create<VentureState>()(
             setMilestones: (milestones) => set({ milestones }),
             setTeam: (team) => set({ team }),
             setReferences: (references) => set({ references }),
-            setHiddenRows: (hiddenRows) => set({ hiddenRows }),
+            //setHiddenRows: (hiddenRows) => set({ hiddenRows }),
 
             // Archive actions
             setArchiveName: (name) => set({ archiveName: name }),
@@ -172,7 +179,7 @@ export const useVentureStore = create<VentureState>()(
                     marketOpportunity: state.marketOpportunity,
                     milestones: state.milestones,
                     references: state.references,
-                    hiddenRows: state.hiddenRows,
+                    //hiddenRows: state.hiddenRows,
                 };
                                 
                 set((state) => {
@@ -191,16 +198,24 @@ export const useVentureStore = create<VentureState>()(
             
             // Bulk actions
             setVentureData: (data) => {
+                // Helper to normalize table data to CellTable format
+                const normalizeCellTable = (value: any): CellTable => {
+                    if (!value) return { values: [] };
+                    if (Array.isArray(value)) return { values: value };
+                    if (typeof value === 'object' && 'values' in value) return value;
+                    return { values: [] };
+                };
+
                 set((prev) => ({
                     ...prev,
                     positioning: data.positioning || createEmptyPositioning(),
                     problem: data.problem || [],
                     solution: data.solution || [],
-                    marketOpportunity: data.marketOpportunity || [],
-                    milestones: data.milestones || [],
-                    team: data.team || [],
-                    references: data.references || [],
-                    hiddenRows: data.hiddenRows || {},
+                    marketOpportunity: normalizeCellTable(data.marketOpportunity),
+                    milestones: normalizeCellTable(data.milestones),
+                    team: normalizeCellTable(data.team),
+                    references: normalizeCellTable(data.references),
+                    //hiddenRows: data.hiddenRows || {},
                 }));
             },
             
@@ -209,11 +224,10 @@ export const useVentureStore = create<VentureState>()(
                 positioning: createEmptyPositioning(),
                 problem: [],
                 solution: [],
-                marketOpportunity: [],
-                milestones: [],
-                team: [],
-                references: [],
-                hiddenRows: {},
+                marketOpportunity: { values: [] },
+                milestones: { values: [] },
+                team: { values: [] },
+                references: { values: [] },
             })),
 
             getVentureData: () => {
@@ -226,7 +240,7 @@ export const useVentureStore = create<VentureState>()(
                     milestones: state.milestones,
                     team: state.team,
                     references: state.references,
-                    hiddenRows: state.hiddenRows,
+                    //hiddenRows: state.hiddenRows,
                 };
             },
         }),
@@ -241,7 +255,7 @@ export const useVentureStore = create<VentureState>()(
                 milestones: state.milestones,
                 team: state.team,
                 references: state.references,
-                hiddenRows: state.hiddenRows,
+                //hiddenRows: state.hiddenRows,
                 archive: state.archive,
             }),
         }
@@ -261,7 +275,7 @@ export function pruneVentureData (venture: VentureData)  {
         marketOpportunity: pruneTable(venture.marketOpportunity),
         milestones: pruneTable(venture.milestones),
         references: pruneTable(venture.references),
-        hiddenRows: venture.hiddenRows,
+        //hiddenRows: venture.hiddenRows,
     };
 }
 
@@ -274,9 +288,22 @@ export function pruneAttributedStrings(array: AttributedString[] | undefined) {
     return array?.filter(e=>e.text!=='');
 }
 
-export function pruneTable(table: StringOrNumberTable | undefined) {
-    const filtered = table?.filter(row => !row.every(item => item === ''));
-    return filtered?.length === 0 ? undefined : filtered;
+export function pruneTable(table: Table) {
+
+    if( !table )
+        return undefined;
+
+    if( Array.isArray(table) ) {
+        const filtered = table?.filter(row => !row.every(item => item === ''));
+        return filtered?.length === 0 ? undefined : filtered;
+    }
+
+    if( typeof table === 'object' && 'values' in table ) {
+        const filtered = table.values?.filter(row => !row.every(item => item === ''));
+        return filtered?.length === 0 ? undefined : filtered;
+    }
+
+    console.error('pruneTable() found unknown table type:', table);
 }
 
 export function prunePositioning(positioning: TabValues[] | undefined) {
@@ -336,10 +363,22 @@ export function simplifyVentureData(venture: VentureData) {
     return {
         problem: simplifyAttributedStrings(venture.problem),
         solution: simplifyAttributedStrings(venture.solution),
-        team: venture.team,
+        team: simplifyTable(venture.team),
         positioning: simplifyPositioning(venture.positioning),
-        marketOpportunity: venture.marketOpportunity,
-        milestones: venture.milestones,
-        references: venture.references,
+        marketOpportunity: simplifyTable(venture.marketOpportunity),
+        milestones: simplifyTable(venture.milestones),
+        references: simplifyTable(venture.references),
     } as SimplifiedVentureData;
+}
+
+function simplifyTable(table: Table) {
+    if( !table )
+        return undefined;
+
+    if( Array.isArray(table) )
+        return table;
+    else if( typeof table === 'object' && 'values' in table )
+        return table.values;
+
+    console.error('simplifyTable() found unknown table type:', table);
 }

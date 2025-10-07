@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button, IconButton } from '@/components';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import type { StringOrNumberTable } from '@/stores/ventureStore';
+import type { Table, CellTable } from '@/stores/ventureStore';
 
 // Common number handlers for reuse across number and currency columns
 const renderNumberCell = (value: string | number, formatFunction?: (value: string | number) => string) => {
@@ -80,21 +80,24 @@ const asString = (value: string | number | undefined | null ): string => {
 export interface EditableTableProps {
     placeholders?: string[];
     columns: EditableTableColumn[];
-    values?: StringOrNumberTable;
-    hiddenRows?: StringOrNumberTable;
-    onUpdate?: (values: StringOrNumberTable, hiddenRows?: StringOrNumberTable) => void;
+    values?: Table; // Accepts either a StringOrNumberTable or a CellTable, converting when necessary
+    //hiddenRows?: StringOrNumberTable;
+    onUpdate?: ( table: CellTable ) => void;
 }
 
-export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate }: EditableTableProps) => {
+export const EditableTable = ({ columns, values: table = [], onUpdate }: EditableTableProps) => {
     const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const values = Array.isArray(table) ? table : table.values;
+    const hidden = typeof table === 'object' && 'hidden' in table && table.hidden ? table.hidden : [];
     
     // Add a blank row if the values array is empty
     useEffect(() => {
         if (values.length === 0 && onUpdate) {
-            onUpdate([new Array(columns.length).fill('')]);
+            onUpdate({ values: [new Array(columns.length).fill('')], hidden });
         }
     }, [values.length, columns.length, onUpdate]);
     
@@ -113,7 +116,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                 newValues[rowIndex] = new Array(columns.length).fill('');
             }
             newValues[rowIndex][colIndex] = newValue;
-            onUpdate(newValues);
+            onUpdate({ values: newValues, hidden });
         }
     };
 
@@ -139,7 +142,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
         if (onUpdate) {
             const newRow = new Array(columns.length).fill('');
             const newRowIndex = values.length;
-            onUpdate([...values, newRow]);
+            onUpdate({ values: [...values, newRow], hidden });
             // Set the first cell of the new row as the editing cell
             setEditingCell({ row: newRowIndex, col: 0 });
         }
@@ -148,32 +151,32 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
     const deleteRow = (rowIndex: number) => {
         if (onUpdate && values.length > 1) {
             const newValues = values.filter((_, index) => index !== rowIndex);
-            onUpdate(newValues);
+            onUpdate({ values: newValues, hidden });    
         }
     };
 
     const hideRow = (rowIndex: number) => {
         if (onUpdate) {
             const rowToHide = values[rowIndex];
-            const newValues = values.filter((_, index) => index !== rowIndex);
-            const newHiddenRows = [...hiddenRows, rowToHide];
-            onUpdate(newValues, newHiddenRows);
+            const newValues = values.filter((_: any, index: number) => index !== rowIndex);
+            const newHiddenRows = [...hidden, rowToHide];
+            onUpdate({ values: newValues, hidden: newHiddenRows });
         }
     };
 
     const unhideRow = (rowIndex: number) => {
         if (onUpdate) {
-            const rowToUnhide = hiddenRows[rowIndex];
-            const newHiddenRows = hiddenRows.filter((_, index) => index !== rowIndex);
+            const rowToUnhide = hidden[rowIndex];
+            const newHiddenRows = hidden.filter((_: any, index: number) => index !== rowIndex);
             const newValues = [...values, rowToUnhide];
-            onUpdate(newValues, newHiddenRows);
+            onUpdate({ values: newValues, hidden: newHiddenRows });
         }
     };
 
     const deleteHiddenRow = (rowIndex: number) => {
         if (onUpdate) {
-            const newHiddenRows = hiddenRows.filter((_, index) => index !== rowIndex);
-            onUpdate(values, newHiddenRows);
+            const newHiddenRows = hidden.filter((_: any, index: number) => index !== rowIndex);
+            onUpdate({ values, hidden: newHiddenRows });
         }
     };
 
@@ -211,7 +214,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
         // Insert at the new position
         newValues.splice(dropIndex, 0, draggedItem);
         
-        onUpdate?.(newValues, hiddenRows);
+        onUpdate?.({ values: newValues, hidden });
         setDraggedIndex(null);
         setDragOverIndex(null);
     };
@@ -328,7 +331,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
             </div>
             
             {/* Hidden Rows Section */}
-            {hiddenRows && hiddenRows.length > 0 && (
+            {hidden && hidden.length > 0 && (
                 <div className="mt-6 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-gray-100">Hidden Rows</h4>
                     <table className="mt-4 min-w-full border-collapse">
@@ -351,7 +354,7 @@ export const EditableTable = ({ columns, values = [], hiddenRows = [], onUpdate 
                              </tr>
                          </thead>
                         <tbody>
-                            {hiddenRows.map((row, rowIndex) => {
+                            {hidden.map((row: any, rowIndex: number) => {
                                 // Ensure row is an array
                                 const rowArray = Array.isArray(row) ? row : [];
                                 return (

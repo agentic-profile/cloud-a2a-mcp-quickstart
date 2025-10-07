@@ -8,7 +8,7 @@ import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
-import type { AttributedString, StringOrNumberTable } from '@/stores/ventureStore';
+import type { AttributedString } from '@/stores/ventureStore';
 import ShowMarkdown from './ShowMarkdown';
 
 
@@ -31,9 +31,9 @@ const VenturePage = () => {
         milestones,
         team,
         references,
-        hiddenRows,
+        //hiddenRows,
         updatePositioningTab,
-        setHiddenRows,
+        //setHiddenRows,
         setProblem,
         setSolution,
         setMarketOpportunity,
@@ -69,30 +69,6 @@ const VenturePage = () => {
     const handleSolutionUpdate = useCallback((values: AttributedString[]) => {
         setSolution(values);
     }, [setSolution]);
-
-    const handleMarketOpportunityUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
-        setMarketOpportunity(values);
-        if( hidden !== undefined )
-            setHiddenRows({ ...hiddenRows, marketOpportunity: hidden });
-    }, [setMarketOpportunity]);
-
-    const handleMilestonesUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
-        setMilestones(values);
-        if( hidden !== undefined )
-            setHiddenRows({ ...hiddenRows, milestones: hidden });
-    }, [setMilestones]);
-
-    const handleTeamUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
-        setTeam(values);
-        if( hidden !== undefined )
-            setHiddenRows({ ...hiddenRows, team: hidden });
-    }, [setTeam]);
-
-    const handleReferencesUpdate = useCallback((values: StringOrNumberTable, hidden: StringOrNumberTable | undefined) => {
-        setReferences(values);
-        if( hidden !== undefined )
-            setHiddenRows({ ...hiddenRows, references: hidden });
-    }, [setReferences]);
 
     // Handle updates to tab values
     const handleUpdate = useCallback((tabId: string, values: string[], selected: number) => {
@@ -167,8 +143,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Size (TAM)", "USD")
                         ]}
                         values={marketOpportunity}
-                        hiddenRows={hiddenRows?.marketOpportunity}
-                        onUpdate={handleMarketOpportunityUpdate}
+                        onUpdate={setMarketOpportunity}
                     />
                 </CardTitleAndBody>
 
@@ -195,8 +170,7 @@ const VenturePage = () => {
                             EditableCurrencyColumn("Funding Needed", "USD")
                         ]}
                         values={milestones}
-                        hiddenRows={hiddenRows?.milestones}
-                        onUpdate={handleMilestonesUpdate}
+                        onUpdate={setMilestones}
                     />
                 </CardTitleAndBody>
 
@@ -212,8 +186,7 @@ const VenturePage = () => {
                             ])
                         ]}
                         values={team}
-                        hiddenRows={hiddenRows?.team}
-                        onUpdate={handleTeamUpdate}
+                        onUpdate={setTeam}
                     />
                 </CardTitleAndBody>
 
@@ -228,12 +201,11 @@ const VenturePage = () => {
                             EditableTextColumn("Description")
                         ]}
                         values={references}
-                        hiddenRows={hiddenRows?.references}
-                        onUpdate={handleReferencesUpdate}
+                        onUpdate={setReferences}
                     />
                 </CardTitleAndBody>
 
-                <ShowMarkdown ventureData={{positioning, problem, solution, marketOpportunity, milestones, team, references, hiddenRows}} />
+                <ShowMarkdown ventureData={{positioning, problem, solution, marketOpportunity, milestones, team, references}} />
 
                 <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
                     variant="success"
