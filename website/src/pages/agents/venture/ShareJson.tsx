@@ -3,6 +3,7 @@ import { Button } from '@/components';
 import Modal from '@/components/Modal';
 import { useExportFunctions } from './ExportVentureJson';
 import ImportVentureJson from './ImportVentureJson';
+import { simplifyVentureData, type VentureData } from '@/stores/ventureStore';
 
 interface ShareJsonProps {
     values: Record<string, any>;
@@ -12,6 +13,9 @@ interface ShareJsonProps {
 const ShareJson = ({ values, onDataImported }: ShareJsonProps) => {
     const [showImportModal, setShowImportModal] = useState(false);
     const { viewJson, exportJson } = useExportFunctions(values);
+
+    const cleanValues = simplifyVentureData(values as VentureData);
+    const { viewJson: viewCleanJson, exportJson: exportCleanJson } = useExportFunctions(cleanValues);
 
     const handleImportData = (importedData: any) => {
         onDataImported(importedData);
@@ -25,13 +29,25 @@ const ShareJson = ({ values, onDataImported }: ShareJsonProps) => {
                     onClick={viewJson}
                     variant="primary"
                 >
-                    View JSON
+                    View Raw JSON
                 </Button>
                 <Button
                     onClick={exportJson}
                     variant="success"
                 >
-                    Export JSON
+                    Export Raw JSON
+                </Button>
+                <Button
+                    onClick={viewCleanJson}
+                    variant="primary"
+                >
+                    View Clean JSON
+                </Button>
+                <Button
+                    onClick={exportCleanJson}
+                    variant="success"
+                >
+                    Export Clean JSON
                 </Button>
                 <Button
                     onClick={() => setShowImportModal(true)}

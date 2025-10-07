@@ -1,4 +1,11 @@
 export function resolveName(positioning: Record<string, any> | undefined) {
+    if( !positioning )
+        return 'Your Venture';
+    if( typeof positioning === 'object' && 'name' in positioning )
+        return positioning.name;
+    if( !Array.isArray(positioning) )
+        return "Your Venture";  // unexpected type
+
     const nameTab = positioning?.find((p: { id: string; values: string[] }) => p.id === 'name');
     if (!nameTab) return 'Your Venture';
     
@@ -7,6 +14,7 @@ export function resolveName(positioning: Record<string, any> | undefined) {
 }
 
 export function viewJsonInWindow(values: Record<string, any>) {
+    console.log('viewJsonInWindow', JSON.stringify(values, null, 4));
     const jsonString = JSON.stringify(values, null, 4);
     const name = resolveName(values.positioning);
     
@@ -69,9 +77,3 @@ export const useExportFunctions = (values: Record<string, any>) => {
         exportJson: () => downloadJson(values)
     };
 };
-
-// Legacy component for backward compatibility
-export default function ExportVentureJson() {
-    // This component is now deprecated in favor of using the utility functions
-    return null;
-}
