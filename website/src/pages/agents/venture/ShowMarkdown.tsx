@@ -1,6 +1,6 @@
 import { Button } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
-import { pruneVentureWorksheet, simplifyVentureWorksheet } from '@/stores/venture-utils';
+import { pruneVentureWorksheet, summarizeVentureWorksheet } from '@/stores/venture-utils';
 import { type VentureWorksheet } from '@/stores/venture-types';
 import { generateMarkdownSummary } from './markdown-generator';
 import { useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ const ShowMarkdown = ({ ventureWorksheet }: ShowMarkdownProps) => {
 
     useEffect(()=>{
         const pruned = pruneVentureWorksheet(ventureWorksheet); // remove empty values and blank lines
-        const markdown = generateMarkdownSummary(simplifyVentureWorksheet(pruned));
+        const markdown = generateMarkdownSummary(summarizeVentureWorksheet(pruned));
         setMarkdown(markdown);
     },[ventureWorksheet])
 

@@ -8,7 +8,7 @@ import agentsData from '../agents.json';
 import { generateMarkdownSummary } from './markdown-generator';
 import { type HttpProgress, type HttpRequest } from '@/components/JsonRpcDebug';
 import greenCheckmark from '@/assets/green_checkmark.svg';
-import { simplifyVentureWorksheet } from '@/stores/venture-utils';
+import { summarizeVentureWorksheet } from '@/stores/venture-utils';
 
 const DEFAULT_MCP_URLS = [
     'https://example-api.agenticprofile.ai/mcp/venture',
@@ -45,8 +45,8 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
         }
 
         // Create the venture data payload
-        const simplifiedVenture = simplifyVentureWorksheet(getVentureWorksheet());
-        const markdown = generateMarkdownSummary(simplifiedVenture);
+        const ventureSummary = summarizeVentureWorksheet(getVentureWorksheet());
+        const markdown = generateMarkdownSummary(ventureSummary);
 
         // Create the JSON-RPC request
         const mcpRequest = {
@@ -54,7 +54,7 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
             params: {
                 name: 'update',
                 profile: {
-                    ...simplifiedVenture,
+                    ...ventureSummary,
                     markdown,
                     kind: 'venture'
                 }

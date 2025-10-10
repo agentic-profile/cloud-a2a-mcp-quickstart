@@ -103,7 +103,7 @@ function simplifyPositioning(positioning: Positioning) {
     }), {} as SimplifiedPositioning);
 }
 
-export function simplifyVentureWorksheet(venture: VentureWorksheet) {
+export function summarizeVentureWorksheet(venture: VentureWorksheet) {
     venture = pruneVentureWorksheet(venture);
     return {
         problem: simplifyAttributedStrings(venture.problem),
