@@ -4,6 +4,7 @@ interface ImportVentureJsonProps {
     onImport: (data: any) => void;
 }
 
+/*
 interface VentureData {
     problem?: string[];
     solution?: string[];
@@ -12,7 +13,7 @@ interface VentureData {
     marketOpportunity?: (string | number)[][];
     milestones?: (string | number)[][];
     references?: (string | number)[][];
-}
+}*/
 
 const ImportVentureJson = ({ onImport }: ImportVentureJsonProps) => {
     const [isDragOver, setIsDragOver] = useState(false);
@@ -34,7 +35,7 @@ const ImportVentureJson = ({ onImport }: ImportVentureJsonProps) => {
             try {
                 const content = e.target?.result as string;
                 console.log('Raw JSON content:', content);
-                const data: VentureData = JSON.parse(content);
+                const data = JSON.parse(content);
                 console.log('Parsed JSON data:', data);
                 
                 // Validate that the JSON contains expected venture data structure

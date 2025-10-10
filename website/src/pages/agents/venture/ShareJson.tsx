@@ -3,10 +3,11 @@ import { Button } from '@/components';
 import Modal from '@/components/Modal';
 import { useExportFunctions } from './ExportVentureJson';
 import ImportVentureJson from './ImportVentureJson';
-import { simplifyVentureData, type VentureData } from '@/stores/ventureStore';
+import { simplifyVentureWorksheet } from '@/stores/venture-utils';
+import { type VentureWorksheet } from '@/stores/venture-types';
 
 interface ShareJsonProps {
-    values: Record<string, any>;
+    values: VentureWorksheet;
     onDataImported: (importedData: any) => void;
 }
 
@@ -14,7 +15,7 @@ const ShareJson = ({ values, onDataImported }: ShareJsonProps) => {
     const [showImportModal, setShowImportModal] = useState(false);
     const { viewJson, exportJson } = useExportFunctions(values);
 
-    const cleanValues = simplifyVentureData(values as VentureData);
+    const cleanValues = simplifyVentureWorksheet(values);
     const { viewJson: viewCleanJson, exportJson: exportCleanJson } = useExportFunctions(cleanValues);
 
     const handleImportData = (importedData: any) => {
@@ -29,31 +30,31 @@ const ShareJson = ({ values, onDataImported }: ShareJsonProps) => {
                     onClick={viewJson}
                     variant="primary"
                 >
-                    View Raw JSON
+                    View Worksheet JSON
                 </Button>
                 <Button
                     onClick={exportJson}
                     variant="success"
                 >
-                    Export Raw JSON
+                    Export Worksheet JSON
                 </Button>
                 <Button
                     onClick={viewCleanJson}
                     variant="primary"
                 >
-                    View Clean JSON
+                    View Public JSON
                 </Button>
                 <Button
                     onClick={exportCleanJson}
                     variant="success"
                 >
-                    Export Clean JSON
+                    Export Public JSON
                 </Button>
                 <Button
                     onClick={() => setShowImportModal(true)}
                     variant="primary"
                 >
-                    Import JSON
+                    Import WorksheetJSON
                 </Button>
             </div>
 

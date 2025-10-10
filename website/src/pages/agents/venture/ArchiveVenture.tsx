@@ -6,7 +6,7 @@ import { deepEqual } from '@/tools/misc';
 
 
 const ArchiveVenture = () => {
-    const { archive, archiveVenture, setVentureData, removeFromArchive, archiveName, setArchiveName, getVentureData } = useVentureStore();
+    const { archive, archiveVenture, setVentureWorksheet, removeFromArchive, archiveName, setArchiveName, getVentureWorksheet } = useVentureStore();
 
     const handleArchiveVenture = () => {
         const name = archiveName.trim();
@@ -17,8 +17,8 @@ const ArchiveVenture = () => {
 
     const handleLoadArchivedVenture = (archivedItem: any) => {
         // Remove the name property before importing
-        const { name, ...ventureData } = archivedItem;
-        setVentureData(ventureData);
+        const { name, ...worksheet } = archivedItem;
+        setVentureWorksheet(worksheet);
 
         setArchiveName(name);
     };
@@ -32,7 +32,7 @@ const ArchiveVenture = () => {
             return true;
 
         const { name, updated, ...ventureData } = archivedItem;
-        const current = getVentureData();
+        const current = getVentureWorksheet();
         return deepEqual(ventureData, current) != true;
     };
 

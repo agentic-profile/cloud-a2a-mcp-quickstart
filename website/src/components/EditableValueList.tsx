@@ -3,7 +3,7 @@ import { PlusIcon, TrashIcon, StarIcon, EyeIcon, EyeSlashIcon, Bars3Icon } from 
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
 import { useRef, useEffect, useState } from 'react';
-import { type AttributedString } from '@/stores/ventureStore';
+import { type AttributedString } from '@/stores/venture-types';
 
 interface EditableValueListProps {
     placeholder?: string;

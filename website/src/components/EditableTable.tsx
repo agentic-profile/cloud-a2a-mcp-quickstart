@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button, IconButton } from '@/components';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import type { Table, CellTable } from '@/stores/ventureStore';
+import type { CellTable } from '@/stores/venture-types';
 
 // Common number handlers for reuse across number and currency columns
 const renderNumberCell = (value: string | number, formatFunction?: (value: string | number) => string) => {
@@ -80,12 +80,11 @@ const asString = (value: string | number | undefined | null ): string => {
 export interface EditableTableProps {
     placeholders?: string[];
     columns: EditableTableColumn[];
-    values?: Table; // Accepts either a StringOrNumberTable or a CellTable, converting when necessary
-    //hiddenRows?: StringOrNumberTable;
+    values?: CellTable;
     onUpdate?: ( table: CellTable ) => void;
 }
 
-export const EditableTable = ({ columns, values: table = [], onUpdate }: EditableTableProps) => {
+export const EditableTable = ({ columns, values: table = {values: []}, onUpdate }: EditableTableProps) => {
     const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);

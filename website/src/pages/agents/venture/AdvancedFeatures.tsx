@@ -2,24 +2,25 @@ import { Button } from '@/components';
 import { CardTitleAndBody } from '@/components/Card';
 import ShareJson from './ShareJson';
 import ArchiveVenture from './ArchiveVenture';
-import { useVentureStore, pruneVentureData } from '@/stores/ventureStore';
+import { useVentureStore } from '@/stores/ventureStore';
+import { pruneVentureWorksheet } from '@/stores/venture-utils';
 
 const AdvancedFeatures = () => {
 
     const {
-        setVentureData,
-        clearVentureData,
-        getVentureData
+        setVentureWorksheet,
+        clearVentureWorksheet,
+        getVentureWorksheet
     } = useVentureStore();
 
-    const ventureData = pruneVentureData(getVentureData()); // remove empty values and blank lines
+    const ventureData = pruneVentureWorksheet(getVentureWorksheet()); // remove empty values and blank lines
 
     return (
         <CardTitleAndBody title="More Advanced Features..." collapsed={true}>
             <div className="space-y-4">
                 <div className="flex gap-3">
                     <Button
-                        onClick={clearVentureData}
+                        onClick={clearVentureWorksheet}
                         variant="danger"
                     >
                         Clear All Data
@@ -27,7 +28,7 @@ const AdvancedFeatures = () => {
                 </div>
                 <ShareJson
                     values={ventureData}
-                    onDataImported={setVentureData}
+                    onDataImported={setVentureWorksheet}
                 />
                 <ArchiveVenture />
             </div>

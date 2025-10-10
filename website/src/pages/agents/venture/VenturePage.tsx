@@ -8,7 +8,7 @@ import PublishVentureToMcp from './PublishVentureToMcp';
 import EnlistAgent from './EnlistAgent';
 import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
-import type { AttributedString } from '@/stores/ventureStore';
+import type { AttributedString } from '@/stores/venture-types';
 import ShowMarkdown from './ShowMarkdown';
 
 
@@ -205,7 +205,7 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <ShowMarkdown ventureData={{positioning, problem, solution, marketOpportunity, milestones, team, references}} />
+                <ShowMarkdown ventureWorksheet={{positioning, problem, solution, marketOpportunity, milestones, team, references}} />
 
                 <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
                     variant="success"

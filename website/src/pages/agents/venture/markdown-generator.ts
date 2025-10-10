@@ -1,10 +1,10 @@
-import type { SimplifiedVentureData } from '@/stores/ventureStore';
+import type { VentureSummary } from '@/stores/venture-types';
 import { generatePositioningStatement, renderPositioning } from './positioning';
 
 /**
  * Generate a complete Markdown summary from venture data
  */
-export function generateMarkdownSummary(data: SimplifiedVentureData): string {
+export function generateMarkdownSummary(data: VentureSummary): string {
     const {
         problem,
         solution,

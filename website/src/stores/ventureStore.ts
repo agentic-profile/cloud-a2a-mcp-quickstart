@@ -1,64 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { type VentureWorksheet, type CellTable, type AttributedString, type TabValues } from "./venture-types";
 
-export interface TabValues {
-    id: string;
-    values: string[];
-    selected: number;
-}
-
-export interface AttributedString {
-    text: string;
-    hidden?: boolean;
-}
-
-export type StringOrNumberTable = (string | number)[][];
-
-export interface CellTable {
-    values: StringOrNumberTable | undefined;
-    hidden?: StringOrNumberTable | undefined;
-}
-
-export type Table = CellTable | StringOrNumberTable | undefined;
-
-//export interface HiddenRows {
-//    [key: string]: StringOrNumberTable;
-//}
-
-export interface VentureData {
-    problem: AttributedString[] | undefined;
-    solution: AttributedString[] | undefined;
-    team: Table;
-    positioning: TabValues[] | undefined;
-    marketOpportunity: Table;
-    milestones: Table;
-    references: Table;
-    //hiddenRows?: HiddenRows | undefined;
-}
-
-interface ArchivedVentureData extends VentureData {
+interface ArchivedVentureWorksheet extends VentureWorksheet {
     name: string;
     updated: string
 }
 
-export interface VentureState {
-    // Positioning data
-    positioning: TabValues[];
-    
-    // Basic arrays
-    problem: AttributedString[];
-    solution: AttributedString[];
-    
-    // Table data (arrays of arrays with mixed string/number types)
-    marketOpportunity: CellTable;
-    milestones: CellTable;
-    team: CellTable;
-    references: CellTable;
-    //hiddenRows: HiddenRows;
+export interface VentureState extends VentureWorksheet {
     
     // Archive data
     archiveName: string;
-    archive: ArchivedVentureData[];
+    archive: ArchivedVentureWorksheet[];
     
     // Actions for positioning data
     setPositioning: (positioning: TabValues[]) => void;
@@ -74,7 +27,6 @@ export interface VentureState {
     setMilestones: (milestones: CellTable) => void;
     setTeam: (team: CellTable) => void;
     setReferences: (references: CellTable) => void;
-    //setHiddenRows: (hiddenRows: HiddenRows) => void;
     
     // Actions for archive
     setArchiveName: (name: string) => void;
@@ -83,9 +35,9 @@ export interface VentureState {
     clearArchive: () => void;
     
     // Bulk actions
-    setVentureData: (data: Partial<VentureState>) => void;
-    getVentureData: () => VentureData;
-    clearVentureData: () => void;
+    setVentureWorksheet: (data: Partial<VentureState>) => void;
+    getVentureWorksheet: () => VentureWorksheet;
+    clearVentureWorksheet: () => void;
 }
 
 // Default positioning tabs structure
@@ -118,7 +70,6 @@ export const useVentureStore = create<VentureState>()(
             milestones: { values: [] },
             team: { values: [] },
             references: { values: [] },
-            //hiddenRows: {},
             archive: [],
             archiveName: '',
             
@@ -162,14 +113,13 @@ export const useVentureStore = create<VentureState>()(
             setMilestones: (milestones) => set({ milestones }),
             setTeam: (team) => set({ team }),
             setReferences: (references) => set({ references }),
-            //setHiddenRows: (hiddenRows) => set({ hiddenRows }),
 
             // Archive actions
             setArchiveName: (name) => set({ archiveName: name }),
             archiveVenture: (name) => {
                 const state = get();
                 const updated = new Date().toISOString();
-                const archivedVenture: ArchivedVentureData = {
+                const archivedVenture: ArchivedVentureWorksheet = {
                     name,
                     updated,
                     problem: state.problem,
@@ -179,7 +129,6 @@ export const useVentureStore = create<VentureState>()(
                     marketOpportunity: state.marketOpportunity,
                     milestones: state.milestones,
                     references: state.references,
-                    //hiddenRows: state.hiddenRows,
                 };
                                 
                 set((state) => {
@@ -197,7 +146,7 @@ export const useVentureStore = create<VentureState>()(
             clearArchive: () => set({ archive: [] }),
             
             // Bulk actions
-            setVentureData: (data) => {
+            setVentureWorksheet: (data) => {
                 // Helper to normalize table data to CellTable format
                 const normalizeCellTable = (value: any): CellTable => {
                     if (!value) return { values: [] };
@@ -215,11 +164,10 @@ export const useVentureStore = create<VentureState>()(
                     milestones: normalizeCellTable(data.milestones),
                     team: normalizeCellTable(data.team),
                     references: normalizeCellTable(data.references),
-                    //hiddenRows: data.hiddenRows || {},
                 }));
             },
             
-            clearVentureData: () => set((prev) => ({
+            clearVentureWorksheet: () => set((prev) => ({
                 ...prev,
                 positioning: createEmptyPositioning(),
                 problem: [],
@@ -230,7 +178,7 @@ export const useVentureStore = create<VentureState>()(
                 references: { values: [] },
             })),
 
-            getVentureData: () => {
+            getVentureWorksheet: () => {
                 const state = get();
                 return {
                     positioning: state.positioning,
@@ -240,7 +188,6 @@ export const useVentureStore = create<VentureState>()(
                     milestones: state.milestones,
                     team: state.team,
                     references: state.references,
-                    //hiddenRows: state.hiddenRows,
                 };
             },
         }),
@@ -255,147 +202,8 @@ export const useVentureStore = create<VentureState>()(
                 milestones: state.milestones,
                 team: state.team,
                 references: state.references,
-                //hiddenRows: state.hiddenRows,
                 archive: state.archive,
             }),
         }
     )
 );
-
-//
-// Pruning to eliminate empty values.  Does not remove any data like hidden rows.
-//
-
-export function pruneVentureData (venture: VentureData)  {
-    return {
-        problem: pruneAttributedStrings(venture.problem),
-        solution: pruneAttributedStrings(venture.solution),
-        team: pruneTable(venture.team),
-        positioning: prunePositioning(venture.positioning),
-        marketOpportunity: pruneTable(venture.marketOpportunity),
-        milestones: pruneTable(venture.milestones),
-        references: pruneTable(venture.references),
-        //hiddenRows: venture.hiddenRows,
-    };
-}
-
-export function pruneArray(array: string[]) {
-    const filtered = array.filter(item => item !== '');
-    return filtered.length === 0 ? undefined : filtered;
-}
-
-export function pruneAttributedStrings(array: AttributedString[] | undefined) {
-    return array?.filter(e=>e.text!=='');
-}
-
-function isEmpty(item: string | number) {
-    if( typeof item === 'number' )
-        return !!item;
-    else if( typeof item === 'string' )
-        return item.trim() === '';
-    else
-        return false;  // unhandled type, so fail safe to "not empty"
-}
-
-function pruneStringOrNumberTable(table: StringOrNumberTable | undefined) {
-    if( !table )
-        return undefined;
-
-    const filtered = table.filter(row => !row.every(isEmpty));
-    return filtered?.length === 0 ? undefined : filtered;
-}
-
-export function pruneTable(table: Table) {
-
-    if( !table )
-        return undefined;
-
-    if( Array.isArray(table) )
-        return pruneStringOrNumberTable(table);
-
-    if( typeof table === 'object' && 'values' in table ) {
-        const values = pruneStringOrNumberTable(table.values);
-        const hidden = pruneStringOrNumberTable(table.hidden as any);
-        return { values, hidden };
-    }
-
-    console.error(`pruneTable() found unknown table type ${typeof table}: ${table}`);
-    return undefined;
-}
-
-export function prunePositioning(positioning: TabValues[] | undefined) {
-    const filtered = positioning?.map(tab => {
-        const nonEmptyValues = tab.values.filter(value => value !== '');
-        const selectedValue = tab.selected !== -1 ? tab.values[tab.selected] : '';
-        const newSelected = selectedValue !== '' ? nonEmptyValues.indexOf(selectedValue) : -1;
-        
-        return {
-            ...tab,
-            values: nonEmptyValues,
-            selected: newSelected
-        };
-    })
-    .filter(tab => tab.selected !== -1 && tab.values.length > 0);
-    
-    return filtered?.length === 0 ? undefined : filtered;
-}
-
-//
-// Simplified to make it easier to parse
-//
-
-export interface SimplifiedPositioning {
-    forWho?: string | undefined;
-    whoNeed?: string | undefined;
-    name?: string | undefined;
-    productCategory?: string | undefined;
-    keyBenefit?: string | undefined;
-    unlike?: string | undefined;
-    primaryDifferentiator?: string | undefined;
-}
-
-export interface SimplifiedVentureData {
-    problem: string[] | undefined;
-    solution: string[] | undefined;
-    team: StringOrNumberTable | undefined;
-    positioning: SimplifiedPositioning | undefined;
-    marketOpportunity: StringOrNumberTable | undefined;
-    milestones: StringOrNumberTable | undefined;
-    references: StringOrNumberTable | undefined;
-}
-
-function simplifyAttributedStrings(attributedStrings: AttributedString[] | undefined) {
-    return attributedStrings?.filter(e=>e.hidden!==true).map(e=>e.text);
-}
-
-function simplifyPositioning(positioning: TabValues[] | undefined) {
-    return positioning?.reduce((acc, tab) => ({
-        ...acc,
-        [tab.id]: tab.values[tab.selected]
-    }), {} as SimplifiedPositioning);
-}
-
-export function simplifyVentureData(venture: VentureData) {
-    venture = pruneVentureData(venture);
-    return {
-        problem: simplifyAttributedStrings(venture.problem),
-        solution: simplifyAttributedStrings(venture.solution),
-        team: simplifyTable(venture.team),
-        positioning: simplifyPositioning(venture.positioning),
-        marketOpportunity: simplifyTable(venture.marketOpportunity),
-        milestones: simplifyTable(venture.milestones),
-        references: simplifyTable(venture.references),
-    } as SimplifiedVentureData;
-}
-
-function simplifyTable(table: Table) {
-    if( !table )
-        return undefined;
-
-    if( Array.isArray(table) )
-        return table;
-    else if( typeof table === 'object' && 'values' in table )
-        return table.values;
-
-    console.error('simplifyTable() found unknown table type:', table);
-}

@@ -1,4 +1,4 @@
-import type { SimplifiedPositioning } from "@/stores/ventureStore";
+import type { SimplifiedPositioning } from "@/stores/venture-types";
 
 /**
  * Generate positioning statement from extracted values
