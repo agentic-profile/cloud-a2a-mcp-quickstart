@@ -13,17 +13,18 @@ export function resolveName(positioning: Record<string, any> | undefined) {
     return values?.[selected ?? 0] ?? 'Your Venture';
 }
 
-export function viewJsonInWindow(values: Record<string, any>) {
+export function viewJsonInWindow(values: Record<string, any>, suffix: string = 'JSON') {
     console.log('viewJsonInWindow', JSON.stringify(values, null, 4));
     const jsonString = JSON.stringify(values, null, 4);
     const name = resolveName(values.positioning);
+    const title = `${name} - ${suffix} JSON`;
     
     const newWindow = window.open('', '_blank');
     if (newWindow) {
         newWindow.document.write(`
             <html>
                 <head>
-                    <title>${name} - JSON</title>
+                    <title>${title}</title>
                     <style>
                         body { 
                             font-family: 'Courier New', monospace; 
@@ -46,7 +47,7 @@ export function viewJsonInWindow(values: Record<string, any>) {
                     </style>
                 </head>
                 <body>
-                    <h1>${name}</h1>
+                    <h1>${title}</h1>
                     <pre>${jsonString}</pre>
                 </body>
             </html>
@@ -55,7 +56,7 @@ export function viewJsonInWindow(values: Record<string, any>) {
     }
 }
 
-export function downloadJson(values: Record<string, any>) {
+export function downloadJson(values: Record<string, any>, suffix: string) {
     const jsonString = JSON.stringify(values, null, 4);
     const name = resolveName(values.positioning);
     
@@ -63,7 +64,7 @@ export function downloadJson(values: Record<string, any>) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${name.toLowerCase().replace(/\s+/g, '-')}-venture.json`;
+    link.download = `${name.toLowerCase().replace(/\s+/g, '-')}-venture-${suffix}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -71,9 +72,9 @@ export function downloadJson(values: Record<string, any>) {
 }
 
 // Hook for using export functions
-export const useExportFunctions = (values: Record<string, any>) => {
+export const useExportFunctions = (values: Record<string, any>, suffix: string) => {
     return {
-        viewJson: () => viewJsonInWindow(values),
-        exportJson: () => downloadJson(values)
+        viewJson: () => viewJsonInWindow(values, suffix),
+        exportJson: () => downloadJson(values, suffix)
     };
 };

@@ -13,10 +13,10 @@ interface ShareJsonProps {
 
 const ShareJson = ({ values, onDataImported }: ShareJsonProps) => {
     const [showImportModal, setShowImportModal] = useState(false);
-    const { viewJson, exportJson } = useExportFunctions(values);
+    const { viewJson, exportJson } = useExportFunctions(values,"Worksheet");
 
     const ventureSummary = summarizeVentureWorksheet(values);
-    const { viewJson: viewVentureSummary, exportJson: exportVentureSummary } = useExportFunctions(ventureSummary);
+    const { viewJson: viewVentureSummary, exportJson: exportVentureSummary } = useExportFunctions(ventureSummary,"Summary");
 
     const handleImportData = (importedData: any) => {
         onDataImported(importedData);

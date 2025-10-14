@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
+import { type AttributedString, type CellTable, type VentureWorksheet } from '@/stores/venture-types';
 
 interface ImportVentureJsonProps {
-    onImport: (data: any) => void;
+    onImport: (data: VentureWorksheet) => void;
 }
 
 /*
@@ -43,8 +44,10 @@ const ImportVentureJson = ({ onImport }: ImportVentureJsonProps) => {
                     throw new Error('Invalid JSON structure');
                 }
 
-                console.log('About to import data:', data);
-                onImport(data);
+                const worksheet = asWorksheet(data);
+
+                //console.log('About to import data:', data);
+                onImport(worksheet);
                 setIsImporting(false);
             } catch (err) {
                 console.error('JSON parsing error:', err);
@@ -159,3 +162,67 @@ const ImportVentureJson = ({ onImport }: ImportVentureJsonProps) => {
 };
 
 export default ImportVentureJson;
+
+function asWorksheet(data: any): VentureWorksheet {
+
+    // Convert string[] to AttributedString[]
+    const ensureAttributedStrings = (arr: (AttributedString | string)[] | undefined): AttributedString[] => {
+        if (!arr || !Array.isArray(arr)) return [];
+        return arr.map(e => typeof e === 'string' ? { text: e } : e);
+    };
+
+    // Convert StringOrNumberTable to CellTable
+    const ensureCellTable = (table: CellTable | (string | number)[][] | undefined): CellTable => {
+        if( !table )
+            return { values: [] };
+
+        if( typeof table === 'object' && 'values' in table )
+            return table as CellTable;
+
+        if ( Array.isArray(table)) 
+            return { values: table };
+
+        console.error(`ensureCellTable() found unknown table type ${typeof table}: ${table}`);
+        return { values: [] };
+    };
+
+    // Convert SimplifiedPositioning to Positioning
+    const ensurePositioning = (simplified: any): { id: string; values: string[]; selected: number }[] => {
+        // If it's already in array format (Positioning), return as-is
+        if (Array.isArray(simplified)) {
+            return simplified;
+        }
+        
+        // If it's a SimplifiedPositioning object, convert to Positioning array
+        if (simplified && typeof simplified === 'object') {
+            const positioningKeys = [
+                'forWho', 'whoNeed', 'name', 'productCategory', 
+                'keyBenefit', 'unlike', 'primaryDifferentiator'
+            ];
+            
+            return positioningKeys
+                .filter(key => simplified[key] !== undefined)
+                .map(key => ({
+                    id: key,
+                    values: [simplified[key]],
+                    selected: 0
+                }));
+        }
+        
+        // Return empty positioning array
+        console.error(`toPositioning() found unknown positioning type ${typeof simplified}: ${simplified}`);
+        return [];
+    };
+
+    const worksheet = {
+        problem: ensureAttributedStrings(data.problem),
+        solution: ensureAttributedStrings(data.solution),
+        positioning: ensurePositioning(data.positioning),
+        marketOpportunity: ensureCellTable(data.marketOpportunity),
+        milestones: ensureCellTable(data.milestones),
+        team: ensureCellTable(data.team),
+        references: ensureCellTable(data.references),
+    } as VentureWorksheet;
+
+    return worksheet;
+}

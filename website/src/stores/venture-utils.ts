@@ -18,7 +18,7 @@ export function pruneVentureWorksheet (venture: VentureWorksheet)  {
 }
 
 export function pruneAttributedStrings(array: AttributedString[]) {
-    return array?.filter(e=>!!e.text?.trim() && !e.hidden);
+    return array?.filter(e=>!!e.text?.trim());
 }
 
 function isEmpty(item: string | number) {
