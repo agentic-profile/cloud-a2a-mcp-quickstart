@@ -56,10 +56,10 @@ export class ErrorBoundary extends Component<Props, State> {
                             An error occurred while rendering this component.
                         </p>
                         
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
+                        {this.state.error && (
                             <details className="mt-4">
                                 <summary className="cursor-pointer text-sm font-medium text-red-600 dark:text-red-400 mb-2">
-                                    Error Details (Development)
+                                    Error Details
                                 </summary>
                                 <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-700">
                                     <pre className="text-xs text-red-800 dark:text-red-200 whitespace-pre-wrap overflow-x-auto">
