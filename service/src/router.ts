@@ -26,6 +26,7 @@ app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
+        'mcp-protocol-version',
         'Content-Type', 
         'Authorization', 
         'WWW-Authenticate',
@@ -45,6 +46,12 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Logging middleware to log HTTP method and path
+app.use((req, _res, next) => {
+    console.log(`Starting ${req.method} ${req.path}`, req.body);
+    next();
+});
 
 // Health check endpoint
 const started = new Date().toISOString();

@@ -30,3 +30,21 @@ export function mcpResultResponse( id: string | number, result: MCPResult ): JSO
         result
     };
 }
+
+export const DEFAULT_MCP_INITIALIZE_RESPONSE = {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {
+        "logging": {},
+        "prompts": {},
+        "resources": {},
+        "tools": {}
+    },
+    /*
+    "serverInfo": {
+        "name": "ExampleServer",
+        "title": "Example Server Display Name",
+        "version": "1.0.0"
+    },
+    "instructions": "Optional instructions for the client"
+    */
+};

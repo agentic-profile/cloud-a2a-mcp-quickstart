@@ -35,7 +35,9 @@ export function describeJsonRpcRequestError(req: any): string | null | undefined
         return "Missing 'jsonrpc' parameter";
     else if( jsonrpc !== '2.0' )
         return `invalid 'jsonrpc' version: ${jsonrpc}`;
-    else if( !id )
+    else if( id !== undefined && ( typeof id !== 'string' && typeof id !== 'number' && id !== null ) )
+        return `invalid 'id' type: ${typeof id} (expected string, number, or null)`;
+    else if( id === null )
         return 'Missing JSON RPC request id';
     else if( !method )
         return 'Missing JSON RPCrequest method';
