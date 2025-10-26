@@ -11,9 +11,9 @@ import { resolveParamFromWindow } from '@/tools/net';
 import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_IDENTITY_HOST_URLS = [
-    'https://matchwise.ai/import',
-    'https://lifepass.ai/import',
-    'http://localhost:5174/import'
+    'https://matchwise.ai/import/key',
+    'https://lifepass.ai/import/key',
+    'http://localhost:5174/import/key'
 ];
 
 // Base64web encoding function (URL-safe base64)

@@ -33,9 +33,12 @@ export const TabbedEditableLists = ({
         return null;
     }
 
+    // Ensure values is always an array
+    const safeValues = Array.isArray(values) ? values : [];
+
     const { id, placeholder } = tabs[activeTabIndex];
     // Find the tab values by ID instead of by index to handle imported data correctly
-    const currentTabValues = values.find(tab => tab.id === id);
+    const currentTabValues = safeValues.find(tab => tab.id === id);
     const tabValues = currentTabValues?.values || [];
     const selected = currentTabValues?.selected ?? -1;
     

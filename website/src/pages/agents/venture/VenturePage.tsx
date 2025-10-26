@@ -10,6 +10,7 @@ import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
 import type { AttributedString } from '@/stores/venture-types';
 import ShowMarkdown from './ShowMarkdown';
+import ShareVentureWorksheet, { useShareParams } from './ShareVentureWorksheet';
 
 
 const POSITIONING_TABS = [
@@ -31,9 +32,7 @@ const VenturePage = () => {
         milestones,
         team,
         references,
-        //hiddenRows,
         updatePositioningTab,
-        //setHiddenRows,
         setProblem,
         setSolution,
         setMarketOpportunity,
@@ -41,7 +40,10 @@ const VenturePage = () => {
         setTeam,
         setReferences,
     } = useVentureStore();
-    
+
+    const { shareUrl, shareHost } = useShareParams();
+    const isShare = shareUrl ? true : false;
+
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
     const [isShareCollapsed, setIsShareCollapsed] = useState(true);
     const enlistAgentRef = useRef<HTMLDivElement>(null);
@@ -86,21 +88,26 @@ const VenturePage = () => {
                     <CardBody>
                         <div className="space-y-4 p-6">
                             <p className="lg">
-                                Use this interactive tool to help summarize your business venture, generate an elevator
+                                Use this interactive worksheet to help summarize your business venture, generate an elevator
                                 pitch, and set milestones.  This is not
                                 a full <a href="https://www.slideshare.net/slideshow/sequoia-capital-pitchdecktemplate/46231251" target="_blank">Sequoia ready pitch deck</a>,
                                 but it does make sure you have covered the basics.
                             </p>
-                            <p className="lg">
+                            { isShare && <p className="lg">
+                                Once you have completed the worksheet, you can share the data back to the
+                                website that sent you here.  Press the "Share Worksheet Back to {shareHost}"
+                                button at the bottom of this page.
+                            </p> }
+                            { !isShare && <p className="lg">
                                 You can publish a summary on the Agentic Web with our
                                 MCP service so you can be found by 
                                 investors, technology providers, and talent (see Publish section below).  You can
                                 also use the generated markdown summary with your favorite generative AI tool (see Markdown Summary section below).
-                            </p>
-                            <p className="lg">
+                            </p> }
+                            { !isShare && <p className="lg">
                                 <strong>NOTE:</strong> The information you type is only stored in your browser's local storage.
                                 If you want to publish your venture to the Agentic Web, please use the publish section below.
-                            </p>
+                            </p> }
                         </div>
                     </CardBody>
                 </Card>
@@ -205,7 +212,12 @@ const VenturePage = () => {
                     />
                 </CardTitleAndBody>
 
-                <ShowMarkdown ventureWorksheet={{positioning, problem, solution, marketOpportunity, milestones, team, references}} />
+                <ShareVentureWorksheet />
+
+                <ShowMarkdown
+                    ventureWorksheet={{positioning, problem, solution, marketOpportunity, milestones, team, references}}
+                    collapsed={isShare}
+                />
 
                 <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
                     variant="success"

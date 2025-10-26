@@ -2,8 +2,13 @@ import type { TabValues } from '@/components/TabbedEditableLists';
 import { generatePositioningStatement } from './positioning';
 
 export function PositioningStatement({ tabValues }: { tabValues: TabValues[] }) {
-    const positioning = tabValues.reduce((acc, tab) => {
-        acc[tab.id] = tab.values[tab.selected];
+    // Ensure tabValues is always an array
+    const safeTabValues = Array.isArray(tabValues) ? tabValues : [];
+    
+    const positioning = safeTabValues.reduce((acc, tab) => {
+        if (tab && tab.values && Array.isArray(tab.values) && tab.selected >= 0) {
+            acc[tab.id] = tab.values[tab.selected];
+        }
         return acc;
     }, {} as Record<string, string>);
 

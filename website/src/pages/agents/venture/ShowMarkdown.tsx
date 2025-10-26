@@ -7,9 +7,10 @@ import { useEffect, useState } from 'react';
 
 interface ShowMarkdownProps {
     ventureWorksheet: VentureWorksheet;
+    collapsed?: boolean;
 }
 
-const ShowMarkdown = ({ ventureWorksheet }: ShowMarkdownProps) => {
+const ShowMarkdown = ({ ventureWorksheet, collapsed = false}: ShowMarkdownProps) => {
     const [markdown, setMarkdown] = useState('');
 
     useEffect(()=>{
@@ -23,7 +24,7 @@ const ShowMarkdown = ({ ventureWorksheet }: ShowMarkdownProps) => {
     };
 
     return (
-        <CardTitleAndBody title="Markdown Summary" collapsed={false} variant="success">
+        <CardTitleAndBody title="Markdown Summary" collapsed={collapsed} variant="success">
             <div className="flex justify-between">
                 <p className="mb-4">
                     Below is a <a href="https://legalengineer.substack.com/p/markdown-the-secret-language-of-ai" target="_blank">markdown</a> summary of your venture idea.  Copy this markdown and use with your favorite

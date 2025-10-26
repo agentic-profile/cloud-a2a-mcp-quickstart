@@ -74,10 +74,16 @@ export const useVentureStore = create<VentureState>()(
             archiveName: '',
             
             // Positioning actions
-            setPositioning: (positioning) => set({ positioning }),
+            setPositioning: (positioning) => set({ 
+                positioning: Array.isArray(positioning) ? positioning : createEmptyPositioning() 
+            }),
             
             updatePositioningTab: (tabId, values, selected) => 
                 set((state) => {
+                    // Ensure positioning is always an array
+                    if (!Array.isArray(state.positioning)) {
+                        state.positioning = createEmptyPositioning();
+                    }
                     const existingTabIndex = state.positioning.findIndex(tab => tab.id === tabId);
                     
                     if (existingTabIndex !== -1) {
@@ -204,6 +210,13 @@ export const useVentureStore = create<VentureState>()(
                 references: state.references,
                 archive: state.archive,
             }),
+            // Add migration to ensure positioning is always an array
+            migrate: (persistedState: any) => {
+                if (persistedState.positioning && !Array.isArray(persistedState.positioning)) {
+                    persistedState.positioning = createEmptyPositioning();
+                }
+                return persistedState;
+            },
         }
     )
 );
