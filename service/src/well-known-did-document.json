@@ -4,16 +4,16 @@
         "https://w3id.org/security/suites/jws-2020/v1",
         "https://iamagentic.org/ns/agentic-profile/v1"
     ],
-    "id": "did:web:example.com",
+    "id": "TBD",
     "verificationMethod": [
         {
-            "id": "#general-key-0",
+            "id": "#identity-key",
             "type": "JsonWebKey2020",
             "publicKeyJwk": {
                 "kty": "OKP",
                 "alg": "EdDSA",
                 "crv": "Ed25519",
-                "x": "yMA1PxfmDMiVrNSWNuxFOAlp3Q-GWS9NEkfIEs1zO-s"
+                "x": "aYoP9uvg4iDBsgRpjmMLeSVtBz656KkKVEp-QrClwm8"
             }
         },
         {
@@ -23,7 +23,7 @@
                 "kty": "OKP",
                 "alg": "EdDSA",
                 "crv": "Ed25519",
-                "x": "EGMndAEuQVYiran5z3LXsSmzoluv1BRpEsRcB50zm-A"
+                "x": "swyLP0qHCbWlGc67VDGQvZAxv3OFfu2GkswJ6fGaB-8"
             }
         }
     ],

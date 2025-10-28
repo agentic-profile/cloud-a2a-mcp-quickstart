@@ -47,7 +47,8 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
                 return result.Item as T;
             } catch (error) {
                 console.error(`Error loading ${tableName}[${id}]:`, error);
-                throw new Error(`Failed to load ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                throw error;
+                //throw new Error(`Failed to load ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -59,7 +60,8 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
                 }));
             } catch (error) {
                 console.error(`Error saving ${tableName}[${item.id}]:`, error);
-                throw new Error(`Failed to save ${tableName}[${item.id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                throw error;
+                //throw new Error(`Failed to save ${tableName}[${item.id}]: ${error}`);
             }
         },
 
@@ -71,7 +73,8 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
                 }));
             } catch (error) {
                 console.error(`Error deleting ${tableName}[${id}]:`, error);
-                throw new Error(`Failed to delete ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                throw error;
+                //throw new Error(`Failed to delete ${tableName}[${id}]: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -85,7 +88,8 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
                 return result.Items as T[];
             } catch (error) {
                 console.error(`Error querying ${JSON.stringify(query)} from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                throw error;
+                //throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         },
 
@@ -107,7 +111,8 @@ export function itemStore<T extends StoreItem>({ tableName }: StoreOptions): Ite
                 return result.Items as T[];
             } catch (error) {
                 console.error(`Error querying ${JSON.stringify(query)} from DynamoDB ${tableName}:`, error);
-                throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                throw error;
+                //throw new Error(`Failed to query ${JSON.stringify(query)} from ${tableName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }
     }

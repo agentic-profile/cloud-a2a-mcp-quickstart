@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
-import wellKnownDidDocument from './well-known-did.json' with { type: 'json' };
+import wellKnownDidDocument from './well-known-did-document.json' with { type: 'json' };
 
 // A2A handlers and helpers
 import { VentureExecutor, agentCard as ventureCard } from './a2a/venture/index.js';
@@ -20,6 +20,9 @@ import { A2AServiceRouter } from './a2a/router.js';
 
 // Create Express app
 const app = express();
+
+// Trust proxy for accurate req.protocol when behind reverse proxy (e.g., AWS API Gateway)
+app.set('trust proxy', true);
 
 // Middleware
 app.use(cors({

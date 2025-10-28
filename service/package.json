@@ -12,7 +12,8 @@
     "test:redis": "node scripts/test-redis-connection.js",
     "test:local-redis": "npm run build && node scripts/test-local-redis.js",
     "test:local-dynamodb": "npm run build && node scripts/test-local-dynamodb.js",
-    "dev": "tsx --inspect src/index.local.ts"
+    "dev": "tsx --inspect src/index.local.ts",
+    "setup-well-known-agent": "tsx scripts/setup-well-known-agent.js"
   },
   "keywords": [
     "lambda",
@@ -45,6 +46,7 @@
     "redis": "^5.7.0"
   },
   "devDependencies": {
+    "@agentic-profile/express-common": "^0.6.1",
     "@types/aws-lambda": "^8.10.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

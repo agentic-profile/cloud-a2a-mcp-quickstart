@@ -14,7 +14,7 @@
     "foundation:events:prod": "aws cloudformation describe-stack-events --stack-name agentic-foundation-prod --query 'StackEvents[0:5]' --output table",
 
     "service:build": "cd ../service && npm run build",
-    "service:package": "npm run service:build && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist www node_modules package.json",
+    "service:package": "npm run service:build && rm -f function.zip && cd ../service && zip -r ../aws/function.zip dist www node_modules package.json keyring.json",
     
     "service:deploy": "./deploy-service.sh staging example",
     "service:status": "aws cloudformation describe-stacks --stack-name agentic-service-a2a-mcp-example-staging --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo 'STACK_DELETED'",

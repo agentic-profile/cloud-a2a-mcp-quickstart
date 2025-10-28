@@ -25,7 +25,7 @@ async function handleMcpRequest(req: Request, res: Response) {
                 if( !session )
                     return jrpcErrorAuthRequired( requestId );
                 else
-                    return await handleToolsCall( jrpcRequest as JSONRPCRequest, session );
+                    return await handleToolsCall( jrpcRequest as JSONRPCRequest, session, req );
             default:
                 return null;
         }
