@@ -139,14 +139,14 @@ export const useVentureStore = create<VentureState>()(
                                 
                 set((state) => {
                     // Remove any existing venture with this name and add new one to first position
-                    const filteredArchive = state.archive.filter(item => item.name !== name);
+                    const filteredArchive = state.archive?.filter(item => item.name !== name) ?? [];
                     return { archive: [archivedVenture, ...filteredArchive] };
                 });
             },
             
             removeFromArchive: (index) => 
                 set((state) => ({
-                    archive: state.archive.filter((_, i) => i !== index)
+                    archive: state.archive?.filter((_, i) => i !== index) ?? []
                 })),
             
             clearArchive: () => set({ archive: [] }),

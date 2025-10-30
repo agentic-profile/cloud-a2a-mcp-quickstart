@@ -28,6 +28,9 @@ export const EditableValueList = ({
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+    if( !Array.isArray(values) )
+        values = []; // failsafe
+
     const addValue = () => {
         const newValues = [...values, { text: '' }];
         const newIndex = newValues.length - 1;

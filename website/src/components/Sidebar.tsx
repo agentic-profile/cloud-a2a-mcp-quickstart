@@ -81,6 +81,18 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                         <p>v1.0.0</p>
                         <p className="mt-1">Agent World Congress</p>
+                        <p className="mt-1 text-xs">
+                            {typeof __BUILD_TIME__ !== 'undefined' 
+                                ? new Date(__BUILD_TIME__).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                                : ''
+                            }
+                        </p>
                     </div>
                 </div>
             </div>

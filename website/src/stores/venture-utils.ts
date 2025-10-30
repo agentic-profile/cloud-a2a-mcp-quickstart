@@ -18,7 +18,7 @@ export function pruneVentureWorksheet (venture: VentureWorksheet)  {
 }
 
 export function pruneAttributedStrings(array: AttributedString[]) {
-    return array?.filter(e=>!!e.text?.trim());
+    return Array.isArray(array) ? array.filter(e=>!!e.text?.trim()) : [];
 }
 
 function isEmpty(item: string | number) {
@@ -31,7 +31,7 @@ function isEmpty(item: string | number) {
 }
 
 function pruneStringOrNumberTable(table: StringOrNumberTable | undefined) {
-    if( !table )
+    if( !table || !Array.isArray(table) )
         return undefined;
 
     const filtered = table.filter(row => !row.every(isEmpty));
@@ -57,8 +57,9 @@ export function prunePositioning(positioning: Positioning) {
         return positioning; // not an array, so it's already pruned
 
     const filtered = positioning?.map(tab => {
-        const nonEmptyValues = tab.values.filter(value => value !== '');
-        const selectedValue = tab.selected !== -1 ? tab.values[tab.selected] : '';
+        const values = Array.isArray(tab.values) ? tab.values : [];
+        const nonEmptyValues = values.filter(value => value !== '');
+        const selectedValue = tab.selected !== -1 ? values[tab.selected] : '';
         const newSelected = selectedValue !== '' ? nonEmptyValues.indexOf(selectedValue) : -1;
         
         return {
@@ -93,7 +94,7 @@ function asText(item: AttributedString | string) {
 //
 
 function simplifyAttributedStrings(attributedStrings: AttributedString[]) {
-    return attributedStrings?.filter(e=>!isHidden(e)).map(asText);
+    return Array.isArray(attributedStrings) ? attributedStrings.filter(e=>!isHidden(e)).map(asText) : [];
 }
 
 function simplifyPositioning(positioning: Positioning) {
