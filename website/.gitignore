@@ -13,6 +13,7 @@ dist-ssr
 *.local
 /www
 .env
+.env*.local
 keyring.json
 
 # Editor directories and files

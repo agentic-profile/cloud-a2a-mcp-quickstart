@@ -131,6 +131,10 @@ p.lg {
   @apply text-lg text-gray-600 dark:text-gray-400;
 }
 
+p a {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline;
+}
+
 /* Global form label styles */
 .form-label {
   @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
