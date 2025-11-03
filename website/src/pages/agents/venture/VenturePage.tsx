@@ -236,7 +236,7 @@ const VenturePage = () => {
                     <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
                         variant="success"
                         collapsed={isShareCollapsed}
-                        >
+                    >
                         <div className="space-y-4">
                             <p className="mb-4">
                                 <strong>NOTE:</strong> This section is for advanced users.

@@ -99,7 +99,7 @@ export function QuickShare() {
     const targets: ShareTarget[] = [
         { 
             name: 'Matchwise', 
-            url: import.meta.env.VITE_MATCHWISE_SHARE_URL ?? 'https://matchwise.example.com/share',
+            url: import.meta.env.VITE_MATCHWISE_SHARE_URL ?? 'https://matchwise.ai/import/agent',
             description: 'Matchwise hosts your identity on the Agentic Web',
             details: [
                 'Instantly creates your unique identity',
