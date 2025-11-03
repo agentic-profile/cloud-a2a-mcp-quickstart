@@ -83,7 +83,9 @@ const EnlistAgent = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (httpReques
             method: 'tools/call',
             params: {
                 name: 'add-agent',
-                service
+                arguments: {
+                    service
+                }
             }
         };
 

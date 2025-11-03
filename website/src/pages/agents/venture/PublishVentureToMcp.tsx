@@ -53,10 +53,12 @@ const PublishVentureToMcp = ({ onSubmitHttpRequest }: { onSubmitHttpRequest: (ht
             method: 'tools/call',
             params: {
                 name: 'update',
-                profile: {
-                    ...ventureSummary,
-                    markdown,
-                    kind: 'venture'
+                arguments: {
+                    profile: {
+                        ...ventureSummary,
+                        markdown,
+                        kind: 'venture'
+                    }
                 }
             }
         };

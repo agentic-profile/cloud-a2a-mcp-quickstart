@@ -14,6 +14,8 @@ import { chatCompletion, ClaudeMessage } from '../../inference/claude-bedrock.js
 import { parseDid } from '../../utils/did.js';
 import { createSystemPrompt } from './prompt-templates.js';
 import { extractJson } from '../../utils/json.js';
+import { summarizeVentureWorksheet } from './from-website/venture-utils.js';
+import { generateMarkdownSummary } from './from-website/markdown-generator.js';
 
 // For Venture profiles
 const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
@@ -87,7 +89,9 @@ export class VentureExecutor implements AgentExecutor {
 
         let text;
         if( messageHistory.length === 0 ) {
-            text = `Hello!  A quick summary of what I'm working on...\n\n${ventureProfile.markdown}`;
+            const summary = summarizeVentureWorksheet(ventureProfile as any);
+            const md = generateMarkdownSummary(summary);
+            text = `Hello!  A quick summary of what I'm working on...\n\n${md}`;
         } else {
             // continue the conversation
             const options = {
