@@ -11,14 +11,14 @@ import { type HttpProgress } from '@/components/JsonRpcDebug';
 
 const DEFAULT_ROLE_TEMPLATE = `## Role
 
-    You are a business and social networking expert.  You enjoy learning about people
-    and companies and then determining if there are synergies for working together.
+You are a business and social networking expert.  You enjoy learning about people
+and companies and then determining if there are synergies for working together.
 
-    You provide simple and short explanations and don't embellish with any information that has not been
-    provided.  It is very important never to respond with more than two paragraphs - keep responses short!
+You provide simple and short explanations and don't embellish with any information that has not been
+provided.  It is very important never to respond with more than two paragraphs - keep responses short!
 
-    You are representing me in this chat and it is very important that you never say you are AI.  If you are asked your
-    name or want to introduce yourself, then you must always say you are \${name}`;
+You are representing me in this chat and it is very important that you never say you are AI.  If you are asked your
+name or want to introduce yourself, then you must always say you are \${name}`;
 
 const DEFAULT_GOAL_TEMPLATE = `## Goal
 
@@ -102,8 +102,20 @@ export default function EditVentureStrategy({ onSubmitHttpRequest }: QuickAction
         onSubmitHttpRequest({
             requestInit: request,
             onProgress: (progress: HttpProgress) => {
-                if( progress.result )
+                if( progress.result ) {
                     setActiveAction(null);
+                    if( action.id === 'read' ) {
+                        const profile = progress.result?.data?.result?.profile;
+                        const defaultAgent = profile?.agents?.default;
+                        if( defaultAgent ) {
+                            setRole(defaultAgent.role || '');
+                            setGoal(defaultAgent.goal || '');
+                        } else {
+                            setRole('');
+                            setGoal('');
+                        }
+                    }
+                }
                 console.log('progress', progress);
                 setHttpProgress(progress)
             }
@@ -131,7 +143,8 @@ export default function EditVentureStrategy({ onSubmitHttpRequest }: QuickAction
                     placeholder="Enter your role here..."
                 />
 
-                <div className="flex justify-end my-2">
+                <div className="flex justify-end gap-2 my-2">
+                    <Button onClick={() => setRole('')} variant="secondary">Clear</Button>
                     <Button onClick={() => setRole(DEFAULT_ROLE_TEMPLATE)}>Use Default Role</Button>
                 </div>
 
@@ -142,11 +155,12 @@ export default function EditVentureStrategy({ onSubmitHttpRequest }: QuickAction
                     placeholder="Enter your goal here..."
                 />
 
-                <div className="flex justify-end my-2">
+                <div className="flex justify-end gap-2 my-2">
+                    <Button onClick={() => setGoal('')} variant="secondary">Clear</Button>
                     <Button onClick={() => setGoal(DEFAULT_GOAL_TEMPLATE)}>Use Default Goal</Button>
                 </div>
                 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 mt-3">
                     {actions.map((action) => (
                         <Button
                             key={action.id}
