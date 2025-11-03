@@ -61,7 +61,7 @@ export function ShareVentureWorksheet() {
     };
     
     return (
-        <div className="mx-8 md:mx-16 py-24">
+        <div className={CENTER_MARGIN_CLASSES}>
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 shadow-lg">
                 <CardBody>
                     <div className="space-y-4">
@@ -88,6 +88,8 @@ export function ShareVentureWorksheet() {
     );
 };
 
+const CENTER_MARGIN_CLASSES = "md:m-8 lg:m-16 md:!my-16 lg:!my-16";
+
 interface ShareTarget {
     name: string;
     url?: string;
@@ -96,6 +98,8 @@ interface ShareTarget {
 }
 
 export function QuickShare() {
+    const { shareUrl } = useShareParams();
+
     const targets: ShareTarget[] = [
         { 
             name: 'Matchwise', 
@@ -108,7 +112,7 @@ export function QuickShare() {
         },
         { 
             name: 'Lifepass',
-            description: 'Lifepass uses agents to help you lead a happioer healthier life',
+            description: 'Lifepass uses agents to help you lead a happier healthier life',
             details: [
                 'Every morning, Lifepass will suggest new activities and habits to help you lead a happier healthier life'
             ]
@@ -118,8 +122,8 @@ export function QuickShare() {
     return (
         <CardTitleAndBody
             title="Featured Quick Shares"
-            collapsed={false}
-            className="md:m-8 lg:m-16 md:!my-8 lg:!my-16"
+            collapsed={!!shareUrl}
+            className={!!shareUrl ? '' :CENTER_MARGIN_CLASSES}
         >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
                 {targets.map((t, idx) => (
