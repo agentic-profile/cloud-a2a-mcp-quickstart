@@ -30,7 +30,7 @@ export async function handleRecentUpdates<T extends StoreItem>(request: JSONRPCR
     const {
         since = new Date( twentyFourHoursAgo ).toISOString(), // default to one day ago
         kind
-    } = request.params || {};
+    } = request.params?.arguments as any || {};
 
     if( !kind )
         return jrpcError(request.id!, -32602, `Invalid params: kind is required`);

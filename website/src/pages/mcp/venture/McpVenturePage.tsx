@@ -8,6 +8,7 @@ import UpdateVentureProfile from './UpdateVentureProfile';
 import QueryVentureProfiles from './QueryVentureProfiles';
 import QuickActions from './QuickActions';
 import type { HttpRequest } from '@/components/JsonRpcDebug';
+import EditVentureStrategy from './EditVentureStrategy';
 
 const ventureService = mcpServices.find(service => service.id === '2')!;
 
@@ -51,6 +52,8 @@ const McpVenturePage = () => {
 
                 {/* Quick Actions */}
                 <QuickActions onSubmitHttpRequest={setHttpRequest} />
+
+                <EditVentureStrategy onSubmitHttpRequest={setHttpRequest} />
 
                 {/* JsonRpcDebug Component for Update Location */}
                 {httpRequest && (

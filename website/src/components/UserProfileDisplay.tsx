@@ -1,5 +1,5 @@
 import { UserIcon } from '@heroicons/react/24/outline';
-import { Button, Card, CardBody, CardHeader, LabelValue, LabelDid, RadioButton, RadioGroup } from '@/components';
+import { Button, Card, CardBody, CardHeader, LabelValue, LabelDid, RadioButton, RadioGroup, CardTitleAndBody } from '@/components';
 import { useUserProfileStore, type UserProfile } from '@/stores';
 import { type AgentService } from '@agentic-profile/common/schema';
 import { type VerificationMethod } from 'did-resolver';
@@ -101,18 +101,16 @@ export const UserProfileDisplay = () => {
                         </CardBody>
                     </Card>
 
-                    <Card variant="error" className="p-4">
-                        <CardHeader>
-                            <h3>JWK Keyring - Keep this secret!  Only for testing purposes</h3>
-                        </CardHeader>
-                        <CardBody>
-                            <div className="bg-white dark:bg-gray-600 p-3 rounded border">
-                                <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
-                                    {JSON.stringify(keyring, null, 4)}
-                                </pre>
-                            </div>
-                        </CardBody>
-                    </Card>
+                    <CardTitleAndBody
+                        title="JWK Keyring - Keep this secret!  Only for testing purposes"
+                        collapsed={true}
+                        className="mt-6"
+                        variant="error"
+                    >
+                        <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
+                            {JSON.stringify(keyring, null, 4)}
+                        </pre>
+                    </CardTitleAndBody>
                 </div>
 
                 <div className="flex justify-end">

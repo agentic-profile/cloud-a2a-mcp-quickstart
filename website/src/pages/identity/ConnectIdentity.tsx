@@ -4,7 +4,7 @@ import {
 } from "@agentic-profile/auth";
 import { webDidToUrl } from "@agentic-profile/common";
 
-import { Button, EditableUri, LabelValue, Card, CardBody } from '@/components';
+import { Button, EditableUri, LabelValue, Card, CardBody, CardTitleAndBody } from '@/components';
 import { useImportIdentityStore, useUserProfileStore } from '@/stores';
 import { resolveAgentAndVerificationId } from '@/tools/keyring';
 import { resolveParamFromWindow } from '@/tools/net';
@@ -182,14 +182,15 @@ export function ConnectIdentity() {
                 </Button>
             </div>
 
-            <div className="mt-6">
-                <div className="mb-3">
-                    <h3 className="text-lg font-medium">Generated Local JWT Keyring</h3>
-                </div>
+            <CardTitleAndBody
+                title="Generated Local JWT Keyring"
+                collapsed={true}
+                className="mt-6"
+            >
                 <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto text-sm">
-                    {JSON.stringify(exportKeyring, null, 2)}
+                    {JSON.stringify(exportKeyring, null, 4)}
                 </pre>
-            </div>
+            </CardTitleAndBody>
         </div>
     );
 }

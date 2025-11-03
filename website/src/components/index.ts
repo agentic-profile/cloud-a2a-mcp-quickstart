@@ -29,6 +29,7 @@ export { CreateIdentityForm } from '../pages/identity/CreateIdentityForm';
 export { UserProfileDisplay } from './UserProfileDisplay';
 
 // Utility components
+export { Label } from './Label';
 export { LabelValue } from './LabelValue';
 export { LabelDid } from './LabelDid';
 export { LabelJson } from './LabelJson';
@@ -38,6 +39,7 @@ export { Checkbox } from './Checkbox';
 export { EditableUri } from './EditableUri';
 export { EditableValue } from './EditableValue';
 export { default as JsonEditor } from './JsonEditor';
+export { default as MultilineTextEditor } from './MultilineTextEditor';
 export { EditableValueList } from './EditableValueList';
 export { TabbedEditableLists } from './TabbedEditableLists';
 export { HttpProgressSummary } from './HttpProgressSummary';

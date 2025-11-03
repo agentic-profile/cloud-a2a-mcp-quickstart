@@ -63,9 +63,11 @@ async function handleSubscribeToAgent(request: JSONRPCRequest, session: ClientAg
     // Store agent we are handling requests for
     const updateResult = await crud.handleUpdate({
         params: {
-            profile: {
-                kind: 'venture',
-                ...payload.context
+            arguments: {
+                profile: {
+                    kind: 'venture',
+                    ...payload.context
+                }
             }
         }
     } as any, session);
@@ -92,5 +94,3 @@ async function handleSubscribeToAgent(request: JSONRPCRequest, session: ClientAg
 
     return jrpcResult(request.id!, { service });
 }
-
-

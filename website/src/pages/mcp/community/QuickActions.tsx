@@ -6,7 +6,7 @@ import {
     TrashIcon, 
     ListBulletIcon 
 } from '@heroicons/react/24/outline';
-import { mcpToolsCallRequestInit, mcpMethodRequestInit } from '../util/misc';
+import { mcpToolsCallRequestInit2, mcpMethodRequestInit } from '../util/misc';
 import { type HttpProgress } from '@/components/JsonRpcDebug';
 
 interface QuickActionsProps {
@@ -34,13 +34,13 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
             id: 'read',
             label: 'Read Profile',
             icon: <DocumentTextIcon className="w-5 h-5" />,
-            createRequest: ({kind}) => mcpToolsCallRequestInit("read", {kind}),
+            createRequest: ({kind}) => mcpToolsCallRequestInit2("read", {kind}),
         },
         {
             id: 'recent-updates',
             label: 'Recent Profiles',
             icon: <ClockIcon className="w-5 h-5" />,
-            createRequest: ({kind}) => mcpToolsCallRequestInit(
+            createRequest: ({kind}) => mcpToolsCallRequestInit2(
                 "recent-updates",
                 { since: daysAgo(1), kind }
             ),
@@ -49,7 +49,7 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
             id: 'delete',
             label: 'Delete Profile',
             icon: <TrashIcon className="w-5 h-5" />,
-            createRequest: ({kind}) => mcpToolsCallRequestInit("delete", {kind}),
+            createRequest: ({kind}) => mcpToolsCallRequestInit2("delete", {kind}),
         },
         {
             id: 'list-tools',

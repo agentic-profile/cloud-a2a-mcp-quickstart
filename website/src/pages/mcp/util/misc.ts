@@ -1,8 +1,8 @@
-export function mcpToolsCallRequestInit( name: string, params: any = {}) {
+export function mcpToolsCallRequestInit2( name: string, args: any = {}) {
 
     return mcpMethodRequestInit("tools/call", {
-        ...params,
         name,
+        arguments: args
     });
 }
 
