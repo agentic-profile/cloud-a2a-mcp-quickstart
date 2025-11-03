@@ -61,7 +61,7 @@ export function ShareVentureWorksheet() {
     };
     
     return (
-        <div className="mx-16 py-24">
+        <div className="mx-8 md:mx-16 py-24">
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 shadow-lg">
                 <CardBody>
                     <div className="space-y-4">
@@ -119,7 +119,7 @@ export function QuickShare() {
         <CardTitleAndBody
             title="Featured Quick Shares"
             collapsed={false}
-            className="m-16 !my-16"
+            className="md:m-8 lg:m-16 md:!my-8 lg:!my-16"
         >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
                 {targets.map((t, idx) => (
