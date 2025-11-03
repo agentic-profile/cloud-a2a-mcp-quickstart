@@ -24,7 +24,7 @@
   "license": "Apache 2.0",
   "dependencies": {
     "@a2a-js/sdk": "^0.3.2",
-    "@agentic-profile/auth": "^0.6.1",
+    "@agentic-profile/auth": "^0.6.2",
     "@agentic-profile/common": "^0.6.0",
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@aws-sdk/client-cloudformation": "^3.0.0",

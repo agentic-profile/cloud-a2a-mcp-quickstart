@@ -28,6 +28,7 @@ const ServerUrlSetting = () => {
 const SettingsPage = () => {
     const { theme, setTheme } = useTheme();
     const { userProfile } = useUserProfileStore();
+    const { isExpert, setIsExpert } = useSettingsStore();
     const did = userProfile?.profile.id;
     const navigate = useNavigate();
 
@@ -61,6 +62,23 @@ const SettingsPage = () => {
                                 <Switch
                                     isSelected={theme === 'dark'}
                                     onValueChange={(enabled) => setTheme(enabled ? 'dark' : 'light')}
+                                    size="sm"
+                                    color="primary"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Expert Mode Setting */}
+                        <div className="py-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Expert Mode
+                                    </p>
+                                </div>
+                                <Switch
+                                    isSelected={isExpert}
+                                    onValueChange={(enabled) => setIsExpert(enabled)}
                                     size="sm"
                                     color="primary"
                                 />

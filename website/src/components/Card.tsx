@@ -17,7 +17,7 @@ import { useState } from "react";
 import Icon from "./Icon";
 
 
-type CardVariant = "primary" |"default" | "success" | "error";
+type CardVariant = "primary" | "info" | "default" | "success" | "error";
 
 type CardProps = React.ComponentProps<typeof HeroCard> & {
     variant?: CardVariant;
@@ -28,6 +28,8 @@ export function Card({ className = "", variant = "default", ...props }: CardProp
         switch (variant) {
             case "primary":
                 return "border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20";
+            case "info":
+                return "border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20";
             case "success":
                 return "border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20";
             case "error":

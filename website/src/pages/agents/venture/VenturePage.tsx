@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { EditableValueList, Page, TabbedEditableLists } from '@/components';
-import { useVentureStore } from '@/stores';
+import { EditableValueList, Page, Switch, TabbedEditableLists } from '@/components';
+import { useSettingsStore, useVentureStore } from '@/stores';
 import { PositioningStatement } from './PositioningStatement';
 import { CardTitleAndBody, Card, CardBody } from '@/components/Card';
 import { EditableTable, EditableTextColumn, EditableCurrencyColumn, EditableNumberColumn, EditableSelectColumn, EditableUriColumn } from '@/components/EditableTable';
@@ -10,7 +10,7 @@ import { JsonRpcDebug, type HttpRequest } from '@/components/JsonRpcDebug';
 import AdvancedFeatures from './AdvancedFeatures';
 import type { AttributedString } from '@/stores/venture-types';
 import ShowMarkdown from './ShowMarkdown';
-import ShareVentureWorksheet, { useShareParams } from './ShareVentureWorksheet';
+import { ShareVentureWorksheet, useShareParams, QuickShare } from './ShareVentureWorksheet';
 
 
 const POSITIONING_TABS = [
@@ -42,6 +42,7 @@ const VenturePage = () => {
     } = useVentureStore();
 
     const { shareUrl, shareHost } = useShareParams();
+    const { isExpert, setIsExpert } = useSettingsStore();
     const isShare = shareUrl ? true : false;
 
     const [httpRequest, setHttpRequest] = useState<HttpRequest | null>(null);
@@ -216,34 +217,48 @@ const VenturePage = () => {
 
                 <ShowMarkdown
                     ventureWorksheet={{positioning, problem, solution, marketOpportunity, milestones, team, references}}
-                    collapsed={isShare}
+                    collapsed={true}
                 />
 
-                <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
-                    variant="success"
-                    collapsed={isShareCollapsed}
-                    >
-                    <div className="space-y-4">
-                        <p className="mb-4">
-                            <strong>NOTE:</strong> This section is for advanced users.
-                        </p>
-                        <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
-                        <div ref={enlistAgentRef}>
-                            <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                <QuickShare />
+
+                <div className="flex items-center gap-2">
+                    <Switch
+                        isSelected={isExpert}
+                        onValueChange={(enabled) => setIsExpert(enabled)}
+                        size="sm"
+                        color="primary"
+                    />
+                    <span>Expert Mode</span>
+                </div>
+
+                {isExpert && <div className="mt-4 space-y-4">
+                    <CardTitleAndBody title="Share to the Agentic Web (and the World!)"
+                        variant="success"
+                        collapsed={isShareCollapsed}
+                        >
+                        <div className="space-y-4">
+                            <p className="mb-4">
+                                <strong>NOTE:</strong> This section is for advanced users.
+                            </p>
+                            <PublishVentureToMcp onSubmitHttpRequest={setHttpRequest} />
+                            <div ref={enlistAgentRef}>
+                                <EnlistAgent onSubmitHttpRequest={setHttpRequest}/>
+                            </div>
                         </div>
-                    </div>
-                </CardTitleAndBody>
+                    </CardTitleAndBody>
 
-                {httpRequest && (
-                    <div className="mt-6">
-                        <JsonRpcDebug
-                            httpRequest={httpRequest}
-                            onClose={()=>setHttpRequest(null)}
-                        />
-                    </div>
-                )}
+                    {httpRequest && (
+                        <div className="mt-6">
+                            <JsonRpcDebug
+                                httpRequest={httpRequest}
+                                onClose={()=>setHttpRequest(null)}
+                            />
+                        </div>
+                    )}
 
-                <AdvancedFeatures />
+                    <AdvancedFeatures />
+                </div>}
             </div>
         </Page>
     );
