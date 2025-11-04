@@ -52,4 +52,5 @@ export interface VentureSummary {
     marketOpportunity: StringOrNumberTable | undefined;
     milestones: StringOrNumberTable | undefined;
     references: StringOrNumberTable | undefined;
+    markdown?: string
 }

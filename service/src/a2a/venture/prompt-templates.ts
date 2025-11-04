@@ -1,6 +1,9 @@
-import { StoreItem } from "../../stores/types.js";
 import { parseDid } from "../../utils/did.js";
 import { replacePlaceholders } from "../../utils/template.js";
+import { PromptStrategy } from "../types.js";
+import { VentureSummary } from "./from-website/venture-types.js";
+import { generateMarkdownSummary } from './from-website/markdown-generator.js';
+
 
 const DEFAULT_ROLE_TEMPLATE = `## Role
 
@@ -27,33 +30,25 @@ If there is very good synergy or compatibility, then do three things:
 3. Add the following exact JSON with no changes to it: { "metadata": {"resolution": { "like": true } } }
 
 <VentureProfile>
-\${ventureProfile.markdown}
+\${ventureSummary.markdown}
 </VentureProfile>
 `;
 
-/*
-const DEFAULT_SYSTEM_TEMPLATE = `
-    You are a helpful assistant that is creating a startup that is descibed in the VentureProfile.
-    You need to respond to the user's message based on the venture profile and the message history.
-    Ask questions to determine if the person you are chatting with has any synergy with the startup.
-    Try to convince the person you are chatting with that your startup is going to be successful.
-
-    <VentureProfile>
-    \${ventureProfile.markdown}
-    </VentureProfile>
-    `
-*/
-
-export function createSystemPrompt( ventureProfile: StoreItem, fromAgentDid: string, strategy: StoreItem | undefined ) {
+export function createSystemPrompt( ventureSummary: VentureSummary, fromAgentDid: string, promptStrategy: PromptStrategy | undefined ) {
     const { fragment = "venture" } = parseDid(fromAgentDid);
-    const agent = strategy?.agents?.[fragment];
-    const name = "Dave";
+    console.log('💼 createSystemPrompt: fragment=', fragment );
+    const agent = promptStrategy?.agents?.[fragment] ?? promptStrategy?.agents?.default;
+    const name = ventureSummary.positioning?.name ?? "This company";
+
+    if( !ventureSummary.markdown )
+        ventureSummary.markdown = generateMarkdownSummary( ventureSummary ); // rehydrate
+
 
     const roleTemplate = agent?.role ?? DEFAULT_ROLE_TEMPLATE;
-    const role = replacePlaceholders({ template: roleTemplate, context: { name, ventureProfile } });
+    const role = replacePlaceholders({ template: roleTemplate, context: { name, ventureSummary } });
 
     const goalTemplate = agent?.goal ?? DEFAULT_GOAL_TEMPLATE;
-    const goal = replacePlaceholders({ template: goalTemplate, context: { name, ventureProfile } });
+    const goal = replacePlaceholders({ template: goalTemplate, context: { name, ventureSummary } });
 
     const parts = [ role, goal ];
     return parts.join('\n\n');

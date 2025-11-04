@@ -6,7 +6,7 @@ import {
 } from "@a2a-js/sdk/server";
 import { Message, TextPart } from '@a2a-js/sdk';
 import { resolveSession } from '../handle-a2a-request.js';
-import { A2AEnvelope } from '../types.js';
+import { A2AEnvelope, PromptStrategy } from '../types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
 import { StoreItem } from '../../stores/types.js';
 import { a2aContextStore } from './context-store.js';
@@ -14,8 +14,8 @@ import { chatCompletion, ClaudeMessage } from '../../inference/claude-bedrock.js
 import { parseDid } from '../../utils/did.js';
 import { createSystemPrompt } from './prompt-templates.js';
 import { extractJson } from '../../utils/json.js';
-import { summarizeVentureWorksheet } from './from-website/venture-utils.js';
 import { generateMarkdownSummary } from './from-website/markdown-generator.js';
+import { VentureSummary } from './from-website/venture-types.js';
 
 // For Venture profiles
 const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
@@ -66,36 +66,41 @@ export class VentureExecutor implements AgentExecutor {
 
         // read my profile (who am I?) = toAgentDid (not the client)
         const ventureId = `${toDid}^venture`;
-        const ventureProfile = await ventureProfileStore.readItem(ventureId);
-        if( !ventureProfile )
-            throw new Error(`Venture profile not found for ${ventureId}`);
-        console.log('💼 Venture profile:', ventureProfile);
+        const ventureSummary = await ventureProfileStore.readItem(ventureId) as unknown as VentureSummary;
+        if( !ventureSummary )
+            throw new Error(`Venture summary not found for ${ventureId}`);
+        console.log('💼 Venture summary:', ventureSummary);
 
         // custom goals/prompt/strategy depending on the target agent I am talking to...
         const strategyId = `${toDid}^venture-strategy`;
-        const strategy = await ventureProfileStore.readItem(strategyId);
+        const strategy = await ventureProfileStore.readItem(strategyId) as unknown as PromptStrategy;
         if( !strategy )
             throw new Error(`Venture strategy not found for ${strategyId}`);
         console.log('💼 Venture strategy:', strategy);
 
+        let { messageHistory = [] } = await contextStore.fetchContext(contextId) ?? {}
+        console.log('💼 Fetch message history:', messageHistory);
+
+        if( envelope?.rewind ) {
+            console.log('💼 Rewinding message history to:', envelope.rewind);
+            messageHistory = [];
+        }
+
         //
         // Claude...
         //
-        const { messageHistory = [] } = await contextStore.fetchContext(contextId) ?? {}
-        console.log('💼 Fetch message history:', messageHistory);
 
         const prompt = textPart.text;
         const userMessage = { role: "user", content: prompt } as ClaudeMessage;
 
         let text;
         if( messageHistory.length === 0 ) {
-            const summary = summarizeVentureWorksheet(ventureProfile as any);
-            const md = generateMarkdownSummary(summary);
+            const md = generateMarkdownSummary(ventureSummary);
             text = `Hello!  A quick summary of what I'm working on...\n\n${md}`;
         } else {
             // continue the conversation
             const options = {
-                system: createSystemPrompt( ventureProfile, fromAgentDid, strategy ),
+                system: createSystemPrompt( ventureSummary, fromAgentDid, strategy ),
                 messages: [...messageHistory, userMessage]
             };
             text = await chatCompletion(options);

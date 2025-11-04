@@ -52,7 +52,9 @@ export const EditableUri = ({ card = true, label, value, placeholder, options, o
     };
 
     const handleOptionSelect = (option: string) => {
-        setEditableValue(option);
+        //setEditableValue(option);
+        onUpdate(option);
+        setIsEditing(false);
     };
 
     const content = (

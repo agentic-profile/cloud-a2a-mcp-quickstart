@@ -60,8 +60,6 @@ export interface JsonRpcResponse {
 export const JsonRpcDebug = ({ 
     url, 
     httpRequest,
-    //onClose,
-    //onClear,
     className = '' 
 }: JsonRpcDebugProps) => {
     const [spinner, setSpinner] = useState(false);
@@ -78,20 +76,6 @@ export const JsonRpcDebug = ({
     const [retryInit, setRetryInit] = useState<RequestInit | null>(null);
     const [retryResult, setRetryResult] = useState<Result | null>(null);
     const { authToken, setAuthToken, clearAuthToken } = useAuthToken(url);
-
-    /* Clear all internal state
-    const clearAllState = () => {
-        setRequestInit(null);
-        setMethod(null);
-        setResult(null);
-        setRetryInit(null);
-        setRetryResult(null);
-        setRetrySpinner(false);
-        setSpinner(false);
-        if (onClear) {
-            onClear();
-        }
-    };*/
 
     const handleSendRequest = async (request: RequestInit) => {
         if( !url )

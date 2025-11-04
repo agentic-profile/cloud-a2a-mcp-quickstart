@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, StarIcon as StarOutlineIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import { Page, Button, EditableUri, ErrorSubtext, JsonRpcDebug, Markdown, Card, CardBody, HttpProgressSummary, LabelValue, LabelDid, Spinner } from '@/components';
-import { resolveParamFromWindow, updateWindowParam } from '@/tools/net';
+import {
+    Page,
+    Button, Label,
+    EditableUri, ErrorSubtext, JsonRpcDebug, Markdown, Card, CardBody,
+    HttpProgressSummary, LabelValue, LabelDid, Spinner,
+    Switch
+} from '@/components';
+import { useParamFromWindow, updateWindowParam } from '@/tools/net';
 import type { HttpProgress } from '@/components/JsonRpcDebug';
 import { useUserProfileStore } from '@/stores';
 import { webDidToUrl } from "@agentic-profile/common";
@@ -11,9 +17,8 @@ import { parseDid } from '@/tools/misc';
 import { validateDidWebUri } from '@/tools/net';
 
 const A2A_URL_PARAM = 'a2aUrl';
-
-const TO_AGENT_OPTIONS = [ 'did:web:iamagentic.ai:1#venture' ];
-
+const TO_AGENT_OPTIONS = [ 'did:web:iamagentic.ai:127#venture' ];
+const TO_SERVICE_ENDPOINT_OPTIONS = ['http://localhost:3000/a2a/venture'];
 
 interface Message {
     id: string;
@@ -37,16 +42,17 @@ export const ChatPage = () => {
     ]);*/
     const [inputText, setInputText] = useState('');
     const [currentRequest, setCurrentRequest] = useState<RequestInit | null>(null);
+    const [resolution, setResolution] = useState<any|undefined>({like:false});
 
-    //const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [agentDidError, setAgentDidError] = useState<string | null>(null);
     const [sendMessageError, setSendMessageError] = useState<string | null>(null);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [ loadingProfile, setLoadingProfile] = useState(false);
 
-    const a2aUrl = resolveParamFromWindow(A2A_URL_PARAM);
+    const a2aUrl = useParamFromWindow(A2A_URL_PARAM);
     const [toAgentDid, setToAgentDid] = useState<string>('');
+    const [doRewind, setDoRewind] = useState(false);
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -114,7 +120,6 @@ export const ChatPage = () => {
             } else if( !service.serviceEndpoint ) {
                 setAgentDidError(`Service endpoint not found for ${agentDid}: ${serviceId}`);
             } else { 
-                //setA2aUrl(service.serviceEndpoint);
                 updateWindowParam(A2A_URL_PARAM, service.serviceEndpoint);
             }
         } catch (error) {
@@ -137,7 +142,11 @@ export const ChatPage = () => {
             timestamp: new Date()
         };
         
-        setMessages(prev => [...prev, newMessage]);
+        if( doRewind ) {
+            setMessages([newMessage]);
+            setResolution(undefined);
+        } else
+            setMessages(prev => [...prev, newMessage]);
         
         // Clear any previous error messages
         setSendMessageError(null);
@@ -157,7 +166,8 @@ export const ChatPage = () => {
                         ],
                         metadata: {
                             envelope: {
-                                toAgentDid
+                                toAgentDid,
+                                rewind: doRewind ? new Date(0).toISOString() : undefined
                             }
                         }
                     }
@@ -165,12 +175,16 @@ export const ChatPage = () => {
             })
         };
         
+        setDoRewind(false);
         setCurrentRequest(rpcRequest);
         setInputText('');
     };
 
     const handleJsonRpcResult = (result: any) => {
         const { kind, parts, metadata } = result?.data?.result ?? {};
+        if( metadata?.resolution ) {
+            setResolution(metadata.resolution);
+        }
         if ( parts ) {
             if( kind !== "message" ) {
                 setSendMessageError(`Unknown A2A response kind: ${kind}`);
@@ -204,6 +218,8 @@ export const ChatPage = () => {
         updateWindowParam(A2A_URL_PARAM, a2aUrl);
     };
 
+    const sendDisabledReason = !isValidDid(toAgentDid) ? 'Invalid agent DID' : !isValidUrl(a2aUrl) ? 'Invalid A2A service endpoint' : undefined;
+
     return (
         <Page
             title="Chat with AI Agent"
@@ -234,6 +250,7 @@ export const ChatPage = () => {
                                 value={a2aUrl}
                                 placeholder="Enter peer agent DID including fragment"
                                 onUpdate={handleA2aUrlUpdate}
+                                options={TO_SERVICE_ENDPOINT_OPTIONS}
                             />
                         </div>
 
@@ -249,65 +266,79 @@ export const ChatPage = () => {
                 </Card>
 
                 {/* Messages Container */}
-                <Card 
-                    ref={messagesContainerRef} 
-                    className={`overflow-y-auto mb-6 transition-all duration-300 ease-in-out ${
-                        messages.length === 0
-                            ? 'h-64' // Taller height for empty state to avoid scrollbar
-                            : messages.length <= 2 
-                                ? 'h-64' // Medium height for 1-2 messages
-                                : 'h-96 sm:h-[500px]' // Full height for 3+ messages
-                    }`}
-                >
-                    <CardBody>
-                        {messages.length === 0 ? (
-                            // Empty state with chat icon
-                            <div className="flex flex-col items-center justify-center h-full py-12">
-                                <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
-                                <p className="text-gray-500 dark:text-gray-400 text-lg">Start a conversation</p>
-                                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Send a message below to begin chatting</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {messages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                                    >
-                                        <div
-                                            className={`max-w-xs sm:max-w-lg lg:max-w-2xl xl:max-w-4xl px-4 py-2 rounded-lg ${
-                                                                                            message.sender === 'user'
-                                                            ? 'bg-dodgerblue text-white'
-                                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
-                                            }`}
-                                        >
-                                            <Markdown>{message.text}</Markdown>
-                                            <div className="flex items-center gap-2">
-                                                <p className={`text-xs mt-1 ${
-                                                            message.sender === 'user' 
-                                                                ? 'text-blue-200' 
-                                                                : 'text-gray-500 dark:text-gray-400'
-                                                        }`}>
-                                                    {message.timestamp.toLocaleTimeString()}
-                                                </p>
-                                                {message.metadata?.resolution?.like === true && (
-                                                    <StarSolidIcon className="h-4 w-4 text-yellow-500" />
-                                                )}
-                                                {message.metadata?.resolution?.like === false && (
-                                                    <StarOutlineIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardBody>
-                </Card>
                 <Card>
                     <CardBody>
-
-                        <div className="flex space-x-3">
+                        <div
+                            ref={messagesContainerRef} 
+                            className={`overflow-y-auto mb-6 transition-all duration-300 ease-in-out ${
+                                messages.length === 0
+                                    ? 'h-64' // Taller height for empty state to avoid scrollbar
+                                    : messages.length <= 2 
+                                        ? 'h-64' // Medium height for 1-2 messages
+                                        : 'h-96 sm:h-[500px]' // Full height for 3+ messages
+                            }`}
+                        >
+                            {messages.length === 0 ? (
+                                // Empty state with chat icon
+                                <div className="flex flex-col items-center justify-center h-full py-12">
+                                    <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                                    <p className="text-gray-500 dark:text-gray-400 text-lg">Start a conversation</p>
+                                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Send a message below to begin chatting</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {messages.map((message) => (
+                                        <div
+                                            key={message.id}
+                                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div
+                                                className={`max-w-xs sm:max-w-lg lg:max-w-2xl xl:max-w-4xl px-4 py-2 rounded-lg ${
+                                                                                                message.sender === 'user'
+                                                                ? 'bg-dodgerblue text-white'
+                                                                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                }`}
+                                            >
+                                                <Markdown>{message.text}</Markdown>
+                                                <div className="flex items-center gap-2">
+                                                    <p className={`text-xs mt-1 ${
+                                                                message.sender === 'user' 
+                                                                    ? 'text-blue-200' 
+                                                                    : 'text-gray-500 dark:text-gray-400'
+                                                            }`}>
+                                                        {message.timestamp.toLocaleTimeString()}
+                                                    </p>
+                                                    {message.metadata?.resolution?.like === true && (
+                                                        <StarSolidIcon className="h-4 w-4 text-yellow-500" />
+                                                    )}
+                                                    {message.metadata?.resolution?.like === false && (
+                                                        <StarOutlineIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        { resolution && <div>
+                            <div className="flex items-center justify-between">
+                                <Label label="Peer resolution" />
+                                <button
+                                    onClick={() => setResolution(undefined)}
+                                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                                    aria-label="Clear resolution"
+                                >
+                                    <XMarkIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="mb-2 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 overflow-x-auto">
+                                <pre className="text-sm whitespace-pre-wrap break-words">
+                                    {JSON.stringify(resolution, null, 4)}
+                                </pre>
+                            </div>
+                        </div>}
+                        <div className="flex space-x-3 mb-2">
                             <input
                                 type="text"
                                 value={inputText}
@@ -325,7 +356,18 @@ export const ChatPage = () => {
                                 <span className="hidden sm:inline">Send</span>
                             </Button>
                         </div>
+                        { sendDisabledReason && <ErrorSubtext message={sendDisabledReason} /> }
                         { sendMessageError && <ErrorSubtext message={sendMessageError} /> }
+
+                        <div className="flex items-center gap-2 justify-end">
+                            <Switch
+                                isSelected={doRewind}
+                                onValueChange={(enabled) => setDoRewind(enabled)}
+                                size="sm"
+                                color="primary"
+                            />
+                            <span>Rewind on send</span>
+                        </div>
 
                         <HttpProgressSummary progress={httpProgress} />
                     </CardBody>
@@ -348,4 +390,16 @@ export const ChatPage = () => {
     );
 };
 
+function isValidDid(did: string): boolean {
+    return did.startsWith('did:web:');
+}
 
+function isValidUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+}

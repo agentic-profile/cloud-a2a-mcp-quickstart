@@ -1,5 +1,6 @@
 export interface A2AEnvelope {
     toAgentDid: string;
+    rewind?: string; // ISO8601 date
 }
 
 export interface AgentCardProps {
@@ -7,3 +8,12 @@ export interface AgentCardProps {
 }
 
 export type AgentCardBuilder = (props: AgentCardProps) => any;
+
+export interface PromptStrategy {
+    agents: {
+        [key: string]: {
+            role: string;
+            goal: string;
+        };
+    };
+}
