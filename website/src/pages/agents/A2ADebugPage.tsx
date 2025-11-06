@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Page, JsonRpcDebug, Card, CardBody, Button, EditableUri, JsonEditor } from '@/components';
 import { useParamFromWindow, updateWindowParam, DEFAULT_SERVER_URLS, buildEndpoint } from '@/tools/net';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { v4 as uuidv4 } from "uuid";
 
 const URL_OPTIONS = DEFAULT_SERVER_URLS.map(url => url+'/a2a/venture');
 
@@ -79,7 +80,7 @@ const A2ADebugPage = () => {
 
         // Create the JSON RPC request
         const body = JSON.stringify({
-            method: getParsedPayload().method || 'task/send',
+            method: getParsedPayload().method || 'message/send',
             params: getParsedPayload().params || getParsedPayload()
         });
 
@@ -104,10 +105,11 @@ const A2ADebugPage = () => {
 
     const presetPayloads = [
         {
-            name: 'Task Send Message',
+            name: 'Send Message',
             payload: {
-                method: 'task/send',
+                method: 'message/send',
                 params: {
+                    id: uuidv4(),
                     message: {
                         role: 'user',
                         parts: [

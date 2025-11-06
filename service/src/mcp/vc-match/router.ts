@@ -1,10 +1,10 @@
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { Request, Response, Router as ExpressRouter } from 'express';
 import { handleToolsList, handleToolsCall } from './methods.js';
 import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, processJsonRpcMethod } from '../../json-rpc/index.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 
-const router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // MCP tools/list endpoint
 router.post('/', async (req: Request, res: Response) => {

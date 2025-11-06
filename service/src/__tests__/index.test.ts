@@ -90,7 +90,7 @@ describe('Lambda Handler', () => {
         resource: '',
         body: JSON.stringify({
           id: 'task-1',
-          method: 'tasks/send',
+          method: 'message/send',
           params: {
             position: 'Senior Software Engineer',
           },

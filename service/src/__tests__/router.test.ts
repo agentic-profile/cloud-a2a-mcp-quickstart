@@ -171,7 +171,7 @@ describe('Express Router', () => {
         .post('/a2a/hireme')
         .send({
           id: 'task-1',
-          method: 'tasks/send',
+          method: 'message/send',
           params: {
             position: 'Senior Software Engineer',
             experience: '5+ years',
@@ -208,7 +208,7 @@ describe('Express Router', () => {
         .post('/a2a/vc')
         .send({
           id: 'task-3',
-          method: 'task/send',
+          method: 'message/send',
           params: {
             investment: '1000000',
             stage: 'Series A',

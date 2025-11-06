@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction, Application } from 'express';
 import wellKnownDidDocument from './well-known-did-document.json' with { type: 'json' };
 
 // A2A handlers and helpers
@@ -19,7 +19,7 @@ import walletRouter from "./mcp/wallet/router.js";
 import { A2AServiceRouter } from './a2a/router.js';
 
 // Create Express app
-const app = express();
+const app: Application = express();
 
 // Trust proxy for accurate req.protocol when behind reverse proxy (e.g., AWS API Gateway)
 app.set('trust proxy', true);

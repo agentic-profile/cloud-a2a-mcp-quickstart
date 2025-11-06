@@ -4,7 +4,7 @@ import { handleA2ARequest } from './handle-a2a-request.js';
 import { AgentCardBuilder } from './types.js';
 
 
-export function A2AServiceRouter( executor: AgentExecutor, cardBuilder: AgentCardBuilder ) {
+export function A2AServiceRouter( executor: AgentExecutor, cardBuilder: AgentCardBuilder ): Router {
     const router = Router();
 
     router.get('/agent-card.json', async (req: Request, res: Response) => {

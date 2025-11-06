@@ -25,7 +25,7 @@
   "dependencies": {
     "@a2a-js/sdk": "^0.3.2",
     "@agentic-profile/auth": "^0.6.2",
-    "@agentic-profile/common": "^0.6.0",
+    "@agentic-profile/common": "^0.6.2",
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@aws-sdk/client-cloudformation": "^3.0.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
@@ -43,7 +43,8 @@
     "ioredis": "^5.6.1",
     "loglevel": "^1.9.2",
     "mathjs": "^14.8.2",
-    "redis": "^5.7.0"
+    "redis": "^5.7.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@agentic-profile/express-common": "^0.6.1",
@@ -62,5 +63,6 @@
   },
   "overrides": {
     "express": "^5.1.0"
-  }
+  },
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
 }

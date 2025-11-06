@@ -5,8 +5,9 @@ import {
     ExecutionEventBus,
 } from "@a2a-js/sdk/server";
 import { Message, TextPart } from '@a2a-js/sdk';
+import { AgentMessageEnvelope } from '@agentic-profile/common';
 import { resolveSession } from '../handle-a2a-request.js';
-import { A2AEnvelope, PromptStrategy } from '../types.js';
+import { PromptStrategy } from '../types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
 import { StoreItem } from '../../stores/types.js';
 import { a2aContextStore } from './context-store.js';
@@ -42,10 +43,10 @@ export class VentureExecutor implements AgentExecutor {
     ): Promise<void> {
         // A2A message and session
         const { userMessage: a2aUserMessage } = requestContext;
-        const envelope = a2aUserMessage.metadata?.envelope as A2AEnvelope | undefined;
-        const toAgentDid = envelope?.toAgentDid;
+        const envelope = a2aUserMessage.metadata?.envelope as AgentMessageEnvelope | undefined;
+        const toAgentDid = envelope?.to;
         if( !toAgentDid )
-            throw new Error("Message envelope is missing recipient id (toAgentDid property)");
+            throw new Error("Message envelope is missing recipient id ('to' property)");
         const { did: toDid, fragment: toFragment } = parseDid(toAgentDid);
         if( !toFragment )
             throw new Error("Invalid toAgentDid, missing fragment: " + toAgentDid);

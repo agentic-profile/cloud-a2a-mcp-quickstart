@@ -12,13 +12,15 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@agentic-profile/auth": "^0.6.0",
+    "@agentic-profile/auth": "^0.6.2",
+    "@agentic-profile/common": "^0.6.2",
     "@heroui/react": "^2.8.2",
     "@iconify-icons/lucide": "^1.2.135",
     "@iconify/react": "^6.0.0",
     "@iconify/types": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "did-resolver": "^4.1.0",
     "dompurify": "^3.2.7",
     "marked": "^16.3.0",
     "next-themes": "^0.4.6",
@@ -26,6 +28,7 @@
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
     "tailwind-merge": "^3.3.1",
+    "uuid": "^13.0.0",
     "vite-tsconfig-paths": "^5.1.4",
     "zustand": "^5.0.8"
   },
@@ -50,5 +53,6 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2"
-  }
+  },
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
 }

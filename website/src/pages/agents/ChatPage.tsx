@@ -15,10 +15,15 @@ import { useUserProfileStore } from '@/stores';
 import { webDidToUrl } from "@agentic-profile/common";
 import { parseDid } from '@/tools/misc';
 import { validateDidWebUri } from '@/tools/net';
+import { v4 as uuidv4 } from "uuid";
+
 
 const A2A_URL_PARAM = 'a2aUrl';
-const TO_AGENT_OPTIONS = [ 'did:web:iamagentic.ai:127#venture' ];
-const TO_SERVICE_ENDPOINT_OPTIONS = ['http://localhost:3000/a2a/venture'];
+const TO_AGENT_OPTIONS = [ 'did:web:iamagentic.ai:95#connect' ];
+const TO_SERVICE_ENDPOINT_OPTIONS = [
+    'http://localhost:3000/a2a/venture',
+    'http://localhost:3003/agents/connect'
+];
 
 interface Message {
     id: string;
@@ -152,10 +157,12 @@ export const ChatPage = () => {
         setSendMessageError(null);
         
         // Create JSON-RPC request for chat message
+        const now = new Date().toISOString();
         const rpcRequest: RequestInit = {
             body: JSON.stringify({
-                method: 'task/send',
+                method: 'message/send',
                 params: {
+                    id: uuidv4(),
                     message: {
                         role: 'user',
                         parts: [
@@ -166,7 +173,8 @@ export const ChatPage = () => {
                         ],
                         metadata: {
                             envelope: {
-                                toAgentDid,
+                                to: toAgentDid,
+                                created: now,
                                 rewind: doRewind ? new Date(0).toISOString() : undefined
                             }
                         }

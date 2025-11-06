@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, type Router as ExpressRouter } from 'express';
 import { handleToolsCall } from './methods.js';
 import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, jrpcResult, processJsonRpcMethod } from '../../json-rpc/index.js';
 import { JSONRPCRequest } from '@modelcontextprotocol/sdk/types.js';
@@ -7,7 +7,7 @@ import { MCP_TOOLS } from './tools.js';
 import { DEFAULT_MCP_INITIALIZE_RESPONSE } from '../misc.js';
 import { handleMcpGet, handleMcpDelete } from '../mcp-stream.js';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 async function handleMcpRequest(req: Request, res: Response) {
     await processJsonRpcMethod( req, res, async ( jrpcRequest: JsonRpcRequest, session: ClientAgentSession | null ): Promise<JsonRpcResponse | null> => {
