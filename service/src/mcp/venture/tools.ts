@@ -1,5 +1,20 @@
 export const MCP_TOOLS = [
     {
+        name: 'query',
+        description: 'Read all venture profiles of a specific kind',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                kind: {
+                    type: 'string',
+                    enum: ['venture', 'capital'],
+                    description: 'The kind of venture profile to read'
+                }
+            },
+            required: ['kind']
+        }
+    },
+    {
         name: 'read',
         description: 'Read venture profile of a specific kind and owned by the authenticating agent',
         inputSchema: {
