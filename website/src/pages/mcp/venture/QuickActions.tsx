@@ -46,6 +46,15 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
             ),
         },
         {
+            id: 'list-all',
+            label: 'List All Profiles',
+            icon: <ClockIcon className="w-5 h-5" />,
+            createRequest: ({kind}) => mcpToolsCallRequestInit2(
+                "query",
+                { kind }
+            ),
+        },
+        {
             id: 'delete',
             label: 'Delete Profile',
             icon: <TrashIcon className="w-5 h-5" />,

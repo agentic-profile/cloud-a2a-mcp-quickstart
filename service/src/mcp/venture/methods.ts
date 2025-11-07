@@ -1,6 +1,6 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { itemStore } from '../../stores/dynamodb-store.js';
-import { jrpcError, jrpcResult } from '../../json-rpc/index.js';
+import { jrpcError, jrpcResult, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { resolveAgentId } from '../../json-rpc/utils.js';
 
 import { ClientAgentSession } from '@agentic-profile/auth';
@@ -27,10 +27,17 @@ function authorResolver(_item: StoreItem | undefined, session: ClientAgentSessio
 
 const crud = mcpCrud(store, { idResolver, itemKey: "profile", authorResolver, authorKey: "subjectDid" } );
 
-export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession, req: Request): Promise<JSONRPCResponse | JSONRPCError> {
+export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession | null, req: Request): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
 
     console.log('🔍 handleToolsCall', name, request, session);
+
+    if( name === 'query')
+        return await handleQuery(request);
+
+    // all other requests require authentication
+    if( !session )
+        return jrpcErrorAuthRequired( request.id! );
     
     switch (name) {
         case 'read':
@@ -47,6 +54,36 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
             return await handleSubscribeToAgent(request,session,req);
         default:
             return jrpcError(request.id!, -32601, `Tool ${name} not found`);
+    }
+}
+
+interface QueryPayload {
+    kind: string;
+    limit?: number
+}
+
+async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
+
+    const { kind, limit = 200 } = request.params?.arguments as QueryPayload || {};
+    if( !['venture','capital'].includes(kind) )
+        return jrpcError(request.id!, -32602, `Invalid kind: ${kind}`);
+
+    try {
+        const query = {
+            IndexName: "KindIndex",
+            KeyConditionExpression: "kind = :kind",
+            ExpressionAttributeValues: { 
+                ":kind": kind,
+            },
+            ScanIndexForward: false,
+            Limit: limit          
+        }
+        const profiles = await store.queryItems(query);
+        return jrpcResult(request.id!, { profiles });
+    } catch (error) {
+        const details = `Failed to query ${kind} in ${store.name()}: ${(error as Error).message}`;
+        console.log( details, error);
+        return jrpcError(request.id!, -32603, details);
     }
 }
 

@@ -1,6 +1,6 @@
 import { Router, Request, Response, type Router as ExpressRouter } from 'express';
 import { handleToolsCall } from './methods.js';
-import { jrpcErrorAuthRequired, JsonRpcRequest, JsonRpcResponse, jrpcResult, processJsonRpcMethod } from '../../json-rpc/index.js';
+import { JsonRpcRequest, JsonRpcResponse, jrpcResult, processJsonRpcMethod } from '../../json-rpc/index.js';
 import { JSONRPCRequest } from '@modelcontextprotocol/sdk/types.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { MCP_TOOLS } from './tools.js';
@@ -22,10 +22,7 @@ async function handleMcpRequest(req: Request, res: Response) {
             case 'tools/list':
                 return jrpcResult(requestId, { tools: MCP_TOOLS } );
             case 'tools/call':
-                if( !session )
-                    return jrpcErrorAuthRequired( requestId );
-                else
-                    return await handleToolsCall( jrpcRequest as JSONRPCRequest, session, req );
+                return await handleToolsCall( jrpcRequest as JSONRPCRequest, session, req );
             default:
                 return null;
         }
