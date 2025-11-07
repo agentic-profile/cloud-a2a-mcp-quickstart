@@ -170,13 +170,13 @@ export const ChatPage = () => {
                                 kind: 'text',
                                 text
                             }
-                        ],
-                        metadata: {
-                            envelope: {
-                                to: toAgentDid,
-                                created: now,
-                                rewind: doRewind ? new Date(0).toISOString() : undefined
-                            }
+                        ]
+                    },
+                    metadata: {
+                        envelope: {
+                            to: toAgentDid,
+                            created: now,
+                            rewind: doRewind ? new Date(0).toISOString() : undefined
                         }
                     }
                 }

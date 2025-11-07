@@ -43,8 +43,9 @@ export class VentureExecutor implements AgentExecutor {
     ): Promise<void> {
         // A2A message and session
         const { userMessage: a2aUserMessage } = requestContext;
-        const envelope = a2aUserMessage.metadata?.envelope as AgentMessageEnvelope | undefined;
-        const toAgentDid = envelope?.to;
+        //const envelope = a2aUserMessage.metadata?.envelope as AgentMessageEnvelope | undefined;
+        const a2aEnvelope = (requestContext as any).params.metadata?.envelope as AgentMessageEnvelope | undefined;
+        const toAgentDid = a2aEnvelope?.to;
         if( !toAgentDid )
             throw new Error("Message envelope is missing recipient id ('to' property)");
         const { did: toDid, fragment: toFragment } = parseDid(toAgentDid);
@@ -82,8 +83,8 @@ export class VentureExecutor implements AgentExecutor {
         let { messageHistory = [] } = await contextStore.fetchContext(contextId) ?? {}
         console.log('💼 Fetch message history:', messageHistory);
 
-        if( envelope?.rewind ) {
-            console.log('💼 Rewinding message history to:', envelope.rewind);
+        if( a2aEnvelope?.rewind ) {
+            console.log('💼 Rewinding message history to:', a2aEnvelope.rewind);
             messageHistory = [];
         }
 
