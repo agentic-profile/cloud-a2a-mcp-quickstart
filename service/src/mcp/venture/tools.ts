@@ -12,6 +12,36 @@ export const MCP_TOOLS = [
                 }
             },
             required: ['kind']
+        },
+        outputSchema: {
+            type: 'object',
+            properties: {
+                profiles: {
+                    type: 'array',
+                    description: 'List of venture profiles matching the requested kind',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: {
+                                type: 'string',
+                                description: 'Unique identifier for the profile'
+                            },
+                            kind: {
+                                type: 'string',
+                                enum: ['venture', 'capital', 'venture-strategy'],
+                                description: 'The kind of profile'
+                            },
+                            updated: {
+                                type: 'string',
+                                format: 'date-time',
+                                description: 'Timestamp when the profile was last updated'
+                            }
+                        },
+                        additionalProperties: true
+                    }
+                }
+            },
+            required: ['profiles']
         }
     },
     {

@@ -1,6 +1,6 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { storeValue, getValue } from '../../cache/redis.js';
-import { jrpcResult, jrpcError } from '../../json-rpc/index.js';
+import { jrpcResult, jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { mcpTextContentResponse } from '../misc.js';
 import { MCP_TOOLS } from './tools.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
@@ -9,22 +9,25 @@ export async function handleToolsList(request: JSONRPCRequest): Promise<JSONRPCR
     return jrpcResult(request.id!, { tools: MCP_TOOLS } ) as JSONRPCResponse;
 }
 
-export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession): Promise<JSONRPCResponse | JSONRPCError> {
+export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
 
     console.log('🔍 handleToolsCall', name, session);
     
     switch (name) {
         case 'update':
-            return await handleLocationUpdate(request);
+            return await handleLocationUpdate(request,session);
         case 'query':
-            return await handleLocationQuery(request);
+            return await handleLocationQuery(request,session);
         default:
             return jrpcError(request.id!, -32601, `Tool ${name} not found`);
     }
 }
 
-export async function handleLocationUpdate(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
+export async function handleLocationUpdate(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
+    if( !session )
+        return jrpcErrorAuthRequired( request.id! );
+    
     const { coords } = request.params || {};
     
     if (!coords) {
@@ -35,8 +38,7 @@ export async function handleLocationUpdate(request: JSONRPCRequest): Promise<JSO
         return jrpcError(request.id!, -32602, 'Invalid params: both latitude and longitude must be provided and as numbers');
     }
 
-    const userDid = "did:web:iamagentic.ai:1";
-    const locationKey = `location:${userDid}`;
+    const locationKey = `location:${session.agentDid}`;
     
     const locationData = {
         latitude,
@@ -56,9 +58,11 @@ export async function handleLocationUpdate(request: JSONRPCRequest): Promise<JSO
     }
 }
 
-export async function handleLocationQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
-    const userDid = "did:web:iamagentic.ai:1";
-    const locationKey = `location:${userDid}`;
+export async function handleLocationQuery(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
+    if( !session )
+        return jrpcErrorAuthRequired( request.id! );
+    
+    const locationKey = `location:${session.agentDid}`;
     
     try {
         const locationData = await getValue(locationKey);

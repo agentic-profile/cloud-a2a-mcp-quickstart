@@ -27,7 +27,7 @@ export const useImportIdentityStore = create<ImportIdentityState>()(
     persist(
         (set) => ({
             exportKeyring: null,
-            identityHostUrl: 'https://matchwise.ai/import',
+            identityHostUrl: 'https://matchwise.ai/import/key',
             onSuccessAction: null,
             setExportKeyring: (exportKeyring) => set({ exportKeyring }),
             setIdentityHostUrl: (url) => set({ identityHostUrl: url }),
