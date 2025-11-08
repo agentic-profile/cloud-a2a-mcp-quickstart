@@ -43,14 +43,6 @@ export const CreateIdentityForm = () => {
         setIsCreating(true);
         
         try {
-            const services = [
-                {
-                    name: "People connector",
-                    type: "A2A/venture",
-                    id: "venture",
-                    url: "http://localhost:3000/a2a/venture"
-                }
-            ];
             const { profile, keyring, b64uPublicKey } = await createAgenticProfile({ services, createJwkSet: createEdDsaJwk });
 
             profile.name = userName;
