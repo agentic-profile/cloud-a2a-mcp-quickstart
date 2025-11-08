@@ -22,7 +22,7 @@ export const CreateIdentityForm = () => {
             name: "People connector",
             type: "A2A/venture",
             id: "venture",
-            url: "http://localhost:3000/a2a/venture"
+            url: "https://example-api.agenticprofile.ai/a2a/venture"
         }
     ]);
     const [newService, setNewService] = useState<Service>({
