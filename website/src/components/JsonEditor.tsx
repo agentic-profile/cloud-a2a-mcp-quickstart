@@ -47,6 +47,10 @@ const JsonEditor = ({
 
     const currentIsValid = showValidation ? isValidJson() : true;
 
+    // Convert height class to min-height for resize to work properly
+    // e.g., "h-48" -> "min-h-48"
+    const minHeightClass = height.replace(/^h-/, 'min-h-');
+
     return (
         <div className={`mb-4 ${className}`}>
             {/* Examples */}
@@ -72,7 +76,7 @@ const JsonEditor = ({
                 value={value}
                 onChange={handleChange}
                 disabled={disabled}
-                className={`w-full ${height} p-3 font-mono text-sm rounded-md border resize-none ${
+                className={`w-full ${minHeightClass} p-3 font-mono text-sm rounded-md border resize-y overflow-auto ${
                     currentIsValid
                         ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
                         : 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'

@@ -20,6 +20,7 @@ import McpVolunteerMatchPage from './pages/mcp/McpVolunteerMatchPage';
 import McpVenturePage from './pages/mcp/venture/McpVenturePage';
 import McpReputationPage from './pages/mcp/reputation/McpReputationPage';
 import McpWalletPage from './pages/mcp/wallet/McpWalletPage';
+import McpActivityPage from './pages/mcp/activity/McpActivityPage';
 import SettingsPage from './pages/SettingsPage';
 import IdentityPage from './pages/identity/IdentityPage';
 import { useSettingsStore } from './stores/settingsStore';
@@ -62,6 +63,7 @@ function App() {
                         <Route path="/mcp/venture" element={<McpVenturePage />} />
                         <Route path="/mcp/wallet" element={<McpWalletPage />} />
                         <Route path="/mcp/community" element={<McpCommunityPage />} />
+                        <Route path="/mcp/activity" element={<McpActivityPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/identity" element={<IdentityPage />} />
                     </Routes>
