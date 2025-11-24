@@ -12,6 +12,12 @@ const EXAMPLE_QUERIES: JsonExample[] = [
         }
     },
     {
+        name: 'Text Search',
+        payload: {
+            text: 'london'
+        }
+    },
+    {
         name: 'Distance',
         payload: {
             geolocation: {
@@ -35,7 +41,8 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     }*/
     {
         name: 'All',
-        payload:{
+        payload: {
+            "text": "london",
             "postcode": "E1 3DG",
             "geolocation": {
               "latitude": 51.5171364,
@@ -63,9 +70,7 @@ const QueryActivities = ({ onSubmitHttpRequest }: QueryActivitiesProps) => {
             method: 'tools/call',
             params: {
                 name: 'query',
-                arguments: {
-                    query
-                }
+                arguments: query
             }
         };
     };

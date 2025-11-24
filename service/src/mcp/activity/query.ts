@@ -9,6 +9,7 @@ interface Geolocation {
 }
 
 interface ActivityQuery {
+    text?: string;
     postcode?: string;
     distance?: number;
     geolocation?: Geolocation;
@@ -16,17 +17,23 @@ interface ActivityQuery {
     //timeCommitment?: 'One Time' | 'Weekly' | 'Monthly' | 'Flexible';
 }
 
-export async function handleQuery(request: JSONRPCRequest,activities:any[]): Promise<JSONRPCResponse | JSONRPCError> {
-    const args = request.params?.arguments as { query: ActivityQuery } | undefined;
-    if( !args?.query )
+export async function handleQuery(request: JSONRPCRequest, activities:any[]): Promise<JSONRPCResponse | JSONRPCError> {
+    const query = request.params?.arguments as ActivityQuery | undefined;
+    if( !query )
         return jrpcError(request.id!, -32602, `Invalid arguments: query is required`);
 
-    const { postcode, geolocation, distance, attendanceType, /*timeCommitment*/ } = args.query;
+    const { text, postcode, geolocation, distance, attendanceType, /*timeCommitment*/ } = query;
     let results = activities;
 
     if( postcode ) {
         // activities in a given postcode
-        results = results.filter((activity: any) => activity.postcode === postcode);
+        const caps = postcode.toUpperCase();
+        results = results.filter((activity: any) => activity.postcode === caps);
+    }
+
+    if( text ) {
+        const keywords = text.toLowerCase().split(/\s+/);
+        results = results.filter((activity: any) => ensureKeywords(activity, keywords));
     }
     
     if( distance && geolocation) {
@@ -39,12 +46,31 @@ export async function handleQuery(request: JSONRPCRequest,activities:any[]): Pro
         results = results.filter((activity: any) => activity.activityDefinitionSubDocument?.attendanceType === attendanceType);
     }
 
+    results = pruneActivities(results);
+
     return mcpResultResponse(request.id!, {
         kind: 'activity-list',
         count: results.length,
         activities: results,
-        query: args.query
+        query
     });
+}
+
+// remove properties that are not needed for the response
+function pruneActivities( activities: any[] ): any[] {
+    return activities.map((activity: any) => {
+        const { fulltext, ...etc } = activity;
+        return etc;
+    });
+}
+
+function ensureKeywords( activity: any, keywords: string[] ): boolean {
+    for( const keyword of keywords ) {
+        if( !activity.fulltext.includes(keyword) )
+            return false;
+    }
+
+    return true
 }
 
 // Helper function to calculate distance between two coordinates (Haversine formula)

@@ -1,12 +1,8 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
-import { /*mcpContentResponse, mcpContentResponse,*/ mcpResultResponse } from '../misc.js';
+import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
-
-import activityData from './activities.json' with { type: 'json' };
-const activities = simplifyActivities(activityData);
-console.log('🔍 activities', activities.length );
-
+import { activities } from './activities.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -101,76 +97,4 @@ async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResp
 
 function asMillis(date: string): number {
     return new Date(date).getTime();
-}
-
-//
-// Convert MongoDB objects to simpler objects for the MCP
-//
-
-function simplifyActivities(activities: any[]): any[] {
-    return activities.map(simplifyActivity);
-}
-
-function simplifyActivity(activity: any): any {
-    const result = simplifyObject(activity);
-    result.postcode = resolvePostcodeFromActivity(activity);
-    return result;
-}
-
-function simplifyObject(obj: any): any {
-    if (obj === null || obj === undefined) {
-        return obj;
-    }
-    
-    // If it's an object with a $oid property, replace with the value
-    if (typeof obj === 'object' && !Array.isArray(obj) && obj.$oid !== undefined) {
-        return obj.$oid;
-    }
-    
-    // If it's an object with a $date property, replace with the value
-    if (typeof obj === 'object' && !Array.isArray(obj) && obj.$date !== undefined) {
-        return obj.$date;
-    }
-    
-    // If it's an array, recursively process each element
-    if (Array.isArray(obj)) {
-        return obj.map(item => simplifyObject(item));
-    }
-    
-    // If it's a plain object, recursively process all properties
-    if (typeof obj === 'object') {
-        const simplified: any = {};
-        for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                // Rename _id to id
-                const newKey = key === '_id' ? 'id' : key;
-                simplified[newKey] = simplifyObject(obj[key]);
-            }
-        }
-        return simplified;
-    }
-    
-    // For primitives, return as-is
-    return obj;
-}
-
-function resolvePostcodeFromActivity( activity: any ): string | undefined {
-    let postcode = resolvePostcodeFromStreet( activity.address?.street );
-    if( !postcode )
-        postcode = resolvePostcodeFromStreet( activity.organizationSubDocument?.fullAddress?.street );
-
-    //if( postcode )
-    //    console.log('🔍 postcode', postcode, activity.id );
-    return postcode;
-}
-
-function resolvePostcodeFromStreet( street: string ): string | undefined {
-    // UK postcode pattern: 1-2 letters, 1-2 numbers, optional space, 1 number, 2 letters
-    // Examples: E1 3DG, SW2 1RW, EX32 7EU, CO1 2SL, B3 1DG, NE63 9UJ
-    const ukPostcodeRegex = /\b([A-Z]{1,2}\d{1,2}\s?\d[A-Z]{2})\b/;
-    const match = street?.match(ukPostcodeRegex);
-    if( match )
-        return match[1].trim();
-    else
-        return undefined;
 }
