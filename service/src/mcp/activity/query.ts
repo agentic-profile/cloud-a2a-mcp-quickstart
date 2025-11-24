@@ -12,7 +12,7 @@ interface ActivityQuery {
     postcode?: string;
     distance?: number;
     geolocation?: Geolocation;
-    locationOption?: 'From Home' | 'Single Location' | 'In Person' | 'Multiple Locations';
+    attendanceType?: 'Home' | 'Local';
     //timeCommitment?: 'One Time' | 'Weekly' | 'Monthly' | 'Flexible';
 }
 
@@ -21,7 +21,7 @@ export async function handleQuery(request: JSONRPCRequest,activities:any[]): Pro
     if( !args?.query )
         return jrpcError(request.id!, -32602, `Invalid arguments: query is required`);
 
-    const { postcode, geolocation, distance, locationOption, /*timeCommitment*/ } = args.query;
+    const { postcode, geolocation, distance, attendanceType, /*timeCommitment*/ } = args.query;
     let results = activities;
 
     if( postcode ) {
@@ -34,9 +34,9 @@ export async function handleQuery(request: JSONRPCRequest,activities:any[]): Pro
         results = results.filter((activity: any) => findDistance(geolocation, resolveGeolocation(activity)) <= distance);
     }
 
-    if( locationOption ) {
+    if( attendanceType ) {
         // activities that are remote or in person
-        results = results.filter((activity: any) => activity.locationOption === locationOption);
+        results = results.filter((activity: any) => activity.activityDefinitionSubDocument?.attendanceType === attendanceType);
     }
 
     return mcpResultResponse(request.id!, {

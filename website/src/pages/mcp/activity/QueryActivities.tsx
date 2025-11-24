@@ -8,7 +8,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Postcode',
         payload: {
-            postcode: 'LW 1EG'
+            postcode: 'DT1 2NH'
         }
     },
     {
@@ -24,7 +24,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Remote or In Person',
         payload: {
-            locationOption: 'From Home' // From Home, Single Location, In Person, Multiple Locations
+            attendanceType: 'Home' // 'Local'
         }
     }, /*
     {
@@ -35,15 +35,15 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     }*/
     {
         name: 'All',
-        payload: {
-            postcode: 'LW 1EG',
-            geolocation: {
-                latitude: 51.5074,
-                longitude: -0.1278
+        payload:{
+            "postcode": "E1 3DG",
+            "geolocation": {
+              "latitude": 51.5171364,
+              "longitude": -0.0428627
             },
-            distance: 10,
-            locationOption: 'From Home' // From Home, Single Location, In Person, Multiple Locations
-        }
+            "distance": 10,
+            "attendanceType": "Local"
+          }
     }
 ];
 

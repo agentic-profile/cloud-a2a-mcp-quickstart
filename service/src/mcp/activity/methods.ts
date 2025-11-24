@@ -5,7 +5,7 @@ import { handleQuery } from './query.js';
 
 import activityData from './activities.json' with { type: 'json' };
 const activities = simplifyActivities(activityData);
-console.log('🔍 activities', JSON.stringify(activities, null, 4));
+console.log('🔍 activities', activities.length );
 
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,19 +41,6 @@ async function handleRead(request: JSONRPCRequest): Promise<JSONRPCResponse | JS
         activity
     });
 }
-
-/*
-async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
-    const { postalcode } = request.params?.arguments as { postalcode: string } || {};
-
-    const results = activities.filter((activity: any) => activity.postalcode === postalcode);
-
-    return mcpResultResponse(request.id!, {
-        kind: 'activity-list',
-        activities: results
-    });
-}
-*/
 
 async function handleDelete(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
     if( !session )
@@ -103,7 +90,7 @@ async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResp
             sorted = activities.sort((a: any, b: any) => asMillis(b.updatedAt) - asMillis(a.updatedAt));
             sortedByUpdatedAt = sorted;
         }
-        results =sorted.slice(0, limit)
+        results = sorted.slice(0, limit)
     }
 
     return mcpResultResponse(request.id!, {
@@ -116,12 +103,18 @@ function asMillis(date: string): number {
     return new Date(date).getTime();
 }
 
+//
+// Convert MongoDB objects to simpler objects for the MCP
+//
+
 function simplifyActivities(activities: any[]): any[] {
     return activities.map(simplifyActivity);
 }
 
 function simplifyActivity(activity: any): any {
-    return simplifyObject(activity);
+    const result = simplifyObject(activity);
+    result.postcode = resolvePostcodeFromActivity(activity);
+    return result;
 }
 
 function simplifyObject(obj: any): any {
@@ -159,4 +152,25 @@ function simplifyObject(obj: any): any {
     
     // For primitives, return as-is
     return obj;
+}
+
+function resolvePostcodeFromActivity( activity: any ): string | undefined {
+    let postcode = resolvePostcodeFromStreet( activity.address?.street );
+    if( !postcode )
+        postcode = resolvePostcodeFromStreet( activity.organizationSubDocument?.fullAddress?.street );
+
+    //if( postcode )
+    //    console.log('🔍 postcode', postcode, activity.id );
+    return postcode;
+}
+
+function resolvePostcodeFromStreet( street: string ): string | undefined {
+    // UK postcode pattern: 1-2 letters, 1-2 numbers, optional space, 1 number, 2 letters
+    // Examples: E1 3DG, SW2 1RW, EX32 7EU, CO1 2SL, B3 1DG, NE63 9UJ
+    const ukPostcodeRegex = /\b([A-Z]{1,2}\d{1,2}\s?\d[A-Z]{2})\b/;
+    const match = street?.match(ukPostcodeRegex);
+    if( match )
+        return match[1].trim();
+    else
+        return undefined;
 }
