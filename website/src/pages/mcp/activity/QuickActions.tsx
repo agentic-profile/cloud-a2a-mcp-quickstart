@@ -20,9 +20,10 @@ interface ActionButton {
     createRequest: (params?: any) => RequestInit;
 }
 
+/*
 function daysAgo(days: number) {
     return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-}
+}*/
 
 const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
     const [activeAction, setActiveAction] = useState<string | null>(null);
