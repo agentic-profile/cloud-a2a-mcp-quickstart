@@ -3,6 +3,7 @@ import { type HttpProgress } from '@/components/JsonRpcDebug';
 
 export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | undefined }) => {
     const [isVisible, setIsVisible] = useState(true);
+    const [copied, setCopied] = useState(false);
 
     // Show the component whenever progress changes
     useEffect(() => {
@@ -16,6 +17,18 @@ export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | und
     const { steps, result } = progress;
     const preview = result?.data ? JSON.stringify(result.data, null, 2) : result?.text;
     const error = result?.error ? String(result.error) : null;
+
+    const handleCopy = async () => {
+        if (preview) {
+            try {
+                await navigator.clipboard.writeText(preview);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+    };
     
     return (
         <div className="mt-3 relative">
@@ -49,11 +62,25 @@ export const HttpProgressSummary = ({ progress }: { progress: HttpProgress | und
                 })}
             </ol>
             {result && <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    HTTP {result.fetchResponse?.status} {result.fetchResponse?.statusText}
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        HTTP {result.fetchResponse?.status} {result.fetchResponse?.statusText}
+                    </p>
+                    <button
+                        onClick={handleCopy}
+                        className="px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
+                        aria-label="Copy to clipboard"
+                    >
+                        {copied ? '' : 'Copy to clipboard'}
+                    </button>
+                </div>
                 {error && <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{error}</p>}
-                <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto">{preview}</pre>
+                <pre 
+                    className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto overflow-y-auto"
+                    style={{ height: '256px', minHeight: '100px', maxHeight: '800px', resize: 'vertical' }}
+                >
+                    {preview}
+                </pre>
             </div>}
         </div>
     );

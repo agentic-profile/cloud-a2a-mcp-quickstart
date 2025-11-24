@@ -83,12 +83,25 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
     return mcpResultResponse(request.id!, { updated: index, inserted: index === -1, source: activity.source });
 }
 
+let sortedByUpdatedAt: any[] | null = null;
+
 async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
-    const { since } = request.params?.arguments as { since: string } || {};
+    const { since, limit = 10 } = request.params?.arguments as { since: string, limit: number } || {};
 
-    const sinceMillis = asMillis(since);
-
-    const results = activities.filter((activity: any) => asMillis(activity.updatedAt) > sinceMillis);
+    let results: any[] = [];
+    if( since ) {
+        // activities updated since a given time
+        const sinceMillis = asMillis(since);
+        results = activities.filter((activity: any) => asMillis(activity.updatedAt) > sinceMillis);
+    } else {
+        // Most recent activities up to a limit (default 10)
+        let sorted = sortedByUpdatedAt;
+        if( !sorted ) {
+            sorted = activities.sort((a: any, b: any) => asMillis(b.updatedAt) - asMillis(a.updatedAt));
+            sortedByUpdatedAt = sorted;
+        }
+        results =sorted.slice(0, limit)
+    }
 
     return mcpResultResponse(request.id!, {
         kind: 'activity-list',

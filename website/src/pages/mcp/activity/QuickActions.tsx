@@ -42,7 +42,7 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
             icon: <ClockIcon className="w-5 h-5" />,
             createRequest: () => mcpToolsCallRequestInit2(
                 "recent-updates",
-                { since: daysAgo(1) }
+                {}
             ),
         },
         {
