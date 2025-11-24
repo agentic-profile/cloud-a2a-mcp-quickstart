@@ -1,6 +1,7 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { /*mcpContentResponse, mcpContentResponse,*/ mcpResultResponse } from '../misc.js';
+import { handleQuery } from './query.js';
 
 import activityData from './activities.json' with { type: 'json' };
 const activities = simplifyActivities(activityData);
@@ -20,7 +21,7 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
         case 'update':
             return await handleUpdate(request,session);
         case 'query':
-            return await handleQuery(request);
+            return await handleQuery(request,activities);
         case 'recent-updates':
             return await handleRecentUpdates(request);
         case 'delete':
@@ -41,6 +42,7 @@ async function handleRead(request: JSONRPCRequest): Promise<JSONRPCResponse | JS
     });
 }
 
+/*
 async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
     const { postalcode } = request.params?.arguments as { postalcode: string } || {};
 
@@ -51,6 +53,7 @@ async function handleQuery(request: JSONRPCRequest): Promise<JSONRPCResponse | J
         activities: results
     });
 }
+*/
 
 async function handleDelete(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
     if( !session )
@@ -157,16 +160,3 @@ function simplifyObject(obj: any): any {
     // For primitives, return as-is
     return obj;
 }
-
-/* Helper function to calculate distance between two coordinates (Haversine formula)
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}*/

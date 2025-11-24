@@ -1,49 +1,101 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import McpToolCallCard from '@/components/McpToolCallCard';
-import { useEffect, useState } from 'react';
-import { EditableValue } from '@/components';
-import { useUserProfileStore } from '@/stores/userProfileStore';
+import { useState } from 'react';
+import { JsonEditor } from '@/components';
+import type { JsonExample } from '@/components/JsonEditor';
 
-interface QueryCommunityProfilesProps {
+const EXAMPLE_QUERIES: JsonExample[] = [
+    {
+        name: 'Postcode',
+        payload: {
+            postcode: 'LW 1EG'
+        }
+    },
+    {
+        name: 'Distance',
+        payload: {
+            geolocation: {
+                latitude: 51.5074,
+                longitude: -0.1278
+            },
+            distance: 10
+        }
+    },
+    {
+        name: 'Remote or In Person',
+        payload: {
+            locationOption: 'From Home' // From Home, Single Location, In Person, Multiple Locations
+        }
+    }, /*
+    {
+        name: 'Time commitment',
+        payload: {
+            timeCommitment: 'any', // one-time, weekly, monthly, flexible 
+        }
+    }*/
+    {
+        name: 'All',
+        payload: {
+            postcode: 'LW 1EG',
+            geolocation: {
+                latitude: 51.5074,
+                longitude: -0.1278
+            },
+            distance: 10,
+            locationOption: 'From Home' // From Home, Single Location, In Person, Multiple Locations
+        }
+    }
+];
+
+interface QueryActivitiesProps {
     onSubmitHttpRequest: (request: any) => void;
 }
 
-const QueryCommunityProfiles = ({ onSubmitHttpRequest }: QueryCommunityProfilesProps) => {
-    const { userProfile } = useUserProfileStore();
-    const [did, setDid] = useState<string>('');
-
-    useEffect(() => {
-        setDid(userProfile?.profile?.id ?? '');
-    }, [userProfile]);
+const QueryActivities = ({ onSubmitHttpRequest }: QueryActivitiesProps) => {
+    const [ queryJson, setQueryJson ] = useState<string>('');
     
     const createMcpRequest = () => {
+        const query = jsonToObject(queryJson);
+        if( !query )
+            return undefined;
+
         return {
             method: 'tools/call',
             params: {
-                name: 'about',
-                did
+                name: 'query',
+                arguments: {
+                    query
+                }
             }
         };
     };
 
     return (
         <McpToolCallCard
-            title="Query Community Profiles"
+            title="Query Activities"
             icon={<MagnifyingGlassIcon className="w-5 h-5 text-white" />}
-            description="Click the button below to query the current communities."
-            buttonText="Query Communities"
+            description="Click the button below to query the current activities."
+            buttonText="Query Activities"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         >
-            <EditableValue
-                card={false}
-                label="DID"
-                value={did}
-                placeholder="Enter DID"
-                onUpdate={setDid}
+            <JsonEditor 
+                value={queryJson}
+                onChange={setQueryJson}
+                placeholder="Enter your JSON query here..."
+                height="h-48"
+                examples={EXAMPLE_QUERIES}
             />
         </McpToolCallCard>
     );
 };
 
-export default QueryCommunityProfiles;
+export default QueryActivities;
+
+function jsonToObject(json: string): any | undefined {
+    try {
+        return JSON.parse(json);
+    } catch {
+        return undefined;
+    }
+}
