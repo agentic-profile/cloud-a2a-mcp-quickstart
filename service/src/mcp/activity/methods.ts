@@ -2,6 +2,7 @@ import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprot
 import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
+import { handleChat } from './chat.js';
 import { activities } from './activities.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +21,8 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
             return await handleQuery(request,activities);
         case 'recent-updates':
             return await handleRecentUpdates(request);
+        case 'chat':
+            return await handleChat(request);
         case 'delete':
             return await handleDelete(request,session);
         default:
