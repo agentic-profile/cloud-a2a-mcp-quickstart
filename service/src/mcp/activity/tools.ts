@@ -107,5 +107,34 @@ export const MCP_TOOLS = [
             },
             required: ['activities']
         }
+    },
+    {
+        name: 'chat',
+        description: 'Chat with an assistant to help build a filter for finding activities. The assistant asks questions to understand your criteria and returns both conversational responses and JSON filter objects.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                messages: {
+                    type: 'array',
+                    description: 'Array of messages in the conversation',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            role: {
+                                type: 'string',
+                                enum: ['user', 'assistant'],
+                                description: 'The role of the message sender'
+                            },
+                            content: {
+                                type: 'string',
+                                description: 'The content of the message'
+                            }
+                        },
+                        required: ['role', 'content']
+                    }
+                }
+            },
+            required: ['messages']
+        }
     }
 ];

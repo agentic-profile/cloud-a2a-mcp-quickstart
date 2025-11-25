@@ -3,7 +3,7 @@ import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
 import { handleChat } from './chat.js';
-import { activities } from './activities.js';
+import { activities, buildFulltext } from './activities.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -62,6 +62,7 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
     if( !activity.source )
         activity.source = { id: uuidv4() };
     activity.source.author = session.agentDid;  // URI, e.g. mailto:mike@example.com or did:web:example.com:mike
+    activity.fulltext = buildFulltext(activity);
 
     const index = activities.findIndex((e: any) => e.id === activity.id);
     if ( index === -1 )

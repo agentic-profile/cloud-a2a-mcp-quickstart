@@ -77,7 +77,7 @@ function resolvePostcodeFromStreet( street: string ): string | undefined {
         return undefined;
 }
 
-function buildFulltext( activity: any ): string[] {
+export function buildFulltext( activity: any ): string[] {
     const fulltext = new Set<string>();
 
     addKeywords( fulltext, activity.address?.street );

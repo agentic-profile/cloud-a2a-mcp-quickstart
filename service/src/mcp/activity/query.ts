@@ -9,7 +9,7 @@ interface Geolocation {
 }
 
 interface ActivityQuery {
-    text?: string;
+    keywords?: string;
     postcode?: string;
     distance?: number;
     geolocation?: Geolocation;
@@ -22,7 +22,7 @@ export async function handleQuery(request: JSONRPCRequest, activities:any[]): Pr
     if( !query )
         return jrpcError(request.id!, -32602, `Invalid arguments: query is required`);
 
-    const { text, postcode, geolocation, distance, attendanceType, /*timeCommitment*/ } = query;
+    const { keywords, postcode, geolocation, distance, attendanceType, /*timeCommitment*/ } = query;
     let results = activities;
 
     if( postcode ) {
@@ -31,9 +31,9 @@ export async function handleQuery(request: JSONRPCRequest, activities:any[]): Pr
         results = results.filter((activity: any) => activity.postcode === caps);
     }
 
-    if( text ) {
-        const keywords = text.toLowerCase().split(/\s+/);
-        results = results.filter((activity: any) => ensureKeywords(activity, keywords));
+    if( keywords ) {
+        const tokens = keywords.toLowerCase().split(/\s+/);
+        results = results.filter((activity: any) => ensureKeywords(activity, tokens));
     }
     
     if( distance && geolocation) {
@@ -66,7 +66,7 @@ function pruneActivities( activities: any[] ): any[] {
 
 function ensureKeywords( activity: any, keywords: string[] ): boolean {
     for( const keyword of keywords ) {
-        if( !activity.fulltext.includes(keyword) )
+        if( !activity.fulltext?.includes(keyword) )
             return false;
     }
 

@@ -14,7 +14,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Text Search',
         payload: {
-            text: 'london'
+            keywords: 'london'
         }
     },
     {
@@ -42,7 +42,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'All',
         payload: {
-            "text": "london",
+            "keywords": "london",
             "postcode": "E1 3DG",
             "geolocation": {
               "latitude": 51.5171364,
