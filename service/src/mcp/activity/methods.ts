@@ -3,7 +3,7 @@ import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
 import { handleChat } from './chat.js';
-import { activities, buildFulltext } from './activities.js';
+import { activities, simplifyDoitActivity, simplifyTeamKineticActivity } from './activities.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,7 +36,6 @@ async function handleRead(request: JSONRPCRequest): Promise<JSONRPCResponse | JS
     const activity = activities.find((activity: any) => activity.id === id) ?? null;
 
     return mcpResultResponse(request.id!, {
-        kind: 'activity',
         activity
     });
 }
@@ -58,11 +57,19 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
     if( !session )
         return jrpcErrorAuthRequired( request.id! );
     
-    const { activity } = request.params?.arguments as { activity: any } || {};
+    let { activity } = request.params?.arguments as { activity: any } || {};
+
+    if( activity.kind === 'doit-activity' ) {
+        activity = simplifyDoitActivity(activity);  // convert to odi-activity kind
+    } else if( activity.kind === 'teamkinetic-activity' ) {
+        activity = simplifyTeamKineticActivity(activity);  // convert to odi-activity kind
+    } else if( activity.kind !== 'odi-activity' ) {
+        return jrpcError(request.id!, -32602, `Invalid activity kind: ${activity.kind}`);
+    }
+
     if( !activity.source )
         activity.source = { id: uuidv4() };
     activity.source.author = session.agentDid;  // URI, e.g. mailto:mike@example.com or did:web:example.com:mike
-    activity.fulltext = buildFulltext(activity);
 
     const index = activities.findIndex((e: any) => e.id === activity.id);
     if ( index === -1 )
@@ -92,6 +99,9 @@ async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResp
         }
         results = sorted.slice(0, limit)
     }
+
+    // remove index
+    results = results.map(({ index, ...etc }: any) => etc);
 
     return mcpResultResponse(request.id!, {
         kind: 'activity-list',

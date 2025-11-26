@@ -7,7 +7,7 @@ import { ACTIVITY_EXAMPLE } from './examples';
 const EXAMPLE_ACTIVITIES: JsonExample[] = [
     {
         name: "Activity",
-        payload: { ...ACTIVITY_EXAMPLE, kind: 'activity' }
+        payload: { ...ACTIVITY_EXAMPLE, kind: 'doit-activity' }
     }
 ];
 

@@ -1,3 +1,105 @@
+const CoreActivitySchema = {
+    type: 'object',
+    properties: {
+        kind: {
+            type: 'string',
+            enum: ['odi-activity'],
+            description: 'The type of activity'
+        },
+        source: {
+            type: 'object',
+            description: 'Source information for the activity',
+            properties: {
+                kind: {
+                    type: 'string',
+                    enum: ['teamkinetic-activity', 'doit-activity'],
+                    description: 'The source type'
+                },
+                author: {
+                    type: 'string',
+                    description: 'URI of the author (e.g. mailto:mike@example.com or did:web:example.com:mike)'
+                },
+                id: {
+                    type: 'string',
+                    description: 'Author scoped or global id'
+                }
+            },
+            required: ['kind', 'author', 'id']
+        },
+        createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'ISO 8601 timestamp when the activity was created'
+        },
+        updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'ISO 8601 timestamp when the activity was last updated'
+        },
+        id: {
+            type: 'string',
+            description: 'The unique identifier of the activity'
+        },
+        activity: {
+            type: 'string',
+            description: 'The activity ID'
+        },
+        title: {
+            type: 'string',
+            description: 'The title of the activity'
+        },
+        description: {
+            type: 'string',
+            description: 'Description of the activity'
+        },
+        locationOption: {
+            type: 'string',
+            description: 'Location option for the activity'
+        },
+        cause: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'List of causes this activity supports'
+        },
+        type: {
+            type: 'string',
+            description: 'Type of activity'
+        },
+        start: {
+            type: 'string',
+            format: 'date-time',
+            description: 'ISO 8601 date-time when the activity starts'
+        },
+        end: {
+            type: 'string',
+            format: 'date-time',
+            description: 'ISO 8601 date-time when the activity ends'
+        },
+        address: {
+            type: 'string',
+            description: 'Physical address of the activity'
+        },
+        postcode: {
+            type: 'string',
+            description: 'Postal code of the activity location'
+        },
+        latitude: {
+            type: 'number',
+            description: 'Latitude coordinate of the activity location'
+        },
+        longitude: {
+            type: 'number',
+            description: 'Longitude coordinate of the activity location'
+        },
+        externalApplyLink: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL of web page to apply for the activity'
+        }
+    },
+    required: ['kind', 'id', 'activity']
+};
+
 export const MCP_TOOLS = [
     {
         name: 'read',
@@ -11,7 +113,8 @@ export const MCP_TOOLS = [
                 }
             },
             required: ['id']
-        }
+        },
+        outputSchema: CoreActivitySchema
     },
     {
         name: 'update',
@@ -77,6 +180,17 @@ export const MCP_TOOLS = [
                 }
             },
             required: []
+        },
+        outputSchema: {
+            type: 'object',
+            properties: {
+                activities: {
+                    type: 'array',
+                    items: CoreActivitySchema,
+                    description: 'List of activities matching the query'
+                }
+            },
+            required: ['activities']
         }
     },
     {
@@ -102,7 +216,8 @@ export const MCP_TOOLS = [
             properties: {
                 activities: {
                     type: 'array',
-                    description: 'List of activities that have happened since the given time'
+                    items: CoreActivitySchema,
+                    description: 'List of activities that have been updated since the given time'
                 }
             },
             required: ['activities']

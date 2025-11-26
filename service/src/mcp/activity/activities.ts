@@ -1,21 +1,57 @@
-import activityData from './activities.json' with { type: 'json' };
+import activityData from './data/activities.json' with { type: 'json' };
+//import teamKineticData from './data/odi-opp-data.csv' with { type: 'csv' };
+import { CoreActivity, Geolocation } from './types.js';
 
-export const activities = simplifyActivities(activityData);
+export const activities = simplifyDoitActivities(activityData);
+appendTeamKineticActivities(activities);
 console.log('🔍 activities', activities.length );
 
 
 //
-// Convert MongoDB objects to simpler objects for the MCP
+// Team Kinetic activity data
 //
 
-function simplifyActivities(activities: any[]): any[] {
-    return activities.map(simplifyActivity);
+function appendTeamKineticActivities(activities: any[]): any[] {
+    return activities.map(simplifyTeamKineticActivity);
 }
 
-function simplifyActivity(activity: any): any {
-    const result = simplifyObject(activity);
-    result.postcode = resolvePostcodeFromActivity(activity);
-    result.fulltext = buildFulltext(activity);
+export function simplifyTeamKineticActivity(activity: any): any {
+    return activity;
+}
+
+//
+// Do IT activity data
+//
+
+function simplifyDoitActivities(activities: any[]): any[] {
+    return activities.map(simplifyDoitActivity);
+}
+
+export function simplifyDoitActivity(activity: any): any {
+    const doitActivity = simplifyObject(activity);
+    const { fields, fulltext } = buildFulltext(doitActivity);
+    const postcode = resolvePostcodeFromActivity(doitActivity);
+    const geolocation = resolveGeolocation(doitActivity);
+
+    const result = {
+        kind: 'odi-activity',
+        source: {
+            kind: 'doit-activity',
+            //...doitActivity,
+        },
+        index: {
+            fulltext
+        },
+        postcode,
+        activity: doitActivity.id,
+        id: doitActivity.id,
+        createdAt: doitActivity.createdAt,
+        updatedAt: doitActivity.updatedAt,
+        ...fields,
+        ...(geolocation ?? {}),
+        externalApplyLink: doitActivity.externalApplyLink,
+    } as CoreActivity;
+
     return result;
 }
 
@@ -61,8 +97,6 @@ function resolvePostcodeFromActivity( activity: any ): string | undefined {
     if( !postcode )
         postcode = resolvePostcodeFromStreet( activity.organizationSubDocument?.fullAddress?.street );
 
-    //if( postcode )
-    //    console.log('🔍 postcode', postcode, activity.id );
     return postcode;
 }
 
@@ -77,46 +111,60 @@ function resolvePostcodeFromStreet( street: string ): string | undefined {
         return undefined;
 }
 
-export function buildFulltext( activity: any ): string[] {
+export function buildFulltext( activity: any ): { fields: any, fulltext: string[] } {
     const fulltext = new Set<string>();
+    const fields: any = {};
 
-    addKeywords( fulltext, activity.address?.street );
+    addKeywords( fulltext, activity.address?.street, fields, 'address' );
 
-    const adsd = activity.activityDefinitionSubDocument;
-    addKeywords( fulltext, adsd?.fullAddress?.street );
-    addKeywords( fulltext, adsd?.title );
-    addKeywords( fulltext, adsd?.description );
-
-    let causeOptions = adsd?.causeOptions;
-    if( causeOptions ) {
-        for( const causeOption of causeOptions ) {
-            addKeywords( fulltext, causeOption?.displayName );
-        }
-    }
-
+    // Process organization fields first, so they can be replaced by more specific app and activity field values
     const osd = activity.organizationSubDocument;
     addKeywords( fulltext, osd?.name );
-    addKeywords( fulltext, osd?.description );
+    addKeywords( fulltext, osd?.description, fields, 'description' );
     addKeywords( fulltext, osd?.purpose );
-    addKeywords( fulltext, osd?.fullAddress?.street );
+    addKeywords( fulltext, osd?.fullAddress?.street, fields, 'address' );
 
-    causeOptions = osd?.causeOptions;
+    let causeOptions = osd?.causeOptions;
     if( causeOptions ) {
+        fields.cause = [];
         for( const causeOption of causeOptions ) {
             addKeywords( fulltext, causeOption?.displayName );
+            fields.cause.push( causeOption?.displayName );
         }
     }
     
     const appSummary = activity.appSummary
     addKeywords( fulltext, appSummary?.name );
-    addKeywords( fulltext, appSummary?.description );
+    addKeywords( fulltext, appSummary?.description, fields, 'description' );
 
-    return Array.from(fulltext);
+    // Activity Definition Sub Document has highest priority for fields
+    const adsd = activity.activityDefinitionSubDocument;
+    addKeywords( fulltext, adsd?.fullAddress?.street, fields, 'address' );
+    addKeywords( fulltext, adsd?.title, fields, 'title' );
+    addKeywords( fulltext, adsd?.description, fields, 'description' );
+    addKeywords( fulltext, adsd?.attendanceType, fields, 'attendanceType' );
+    addKeywords( fulltext, adsd?.type, fields, 'type' );
+
+    causeOptions = adsd?.causeOptions;
+    if( causeOptions ) {
+        if( !fields.cause )
+            fields.cause = [];
+        for( const causeOption of causeOptions ) {
+            addKeywords( fulltext, causeOption?.displayName );
+            fields.cause.push( causeOption?.displayName );
+        }
+    }
+
+    return { fields, fulltext: Array.from(fulltext) };
 }
 
-function addKeywords( fulltext: Set<string>, text: string | undefined ) {
+function addKeywords( fulltext: Set<string>, text: string | undefined, fields?: any, name?: string ) {
     if( !text )
         return;
+
+    if( fields && name )
+        fields[name] = text;
+
     const keywords = text.toLowerCase().split(/\s+/);
     for( const keyword of keywords ) {
         fulltext.add(cleanKeyword(keyword));
@@ -125,4 +173,31 @@ function addKeywords( fulltext: Set<string>, text: string | undefined ) {
 
 function cleanKeyword( keyword: string ): string {
     return keyword.replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+function resolveGeolocation( activity: any ): Geolocation | undefined {
+    let location = resolveGeolocationFromAddress( activity.address );
+    if( location ) {
+        return location;
+    }
+
+    location = resolveGeolocationFromAddress( activity.organizationSubDocument?.fullAddress );
+    if( location )
+        return location;
+
+    return undefined;
+}
+
+function resolveGeolocationFromAddress( address: any | undefined ): Geolocation | undefined {
+    if( !address )
+        return undefined;
+    let location = address.location;
+    if( location.type === 'Point' && location.coordinates.length === 2 ) {
+        return {
+            latitude: location.coordinates[1],
+            longitude: location.coordinates[0]
+        }
+    }
+
+    return undefined;
 }

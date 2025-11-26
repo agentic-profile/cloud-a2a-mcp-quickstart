@@ -1,12 +1,9 @@
 import { JSONRPCRequest, JSONRPCResponse, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 import { mcpResultResponse } from "../misc.js";
 import { jrpcError } from '../../json-rpc/index.js';
+import { Geolocation } from './types.js';
 
 
-interface Geolocation {
-    latitude: number;
-    longitude: number;
-}
 
 interface ActivityQuery {
     keywords?: string;
@@ -38,12 +35,12 @@ export async function handleQuery(request: JSONRPCRequest, activities:any[]): Pr
     
     if( distance && geolocation) {
         // activities within a given distance
-        results = results.filter((activity: any) => findDistance(geolocation, resolveGeolocation(activity)) <= distance);
+        results = results.filter((activity: any) => findDistance(geolocation, activity) <= distance);
     }
 
     if( attendanceType ) {
         // activities that are remote or in person
-        results = results.filter((activity: any) => activity.activityDefinitionSubDocument?.attendanceType === attendanceType);
+        results = results.filter((activity: any) => activity.attendanceType === attendanceType);
     }
 
     results = pruneActivities(results);
@@ -59,14 +56,14 @@ export async function handleQuery(request: JSONRPCRequest, activities:any[]): Pr
 // remove properties that are not needed for the response
 function pruneActivities( activities: any[] ): any[] {
     return activities.map((activity: any) => {
-        const { fulltext, ...etc } = activity;
+        const { index, ...etc } = activity;
         return etc;
     });
 }
 
 function ensureKeywords( activity: any, keywords: string[] ): boolean {
     for( const keyword of keywords ) {
-        if( !activity.fulltext?.includes(keyword) )
+        if( !activity.index?.fulltext?.includes(keyword) )
             return false;
     }
 
@@ -92,29 +89,4 @@ function findDistance( coords1: Geolocation, coords2: Geolocation | undefined): 
     return calculateDistance(coords1.latitude, coords1.longitude, coords2.latitude, coords2.longitude);
 }
 
-function resolveGeolocation( activity: any ): Geolocation | undefined {
-    let location = resolveGeolocationFromAddress( activity.organizationSubDocument?.fullAddress );
-    if( location )
-        return location;
 
-    location = resolveGeolocationFromAddress( activity.address );
-    if( location ) {
-        return location;
-    }
-
-    return undefined;
-}
-
-function resolveGeolocationFromAddress( address: any | undefined ): Geolocation | undefined {
-    if( !address )
-        return undefined;
-    let location = address.location;
-    if( location.type === 'Point' && location.coordinates.length === 2 ) {
-        return {
-            latitude: location.coordinates[1],
-            longitude: location.coordinates[0]
-        }
-    }
-
-    return undefined;
-}
