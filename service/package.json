@@ -8,6 +8,7 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "build": "tsc",
+    "postbuild": "mkdir -p dist/mcp/activity/data && cp -r src/mcp/activity/data/* dist/mcp/activity/data/",
     "test": "jest",
     "test:redis": "node scripts/test-redis-connection.js",
     "test:local-redis": "npm run build && node scripts/test-local-redis.js",

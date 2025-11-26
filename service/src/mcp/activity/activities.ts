@@ -1,9 +1,25 @@
-import activityData from './data/activities.json' with { type: 'json' };
 //import teamKineticData from './data/odi-opp-data.csv' with { type: 'csv' };
 import { CoreActivity, Geolocation } from './types.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-export const activities = simplifyDoitActivities(activityData);
-appendTeamKineticActivities(activities);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+// Read and process data in an IIFE to allow original data to be garbage collected after processing
+export const activities = (() => {
+    console.time("Import activities");
+    // Read JSON file directly so it can be garbage collected after processing
+    const activityDataPath = join(__dirname, 'data', 'activities.json');
+    const activityData: any[] = JSON.parse(readFileSync(activityDataPath, 'utf-8'));
+    const processed = simplifyDoitActivities(activityData);
+    console.timeEnd("Import activities");
+    appendTeamKineticActivities(processed);
+    // activityData goes out of scope here and can be garbage collected
+    return processed;
+})();
 console.log('🔍 activities', activities.length );
 
 

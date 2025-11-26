@@ -1,6 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import log, { LogLevelDesc } from "loglevel";
+log.setLevel( process.env.LOG_LEVEL as LogLevelDesc ?? "trace" );
+console.log( "log level", log.getLevel() );
+
 import { app } from './router.js';
 
 const PORT = process.env.PORT || 3000;
