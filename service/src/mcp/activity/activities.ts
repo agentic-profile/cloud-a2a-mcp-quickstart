@@ -1,4 +1,3 @@
-//import teamKineticData from './data/odi-opp-data.csv' with { type: 'csv' };
 import { CoreActivity, Geolocation } from './types.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -17,7 +16,7 @@ export const activities = (() => {
     const processed = simplifyDoitActivities(activityData);
     console.timeEnd("Import activities");
     appendTeamKineticActivities(processed);
-    // activityData goes out of scope here and can be garbage collected
+
     return processed;
 })();
 console.log('🔍 activities', activities.length );
@@ -27,12 +26,104 @@ console.log('🔍 activities', activities.length );
 // Team Kinetic activity data
 //
 
-function appendTeamKineticActivities(activities: any[]): any[] {
-    return activities.map(simplifyTeamKineticActivity);
+function appendTeamKineticActivities(activities: any[]) {
+    // Read CSV file using readFileSync (import doesn't support CSV/TXT files)
+    const csvPath = join(__dirname, 'data', 'odi-opp-data.csv');
+    const csvContent = readFileSync(csvPath, 'utf-8');
+    const csvRows = parseCSV(csvContent);
+    
+    // Skip header row and process data rows
+    csvRows.slice(1).forEach((row) => {
+        const [ id, name, description, tags, _locationType, location, city, postcode, _oppType, externalApplyLink, start, end ] = row;
+        
+        const fulltext = new Set<string>();
+        addKeywords(fulltext, name);
+        addKeywords(fulltext, description);
+        addKeywords(fulltext, tags);
+        addKeywords(fulltext, location);
+        addKeywords(fulltext, city);
+        addKeywords(fulltext, postcode);
+
+        // Create activity object
+        const result: CoreActivity = {
+            kind: 'odi-activity',
+            source: {
+                kind: 'teamkinetic-activity',
+                author: 'teamkinetic',
+                id,
+            },
+            index: {
+                fulltext: Array.from(fulltext)
+            },
+
+            activity: id,
+            id,
+
+            title: name,
+            description,
+            //locationOption: locationType,
+            //cause: tags,
+            //type: oppType,
+            start,
+            end,
+            address: `${location}, ${city}`,
+            postcode,
+
+            externalApplyLink
+        }
+        
+        activities.push(result);
+    });
 }
 
-export function simplifyTeamKineticActivity(activity: any): any {
-    return activity;
+// Simple CSV parser that handles quoted fields
+function parseCSV(content: string): string[][] {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        const nextChar = content[i + 1];
+        
+        if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+                // Escaped quote
+                currentField += '"';
+                i++; // Skip next quote
+            } else {
+                // Toggle quote state
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            // End of field
+            currentRow.push(currentField.trim());
+            currentField = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+            // End of row
+            if (currentField || currentRow.length > 0) {
+                currentRow.push(currentField.trim());
+                rows.push(currentRow);
+                currentRow = [];
+                currentField = '';
+            }
+            // Skip \r\n combination
+            if (char === '\r' && nextChar === '\n') {
+                i++;
+            }
+        } else {
+            currentField += char;
+        }
+    }
+    
+    // Handle last field/row if file doesn't end with newline
+    if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        rows.push(currentRow);
+    }
+    
+    return rows;
 }
 
 //

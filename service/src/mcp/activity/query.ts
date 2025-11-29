@@ -88,5 +88,3 @@ function findDistance( coords1: Geolocation, coords2: Geolocation | undefined): 
         return Infinity;
     return calculateDistance(coords1.latitude, coords1.longitude, coords2.latitude, coords2.longitude);
 }
-
-

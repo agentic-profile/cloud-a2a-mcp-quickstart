@@ -3,7 +3,7 @@ import { jrpcError, jrpcErrorAuthRequired } from '../../json-rpc/index.js';
 import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
 import { handleChat } from './chat.js';
-import { activities, simplifyDoitActivity, simplifyTeamKineticActivity } from './activities.js';
+import { activities, simplifyDoitActivity } from './activities.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,8 +61,8 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
 
     if( activity.kind === 'doit-activity' ) {
         activity = simplifyDoitActivity(activity);  // convert to odi-activity kind
-    } else if( activity.kind === 'teamkinetic-activity' ) {
-        activity = simplifyTeamKineticActivity(activity);  // convert to odi-activity kind
+    //} else if( activity.kind === 'teamkinetic-activity' ) {
+    //    activity = simplifyTeamKineticActivity(activity);  // convert to odi-activity kind
     } else if( activity.kind !== 'odi-activity' ) {
         return jrpcError(request.id!, -32602, `Invalid activity kind: ${activity.kind}`);
     }
