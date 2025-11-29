@@ -37,8 +37,8 @@ export default router;
 const INITIALIZE_RESPONSE = {
     ...DEFAULT_MCP_INITIALIZE_RESPONSE,
     "serverInfo": {
-        "name": "Activity Service",
-        "title": "Publish and query volunteer activities",
+        "name": "Volunteer Service",
+        "title": "Publish and query volunteer profiles",
         "version": "1.0.0"
     }
 };

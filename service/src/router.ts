@@ -18,6 +18,7 @@ import ventureRouter from "./mcp/venture/router.js";
 import walletRouter from "./mcp/wallet/router.js";
 import activityRouter from "./mcp/activity/router.js";
 import { A2AServiceRouter } from './a2a/router.js';
+import volunteerRouter from "./mcp/volunteer/router.js";
 
 // Create Express app
 const app: Application = express();
@@ -89,6 +90,7 @@ app.use('/mcp/reputation', reputationRouter);
 app.use('/mcp/venture', ventureRouter);
 app.use('/mcp/wallet', walletRouter);
 app.use('/mcp/activity', activityRouter);
+app.use('/mcp/volunteer', volunteerRouter);
 
 // Serve the web interface for non-API routes
 app.get('/', (_req: Request, res: Response) => {

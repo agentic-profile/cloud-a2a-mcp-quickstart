@@ -43,5 +43,12 @@ export const mcpServices: MCPService[] = [
         description: 'Bringing communities together, health, and wellness',
         icon: UserGroupIcon,
         route: '/mcp/community'
+    },
+    {
+        id: '7',
+        name: 'Volunteers',
+        description: 'Find volunteers for your activities',
+        icon: UserGroupIcon,
+        route: '/mcp/volunteer'
     }
 ];

@@ -144,7 +144,7 @@ export function simplifyDoitActivity(activity: any): any {
         kind: 'odi-activity',
         source: {
             kind: 'doit-activity',
-            //...doitActivity,
+            ...doitActivity,
         },
         index: {
             fulltext
