@@ -395,17 +395,17 @@ Resources:
       StageName: !Ref Environment
       AutoDeploy: true
 
-  # Neptune DB Subnet Group
+  # Neptune DB Subnet Group (Public Subnets)
   NeptuneSubnetGroup:
     Type: AWS::Neptune::DBSubnetGroup
     Properties:
-      DBSubnetGroupName: !Sub 'agentic-service-neptune-subnet-group-${Project}-${Environment}'
-      DBSubnetGroupDescription: Subnet group for Neptune Serverless cluster
+      DBSubnetGroupName: !Sub 'agentic-service-neptune-public-subnet-group-${Project}-${Environment}'
+      DBSubnetGroupDescription: Subnet group for Neptune Serverless cluster (public subnets for public access)
       SubnetIds:
         - !ImportValue 
-          Fn::Sub: 'agentic-foundation-${Environment}-PrivateSubnet1'
+          Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet1'
         - !ImportValue 
-          Fn::Sub: 'agentic-foundation-${Environment}-PrivateSubnet2'
+          Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet2'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -419,6 +419,12 @@ Resources:
       GroupDescription: Security group for Neptune Serverless cluster
       VpcId: !ImportValue 
         Fn::Sub: 'agentic-foundation-${Environment}-DefaultVpc'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8182
+          ToPort: 8182
+          CidrIp: 0.0.0.0/0
+          Description: 'Allow public access to Neptune (Gremlin/SPARQL) - WARNING: Consider restricting to specific IPs'
       Tags:
         - Key: Name
           Value: !Sub 'agentic-service-neptune-sg-${Project}-${Environment}'
@@ -431,14 +437,16 @@ Resources:
   NeptuneCluster:
     Type: AWS::Neptune::DBCluster
     Properties:
-      DBClusterIdentifier: !Sub 'agentic-service-neptune-${Project}-${Environment}'
-      EngineVersion: 1.3.2.1
+      DBClusterIdentifier: !Sub 'agentic-service-neptune-cluster-${Project}-${Environment}'
+      EngineVersion: 1.4.6.0
       ServerlessScalingConfiguration:
         MinCapacity: 1.0
         MaxCapacity: 2.5
       DBSubnetGroupName: !Ref NeptuneSubnetGroup
       VpcSecurityGroupIds:
         - !Ref NeptuneSecurityGroup
+      IamAuthEnabled: true
+      StorageEncrypted: true
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -449,9 +457,10 @@ Resources:
   NeptuneInstance:
     Type: AWS::Neptune::DBInstance
     Properties:
-      DBInstanceIdentifier: !Sub 'agentic-service-neptune-instance-${Project}-${Environment}'
+      DBInstanceIdentifier: !Sub 'agentic-service-neptune-db-${Project}-${Environment}'
       DBClusterIdentifier: !Ref NeptuneCluster
       DBInstanceClass: db.serverless
+      PubliclyAccessible: true
       Tags:
         - Key: Environment
           Value: !Ref Environment
