@@ -31,75 +31,118 @@ function escapeGremlinString(str: string): string {
 
 /**
  * Build a Gremlin query from QueryVolunteers parameters
- * Uses basic Gremlin filters that work with Neptune.
- * Complex filtering (age ranges, JSON field matching) is done in filterVolunteers()
+ * Uses Neptune's native filters on flattened properties for efficient querying
  */
 function buildQuery(query: QueryVolunteers): string {
     let queryString = 'g.V().hasLabel("Volunteer")';
 
-    // Postcode - exact match (can be done in Gremlin)
+    // Postcode - exact match
     if (query.postcode) {
         queryString += `.has("postcode", "${escapeGremlinString(query.postcode)}")`;
     }
 
-    // Minor - boolean (can be done in Gremlin)
+    // Minor - boolean
     if (query.minor !== undefined) {
         queryString += `.has("minor", ${query.minor})`;
     }
 
-    // Gender - exact match (can be done in Gremlin)
+    // Gender - exact match
     if (query.gender) {
         queryString += `.has("gender", "${escapeGremlinString(query.gender)}")`;
     }
 
-    // For other fields, we'll do basic existence checks to narrow results
-    // Exact filtering happens in filterVolunteers()
-    if (query.minAge !== undefined || query.maxAge !== undefined) {
-        queryString += `.has("age")`;
+    // Age range - use P.gte() and P.lte() predicates
+    if (query.minAge !== undefined) {
+        queryString += `.has("age", P.gte(${query.minAge}))`;
+    }
+    if (query.maxAge !== undefined) {
+        queryString += `.has("age", P.lte(${query.maxAge}))`;
     }
 
+    // Languages - multi-valued property, check all values match (AND condition)
+    // Each .has() call further filters, so chaining them ensures all values are present
     if (query.languages && query.languages.length > 0) {
-        queryString += `.has("languages")`;
+        for (const lang of query.languages) {
+            queryString += `.has("languages", "${escapeGremlinString(lang)}")`;
+        }
     }
 
+    // Skills - multi-valued property, check all values match
     if (query.skills && query.skills.length > 0) {
-        queryString += `.has("skills")`;
+        for (const skill of query.skills) {
+            queryString += `.has("skills", "${escapeGremlinString(skill)}")`;
+        }
     }
 
-    if (query.presence || query.causes || query.timeCommitment || 
-        query.hourPreferences || query.dayPreferences || 
-        query.minDurationHours !== undefined || query.maxDistanceKm !== undefined ||
-        query.startDate || query.endDate) {
-        queryString += `.has("preferences")`;
+    // Presence - now directly queryable on flattened property, check all values match
+    if (query.presence && query.presence.length > 0) {
+        for (const pres of query.presence) {
+            queryString += `.has("preferences.presence", "${escapeGremlinString(pres)}")`;
+        }
+    }
+
+    // Causes - directly queryable on flattened property, check all values match
+    if (query.causes && query.causes.length > 0) {
+        for (const cause of query.causes) {
+            queryString += `.has("preferences.causes", "${escapeGremlinString(cause)}")`;
+        }
+    }
+
+    // Time commitment - directly queryable
+    if (query.timeCommitment) {
+        queryString += `.has("preferences.times.commitment", "${escapeGremlinString(query.timeCommitment)}")`;
+    }
+
+    // Hour preferences - directly queryable, check all values match
+    if (query.hourPreferences && query.hourPreferences.length > 0) {
+        for (const hour of query.hourPreferences) {
+            queryString += `.has("preferences.times.hours", "${escapeGremlinString(hour)}")`;
+        }
+    }
+
+    // Day preferences - directly queryable, check all values match
+    if (query.dayPreferences && query.dayPreferences.length > 0) {
+        for (const day of query.dayPreferences) {
+            queryString += `.has("preferences.times.days", "${escapeGremlinString(day)}")`;
+        }
+    }
+
+    // Min duration hours - use P.gte() predicate
+    if (query.minDurationHours !== undefined) {
+        queryString += `.has("preferences.times.maxDurationHours", P.gte(${query.minDurationHours}))`;
+    }
+
+    // Max distance - use P.gte() predicate (volunteer's maxDistanceKm must be >= query's maxDistanceKm)
+    if (query.maxDistanceKm !== undefined) {
+        queryString += `.has("preferences.maxDistanceKm", P.gte(${query.maxDistanceKm}))`;
+    }
+
+    // Date range - check if start/end dates overlap
+    // This is complex and may need to be done in memory, but we can at least filter for volunteers with dates
+    if (query.startDate || query.endDate) {
+        queryString += `.has("preferences.dates.startDates")`;
     }
 
     // Add valueMap at the end to get all properties
     queryString += '.valueMap(true)';
 
+    console.log('🔍 Built query:', queryString);
+
     return queryString;
 }
 
 /**
- * Check if all values in query array are found in volunteer array
- * @param queryArray - Array from query (may be undefined)
- * @param volunteerArray - Array from volunteer (may be undefined)
- * @returns true if queryArray is undefined, or if every value in queryArray is in volunteerArray
- */
-function checkMatches<T>(queryArray: T[] | undefined, volunteerArray: T[] | undefined): boolean {
-    if (queryArray === undefined) {
-        return true;
-    }
-    const volunteer = volunteerArray || [];
-    return queryArray.every(queryValue => volunteer.includes(queryValue));
-}
-
-/**
  * Filter volunteers based on QueryVolunteers criteria
- * Handles complex filtering that can't be done efficiently in Gremlin queries
+ * Only handles complex filtering that can't be done efficiently in Gremlin:
+ * - Keywords (full-text search across multiple fields)
+ * - Date range overlap (complex date logic)
+ * 
+ * All other filtering (age, skills, languages, presence, causes, etc.) is now done in Gremlin
  */
 function filterVolunteers(volunteers: Volunteer[], query: QueryVolunteers): Volunteer[] {
     return volunteers.filter(volunteer => {
         // Keywords - split into words and check each word appears in any target property
+        // This requires full-text search which is complex in Gremlin, so we do it in memory
         if (query.keywords) {
             const keywordWords = query.keywords
                 .toLowerCase()
@@ -127,75 +170,10 @@ function filterVolunteers(volunteers: Volunteer[], query: QueryVolunteers): Volu
             }
         }
 
-        // Age range
-        if (query.minAge !== undefined && (volunteer.age === undefined || volunteer.age < query.minAge)) {
-            return false;
-        }
-        if (query.maxAge !== undefined && (volunteer.age === undefined || volunteer.age > query.maxAge)) {
-            return false;
-        }
-
-        // Languages
-        if (!checkMatches(query.languages, volunteer.languages)) {
-            return false;
-        }
-
-        // Skills
-        if (!checkMatches(query.skills, volunteer.skills)) {
-            return false;
-        }
-
-        // Preferences-based filtering
-        const { presence, causes, times, dates, maxDistanceKm } = volunteer.preferences ?? {};
-
-        // Presence
-        if (!checkMatches(query.presence, presence)) {
-            return false;
-        }
-
-        // Causes
-        if (!checkMatches(query.causes, causes)) {
-            return false;
-        }
-
-        // Time preferences
-
-        // Time commitment
-        if( query.timeCommitment ) {
-            if( !times?.commitment || times.commitment !== query.timeCommitment) {
-                return false;
-            }
-        }
-
-        // Hour preferences
-        if (!checkMatches(query.hourPreferences, times?.hours)) {
-            return false;
-        }
-
-        // Day preferences
-        if (!checkMatches(query.dayPreferences, times?.days)) {
-            return false;
-        }
-
-        // Min duration hours
-        if (query.minDurationHours !== undefined) {
-            const volunteerDuration = times?.maxDurationHours;
-            if (volunteerDuration === undefined || volunteerDuration < query.minDurationHours) {
-                return false;
-            }
-        }
-
-        // Max distance
-        if (query.maxDistanceKm !== undefined) {
-            const volunteerMaxDistance = maxDistanceKm;
-            if (volunteerMaxDistance === undefined || volunteerMaxDistance < query.maxDistanceKm) {
-                return false;
-            }
-        }
-
-        // Date range - check if volunteer has availability in the specified date range
+        // Date range overlap - complex date logic that's easier to do in memory
+        // Gremlin query already filtered for volunteers with dates, now check overlap
         if (query.startDate || query.endDate) {
-            const volunteerDates = dates || [];
+            const volunteerDates = volunteer.preferences?.dates || [];
             if (volunteerDates.length === 0) {
                 return false; // No availability dates
             }
@@ -203,7 +181,8 @@ function filterVolunteers(volunteers: Volunteer[], query: QueryVolunteers): Volu
             const startDate = query.startDate ? new Date(query.startDate) : null;
             const endDate = query.endDate ? new Date(query.endDate) : null;
             
-            const hasOverlappingDate = volunteerDates.every(dateRange => {
+            // Check if any volunteer date range overlaps with query date range
+            const hasOverlappingDate = volunteerDates.some(dateRange => {
                 const rangeStart = new Date(dateRange.startDate);
                 const rangeEnd = new Date(dateRange.endDate);
                 
@@ -223,6 +202,7 @@ function filterVolunteers(volunteers: Volunteer[], query: QueryVolunteers): Volu
             }
         }
 
+        // All other filters (age, skills, languages, presence, causes, etc.) are now handled in Gremlin
         return true;
     });
 }
