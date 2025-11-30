@@ -1,5 +1,5 @@
 import { NeptunedataClient, ExecuteGremlinQueryCommand } from '@aws-sdk/client-neptunedata';
-import { Volunteer } from '../types.js';
+import { Volunteer, Preferences } from '../types.js';
 
 // Neptune configuration from environment variables (provided by agentic-service.yaml)
 // These are set in the Lambda function environment from CloudFormation template
@@ -87,7 +87,7 @@ function escapeGremlinString(str: string): string {
 }
 
 /**
- * Convert value to Gremlin literal
+ * Convert value to Gremlin literal (for single values only, not arrays)
  */
 function toGremlinValue(value: any): string {
     if (value === null || value === undefined) {
@@ -104,6 +104,148 @@ function toGremlinValue(value: any): string {
 }
 
 /**
+ * Add a property to a Gremlin query, handling arrays by adding each element separately
+ * Returns the query string with property calls appended
+ */
+function addProperty(query: string, key: string, value: any): string {
+    if (value === null || value === undefined) {
+        return query;
+    }
+    
+    // Handle arrays: add each element as a separate property value
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            if (typeof item === 'string') {
+                query += `.property('${escapeGremlinString(key)}', '${escapeGremlinString(item)}')`;
+            } else if (typeof item === 'number' || typeof item === 'boolean') {
+                query += `.property('${escapeGremlinString(key)}', ${String(item)})`;
+            } else {
+                // For complex objects in arrays, serialize to JSON string
+                query += `.property('${escapeGremlinString(key)}', '${escapeGremlinString(JSON.stringify(item))}')`;
+            }
+        }
+        return query;
+    }
+    
+    // Single value
+    query += `.property('${escapeGremlinString(key)}', ${toGremlinValue(value)})`;
+    return query;
+}
+
+/**
+ * Flatten preferences object into individual properties for graph storage
+ * Returns an object with property names and values to be set on the vertex
+ */
+function flattenPreferences(preferences: Preferences): Record<string, any> {
+    const props: Record<string, any> = {};
+    
+    if (preferences.maxDistanceKm !== undefined) {
+        props['preferences.maxDistanceKm'] = preferences.maxDistanceKm;
+    }
+    
+    if (preferences.causes && preferences.causes.length > 0) {
+        props['preferences.causes'] = preferences.causes;
+    }
+    
+    if (preferences.presence && preferences.presence.length > 0) {
+        props['preferences.presence'] = preferences.presence;
+    }
+    
+    if (preferences.times) {
+        if (preferences.times.hours && preferences.times.hours.length > 0) {
+            props['preferences.times.hours'] = preferences.times.hours;
+        }
+        if (preferences.times.days && preferences.times.days.length > 0) {
+            props['preferences.times.days'] = preferences.times.days;
+        }
+        if (preferences.times.maxDurationHours !== undefined) {
+            props['preferences.times.maxDurationHours'] = preferences.times.maxDurationHours;
+        }
+        if (preferences.times.commitment) {
+            props['preferences.times.commitment'] = preferences.times.commitment;
+        }
+    }
+    
+    if (preferences.dates && preferences.dates.length > 0) {
+        // Store dates as separate arrays for start and end dates
+        const startDates: string[] = [];
+        const endDates: string[] = [];
+        for (const dateRange of preferences.dates) {
+            startDates.push(dateRange.startDate);
+            endDates.push(dateRange.endDate);
+        }
+        props['preferences.dates.startDates'] = startDates;
+        props['preferences.dates.endDates'] = endDates;
+    }
+    
+    return props;
+}
+
+/**
+ * Reconstruct preferences object from flattened graph properties
+ */
+function reconstructPreferences(props: Record<string, any>): Preferences | undefined {
+    const preferences: Preferences = {};
+    let hasPreferences = false;
+    
+    if (props['preferences.maxDistanceKm'] !== undefined) {
+        preferences.maxDistanceKm = typeof props['preferences.maxDistanceKm'] === 'string' 
+            ? parseFloat(props['preferences.maxDistanceKm']) 
+            : props['preferences.maxDistanceKm'];
+        hasPreferences = true;
+    }
+    
+    if (props['preferences.causes']) {
+        preferences.causes = props['preferences.causes'];
+        hasPreferences = true;
+    }
+    
+    if (props['preferences.presence']) {
+        preferences.presence = props['preferences.presence'];
+        hasPreferences = true;
+    }
+    
+    // Reconstruct times
+    const times: any = {};
+    if (props['preferences.times.hours']) {
+        times.hours = props['preferences.times.hours'];
+        hasPreferences = true;
+    }
+    if (props['preferences.times.days']) {
+        times.days = props['preferences.times.days'];
+        hasPreferences = true;
+    }
+    if (props['preferences.times.maxDurationHours'] !== undefined) {
+        times.maxDurationHours = typeof props['preferences.times.maxDurationHours'] === 'string'
+            ? parseInt(props['preferences.times.maxDurationHours'], 10)
+            : props['preferences.times.maxDurationHours'];
+        hasPreferences = true;
+    }
+    if (props['preferences.times.commitment']) {
+        times.commitment = props['preferences.times.commitment'];
+        hasPreferences = true;
+    }
+    if (Object.keys(times).length > 0) {
+        preferences.times = times;
+    }
+    
+    // Reconstruct dates from separate arrays
+    if (props['preferences.dates.startDates'] && props['preferences.dates.endDates']) {
+        const startDates = props['preferences.dates.startDates'];
+        const endDates = props['preferences.dates.endDates'];
+        if (Array.isArray(startDates) && Array.isArray(endDates) && startDates.length === endDates.length) {
+            preferences.dates = startDates.map((startDate: string, index: number) => ({
+                startDate,
+                endDate: endDates[index]
+            }));
+            hasPreferences = true;
+        }
+    }
+    
+    return hasPreferences ? preferences : undefined;
+}
+
+/**
  * Update or insert a Volunteer into the Neptune database
  * @param volunteer - The volunteer object to insert or update
  * @returns Promise that resolves when the operation completes
@@ -114,39 +256,73 @@ export async function updateVolunteer(volunteer: Volunteer): Promise<void> {
         
         // Use coalesce pattern for upsert: try to update existing, if not found, create new
         let query = `g.V().hasLabel('Volunteer').has('did', '${escapeGremlinString(did)}').fold().coalesce(`;
-        query += `unfold().property('name', ${toGremlinValue(volunteer.name)})`;
-        query += `.property('updatedAt', ${toGremlinValue(volunteer.updatedAt)})`;
+        query += `unfold()`;
+        query = addProperty(query, 'name', volunteer.name);
+        query = addProperty(query, 'updatedAt', volunteer.updatedAt);
         
         if (volunteer.description) {
-            query += `.property('description', ${toGremlinValue(volunteer.description)})`;
+            query = addProperty(query, 'description', volunteer.description);
         }
         if (volunteer.postcode) {
-            query += `.property('postcode', ${toGremlinValue(volunteer.postcode)})`;
+            query = addProperty(query, 'postcode', volunteer.postcode);
         }
         if (volunteer.skills && volunteer.skills.length > 0) {
-            query += `.property('skills', ${toGremlinValue(volunteer.skills)})`;
+            query = addProperty(query, 'skills', volunteer.skills);
         }
+        // Flatten preferences into individual properties
         if (volunteer.preferences) {
-            query += `.property('preferences', ${toGremlinValue(volunteer.preferences)})`;
+            const prefProps = flattenPreferences(volunteer.preferences);
+            for (const [key, value] of Object.entries(prefProps)) {
+                query = addProperty(query, key, value);
+            }
+        }
+        if (volunteer.age !== undefined) {
+            query = addProperty(query, 'age', volunteer.age);
+        }
+        if (volunteer.minor !== undefined) {
+            query = addProperty(query, 'minor', volunteer.minor);
+        }
+        if (volunteer.gender) {
+            query = addProperty(query, 'gender', volunteer.gender);
+        }
+        if (volunteer.languages && volunteer.languages.length > 0) {
+            query = addProperty(query, 'languages', volunteer.languages);
         }
         
         // If not found, create new vertex
-        query += `, addV('Volunteer').property('did', '${escapeGremlinString(did)}')`;
-        query += `.property('name', ${toGremlinValue(volunteer.name)})`;
-        query += `.property('createdAt', ${toGremlinValue(volunteer.createdAt)})`;
-        query += `.property('updatedAt', ${toGremlinValue(volunteer.updatedAt)})`;
+        query += `, addV('Volunteer')`;
+        query = addProperty(query, 'did', did);
+        query = addProperty(query, 'name', volunteer.name);
+        query = addProperty(query, 'createdAt', volunteer.createdAt);
+        query = addProperty(query, 'updatedAt', volunteer.updatedAt);
         
         if (volunteer.description) {
-            query += `.property('description', ${toGremlinValue(volunteer.description)})`;
+            query = addProperty(query, 'description', volunteer.description);
         }
         if (volunteer.postcode) {
-            query += `.property('postcode', ${toGremlinValue(volunteer.postcode)})`;
+            query = addProperty(query, 'postcode', volunteer.postcode);
         }
         if (volunteer.skills && volunteer.skills.length > 0) {
-            query += `.property('skills', ${toGremlinValue(volunteer.skills)})`;
+            query = addProperty(query, 'skills', volunteer.skills);
         }
+        // Flatten preferences into individual properties
         if (volunteer.preferences) {
-            query += `.property('preferences', ${toGremlinValue(volunteer.preferences)})`;
+            const prefProps = flattenPreferences(volunteer.preferences);
+            for (const [key, value] of Object.entries(prefProps)) {
+                query = addProperty(query, key, value);
+            }
+        }
+        if (volunteer.age !== undefined) {
+            query = addProperty(query, 'age', volunteer.age);
+        }
+        if (volunteer.minor !== undefined) {
+            query = addProperty(query, 'minor', volunteer.minor);
+        }
+        if (volunteer.gender) {
+            query = addProperty(query, 'gender', volunteer.gender);
+        }
+        if (volunteer.languages && volunteer.languages.length > 0) {
+            query = addProperty(query, 'languages', volunteer.languages);
         }
         
         query += `)`;
@@ -156,6 +332,28 @@ export async function updateVolunteer(volunteer: Volunteer): Promise<void> {
         console.error('Error updating volunteer in Neptune:', error);
         throw error;
     }
+}
+
+/**
+ * Extract the actual value from a Gremlin type object
+ * Handles types like g:Int32, g:Int64, g:Boolean, g:Double, etc.
+ */
+function extractGremlinValue(value: any): any {
+    if (value && typeof value === 'object' && value['@type'] && value['@value'] !== undefined) {
+        const gremlinType = value['@type'];
+        const gremlinValue = value['@value'];
+        
+        // Extract the actual value from Gremlin types
+        if (gremlinType === 'g:Int32' || gremlinType === 'g:Int64' || gremlinType === 'g:Double') {
+            return typeof gremlinValue === 'string' ? parseFloat(gremlinValue) : gremlinValue;
+        }
+        if (gremlinType === 'g:Boolean') {
+            return typeof gremlinValue === 'string' ? gremlinValue === 'true' : gremlinValue;
+        }
+        // For other types, return the value as-is
+        return gremlinValue;
+    }
+    return value;
 }
 
 /**
@@ -193,13 +391,27 @@ function parseGremlinVertex(vertex: any): Record<string, any> {
             // Property values are stored as g:List with @value array
             if (value['@type'] === 'g:List' && Array.isArray(value['@value'])) {
                 const listValues = value['@value'];
-                // For most properties, take the first value
-                // For arrays/JSON strings, we'll parse them
-                if (listValues.length > 0) {
-                    result[key] = listValues[0];
+                // Properties that should be arrays: extract all values
+                const arrayProperties = [
+                    'skills', 
+                    'languages',
+                    'preferences.causes',
+                    'preferences.presence',
+                    'preferences.times.hours',
+                    'preferences.times.days',
+                    'preferences.dates.startDates',
+                    'preferences.dates.endDates'
+                ];
+                if (arrayProperties.includes(key) && listValues.length > 0) {
+                    // Extract all values from the list for array properties
+                    result[key] = listValues.map(v => extractGremlinValue(v));
+                } else if (listValues.length > 0) {
+                    // For single-value properties, take the first value
+                    result[key] = extractGremlinValue(listValues[0]);
                 }
             } else {
-                result[key] = value;
+                // Extract the actual value from Gremlin types
+                result[key] = extractGremlinValue(value);
             }
         }
     }
@@ -253,36 +465,54 @@ function propsToVolunteer(props: Record<string, any>): Volunteer | null {
         volunteer.postcode = props.postcode;
     }
     
-    // Parse JSON strings for complex objects
+    // Array properties (stored as Gremlin lists)
     if (props.skills) {
-        try {
-            volunteer.skills = typeof props.skills === 'string' ? JSON.parse(props.skills) : props.skills;
-        } catch (e) {
-            console.warn('Failed to parse skills JSON:', props.skills, e);
-            volunteer.skills = props.skills;
-        }
+        volunteer.skills = props.skills;
     }
     
-    if (props.preferences) {
-        try {
-            volunteer.preferences = typeof props.preferences === 'string' ? JSON.parse(props.preferences) : props.preferences;
-        } catch (e) {
-            console.warn('Failed to parse preferences JSON:', props.preferences, e);
-            volunteer.preferences = props.preferences;
+    // Reconstruct preferences from flattened graph properties
+    const preferences = reconstructPreferences(props);
+    if (preferences) {
+        volunteer.preferences = preferences;
+    }
+    
+    if (props.age !== undefined) {
+        // Handle both Gremlin types and plain numbers/strings
+        if (typeof props.age === 'object' && props.age['@type'] && props.age['@value'] !== undefined) {
+            volunteer.age = extractGremlinValue(props.age);
+        } else {
+            volunteer.age = typeof props.age === 'string' ? parseInt(props.age, 10) : props.age;
         }
+    }
+    if (props.minor !== undefined) {
+        // Handle both Gremlin types and plain booleans/strings
+        if (typeof props.minor === 'object' && props.minor['@type'] && props.minor['@value'] !== undefined) {
+            volunteer.minor = extractGremlinValue(props.minor);
+        } else {
+            volunteer.minor = typeof props.minor === 'string' ? props.minor === 'true' : props.minor;
+        }
+    }
+    if (props.gender) {
+        volunteer.gender = props.gender;
+    }
+    if (props.languages) {
+        volunteer.languages = props.languages;
     }
     
     return volunteer as Volunteer;
 }
 
-export async function listVolunteers(): Promise<Volunteer[]> {
+const LIST_QUERY = 'g.V().hasLabel("Volunteer").valueMap(true)';
+
+export async function queryVolunteers( query: string = LIST_QUERY ): Promise<Volunteer[]> {
     try {
-        const query = 'g.V().hasLabel("Volunteer").valueMap(true)';
         const response = await executeGremlinQuery(query);
 
         console.log('🔍 Neptune listVolunteers response:', JSON.stringify(response, null, 2));
         
         const vertices = extractVerticesFromResponse(response);
+
+        console.log('🔍 Neptune listVolunteers vertices:', JSON.stringify(vertices, null, 2));
         
         if (vertices.length === 0) {
             // Check if this was expected to be a list response

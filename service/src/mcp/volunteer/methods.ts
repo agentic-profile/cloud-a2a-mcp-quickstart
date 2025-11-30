@@ -4,7 +4,7 @@ import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { Volunteer } from './types.js';
-import { bulkDeleteVolunteers, deleteVolunteer, listVolunteers, readVolunteer, updateVolunteer } from './graphdb/neptune.js';
+import { bulkDeleteVolunteers, deleteVolunteer, queryVolunteers, readVolunteer, updateVolunteer } from './graphdb/neptune.js';
 import { parseDid } from '../../utils/did.js';
 import { createRandomVolunteer } from './synthesize.js';
 
@@ -87,13 +87,15 @@ async function handleBulkCreate(request: JSONRPCRequest, session: ClientAgentSes
     if( parseDid(session.agentDid).did !== ADMIN_DID )
         return jrpcError(request.id!, -32603, `You are not authorized to bulk delete volunteers`);
 
-    let { limit } = request.params?.arguments as { limit: number } || {};
+    let { limit = 100, fieldOptionality = 0.5 } = request.params?.arguments as { limit?: number, fieldOptionality?: number } || {};
     const deadline = Date.now() + 10000;
 
     try {
         let count = 0;
-        while( count++ < limit && Date.now() < deadline )
-            await updateVolunteer( createRandomVolunteer() );
+        while( count < limit && Date.now() < deadline ) {
+            await updateVolunteer( createRandomVolunteer(fieldOptionality) );
+            ++count;
+        }
         return mcpResultResponse(request.id!, { count });
     } catch (error) {
         return jrpcError(request.id!, -32603, `Failed to update volunteer: ${error}`);
@@ -119,7 +121,7 @@ async function handleBulkDelete(request: JSONRPCRequest, session: ClientAgentSes
 async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
     //const { since, limit = 10 } = request.params?.arguments as { since: string, limit: number } || {};
     try {
-        const volunteers = await listVolunteers();
+        const volunteers = await queryVolunteers();
         return mcpResultResponse(request.id!, {
             kind: 'volunteer-list',
             volunteers

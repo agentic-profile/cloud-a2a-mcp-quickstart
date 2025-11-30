@@ -1,24 +1,37 @@
-import { Volunteer, Skill, Preferences, TimePreferences, DateRange, Cause, ISO639Language } from "./types.js";
+import { Volunteer, Skill, Preferences, TimePreferences, DateRange, Cause, ISO639Language, Presence, DayPreference, HourPreference, TimeCommitment } from "./types.js";
 
-export function createRandomVolunteer(): Volunteer {
+export function createRandomVolunteer( fieldOptionality: number = 0.0 ): Volunteer {
     const name = randomName();
-    const age = randomAge();
+    const age = randomAge(fieldOptionality);
     const result: Volunteer = {
         did: "did:web:example.com:" + name.toLowerCase().replace(/ /g, '-') + '-' + Math.random().toString().substring(2, 4),
         name,
-        description: randomDescription(),
-        skills: randomSkills(),
-        preferences: randomPreferences(),
-        postcode: randomPostcode(),
+        description: randomDescription(fieldOptionality),
+        skills: randomSkills(fieldOptionality),
+        preferences: randomPreferences(fieldOptionality),
+        postcode: randomPostcode(fieldOptionality),
         age,
-        minor: age ? age < 18 : undefined,
-        gender: randomGender(),
-        languages: randomLanguages(),
+        minor: randomMinor(age, fieldOptionality),
+        gender: randomGender(fieldOptionality),
+        languages: randomLanguages(fieldOptionality),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
 
+    console.log('🔍 Created volunteer:', JSON.stringify(result, null, 2));
+
     return result;
+}
+
+function randomMinor( age: number | undefined, fieldOptionality: number ): boolean | undefined {
+    if( age !== undefined )
+        return age < 18;
+
+    if( Math.random() > fieldOptionality )
+        return undefined;
+
+    // No age, so random chance of being a minor
+    return Math.random() < 0.5 ? true : false;
 }
 
 const POSTCODES = [
@@ -241,8 +254,8 @@ const PASSIONS = [
     "environmental education", "community outreach", "social justice"
 ];
 
-function randomDescription(): string | undefined {
-     if( Math.random() < 0.5 )
+function randomDescription(fieldOptionality: number): string | undefined {
+     if( Math.random() < fieldOptionality )
         return undefined; // half the time, no description
 
     const template = DESCRIPTION_TEMPLATES[Math.floor(Math.random() * DESCRIPTION_TEMPLATES.length)];
@@ -286,15 +299,15 @@ const ALL_SKILLS: Skill[] = [
     "Sustainability & Energy"
 ];
 
-function randomPostcode(): string | undefined {
-    if (Math.random() < 0.5) {
+function randomPostcode(fieldOptionality: number): string | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 50% chance of no postcode
     }
     return POSTCODES[Math.floor(Math.random() * POSTCODES.length)];
 }
 
-function randomSkills(): Skill[] | undefined {
-    if (Math.random() < 0.5) {
+function randomSkills(fieldOptionality: number): Skill[] | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 50% chance of no skills
     }
     
@@ -325,12 +338,11 @@ const ALL_CAUSES: Cause[] = [
 
 const ALL_LANGUAGES: ISO639Language[] = ['en', 'fr', 'de', 'it', 'es', 'ru', 'zh', 'ja', 'ko', 'jp'];
 
-const TIME_HOURS: ('morning' | 'afternoon' | 'evening')[] = ['morning', 'afternoon', 'evening'];
-const TIME_DAYS: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] = 
-    ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const TIME_HOURS: HourPreference[] = ['morning', 'afternoon', 'evening'];
+const TIME_DAYS: DayPreference[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-function randomTimePreferences(): TimePreferences | undefined {
-    if (Math.random() < 0.4) {
+function randomTimePreferences(fieldOptionality: number): TimePreferences | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 40% chance of no time preferences
     }
     
@@ -339,7 +351,7 @@ function randomTimePreferences(): TimePreferences | undefined {
     // Random hours (1-3)
     if (Math.random() < 0.7) {
         const numHours = Math.floor(Math.random() * 3) + 1;
-        const hours: ('morning' | 'afternoon' | 'evening')[] = [];
+        const hours: HourPreference[] = [];
         const availableHours = [...TIME_HOURS];
         for (let i = 0; i < numHours && availableHours.length > 0; i++) {
             const randomIndex = Math.floor(Math.random() * availableHours.length);
@@ -351,7 +363,7 @@ function randomTimePreferences(): TimePreferences | undefined {
     // Random days (1-7)
     if (Math.random() < 0.7) {
         const numDays = Math.floor(Math.random() * 5) + 1; // 1-5 days
-        const days: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] = [];
+        const days: DayPreference[] = [];
         const availableDays = [...TIME_DAYS];
         for (let i = 0; i < numDays && availableDays.length > 0; i++) {
             const randomIndex = Math.floor(Math.random() * availableDays.length);
@@ -362,14 +374,19 @@ function randomTimePreferences(): TimePreferences | undefined {
     
     // Random duration (1-8 hours)
     if (Math.random() < 0.6) {
-        preferences.durationHours = Math.floor(Math.random() * 8) + 1;
+        preferences.maxDurationHours = Math.floor(Math.random() * 8) + 1;
     }
+    
+    // Random time commitment
+    const TIME_COMMITMENTS: TimeCommitment[] = 
+        ['one time', 'weekly', 'monthly', 'flexible'];
+    preferences.commitment = TIME_COMMITMENTS[Math.floor(Math.random() * TIME_COMMITMENTS.length)];
     
     return Object.keys(preferences).length > 0 ? preferences : undefined;
 }
 
-function randomDateRange(): DateRange | undefined {
-    if (Math.random() < 0.6) {
+function randomDateRange(fieldOptionality: number): DateRange | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 60% chance of no date range
     }
     
@@ -385,19 +402,26 @@ function randomDateRange(): DateRange | undefined {
     };
 }
 
-function randomPreferences(): Preferences | undefined {
-    if (Math.random() < 0.5) {
+function randomPreferences(fieldOptionality: number): Preferences | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 50% chance of no preferences
     }
     
-    const preferences: Preferences = {};
+    // Random presence (optional field)
+    const PRESENCE_OPTIONS: Presence[] = ['in-person', 'remote'];
+    // Randomly select 1 or 2 presence options
+    const numPresenceOptions = Math.random() < 0.5 ? 1 : 2;
+    const shuffled = [...PRESENCE_OPTIONS].sort(() => Math.random() - 0.5);
+    const preferences: Preferences = {
+        presence: shuffled.slice(0, numPresenceOptions)
+    };
     
-    const times = randomTimePreferences();
+    const times = randomTimePreferences(fieldOptionality);
     if (times) {
         preferences.times = times;
     }
     
-    const dateRange = randomDateRange();
+    const dateRange = randomDateRange(fieldOptionality);
     if (dateRange) {
         preferences.dates = [dateRange];
     }
@@ -419,17 +443,19 @@ function randomPreferences(): Preferences | undefined {
         preferences.causes = causes;
     }
     
-    return Object.keys(preferences).length > 0 ? preferences : undefined;
+    return preferences;
 }
 
-function randomAge(): number | undefined {
-    if (Math.random() < 0.5) {
-        return undefined; // 50% chance of no age
+function randomAge(fieldOptionality: number): number | undefined {
+    if (Math.random() < fieldOptionality) {
+        return undefined;
     }
     // Age distribution: mostly adults, some seniors, fewer young adults
     const rand = Math.random();
     if (rand < 0.1) {
-        return Math.floor(Math.random() * 5) + 16; // 16-20 (10%)
+        return Math.floor(Math.random() * 10) + 5; // 5-15 (5%)
+    } else if (rand < 0.2) {
+        return Math.floor(Math.random() * 5) + 16; // 16-20 (5%)
     } else if (rand < 0.6) {
         return Math.floor(Math.random() * 30) + 21; // 21-50 (50%)
     } else if (rand < 0.9) {
@@ -439,15 +465,15 @@ function randomAge(): number | undefined {
     }
 }
 
-function randomGender(): 'male' | 'female' | undefined {
-    if (Math.random() < 0.5) {
+function randomGender(fieldOptionality: number): 'male' | 'female' | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 50% chance of no gender specified
     }
     return Math.random() < 0.5 ? 'male' : 'female';
 }
 
-function randomLanguages(): ISO639Language[] | undefined {
-    if (Math.random() < 0.5) {
+function randomLanguages(fieldOptionality: number): ISO639Language[] | undefined {
+    if (Math.random() < fieldOptionality) {
         return undefined; // 50% chance of no languages specified
     }
     

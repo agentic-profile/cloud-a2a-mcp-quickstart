@@ -1,22 +1,47 @@
 export const VOLUNTEER_EXAMPLE = {
-    "createdAt": "2024-01-10T08:30:00.000Z",
-    "updatedAt": "2024-01-10T08:30:00.000Z",
-    "name": "Mike",
-    "description": "I like helping seniors with longevity, and young professionals with their careers",
-    "skills": ["gardening", "animal_care", "event_organisation", "marketing", "fundraising", "administration"],
+    "name": "Brittany Duncan",
+    "description": "Skilled volunteer who is adaptable and positive, making a positive impact wherever they go. Has a passion for healthcare support.",
+    "skills": [
+      "Support, Training & Advocacy"
+    ],
     "preferences": {
-        "times": {
-            "hours": ["afternoon", "evening"],
-            "days": ["monday", "tuesday", "friday", "saturday"],
-            "durationHours": 3
-        },
-        "dates": [
-            {
-                "startDate": "2025-12-01T08:30:00.000Z",
-                "endDate": "2026-01-10T08:30:00.000Z"
-            }
+      "presence": [
+        "in-person"
+      ],
+      "times": {
+        "hours": [
+          "afternoon",
+          "morning",
+          "evening"
         ],
-        "maxDistanceKm": 10
+        "days": [
+          "sunday",
+          "wednesday",
+          "friday"
+        ],
+        "commitment": "weekly"
+      },
+      "dates": [
+        {
+          "startDate": "2025-12-01",
+          "endDate": "2026-06-04"
+        }
+      ],
+      "maxDistanceKm": 8,
+      "causes": [
+        "Crisis and Welfare",
+        "Sustainability, heritage and environment",
+        "Sports, art and culture"
+      ]
     },
-    "postcode": "DT1 2NH"
+    "postcode": "WC1A 1RT",
+    "age": 16,
+    "minor": true,
+    "gender": "female",
+    "languages": [
+      "de"
+    ],
+    "createdAt": "2025-11-30T19:40:11.123Z",
+    "updatedAt": "2025-11-30T19:40:11.123Z"
 };
+  

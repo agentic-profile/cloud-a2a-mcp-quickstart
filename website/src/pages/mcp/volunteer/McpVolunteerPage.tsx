@@ -7,6 +7,7 @@ import McpServiceDescription from '../util/McpServiceDescription';
 import UpdateVolunteer from './UpdateVolunteer';
 import QueryVolunteers from './QueryVolunteers';
 import QuickActions from './QuickActions';
+import BulkCreate from './BulkCreate';
 import type { HttpRequest } from '@/components/JsonRpcDebug';
 
 const volunteerService = mcpServices.find(service => service.id === '7')!;
@@ -24,8 +25,8 @@ const McpVolunteerPage = () => {
 
     return (
         <Page
-            title="Activity MCP Service"
-            subtitle="Find activities that people can do"
+            title="Volunteer MCP Service"
+            subtitle="Find volunteers for activities"
         >
             <div className="space-y-6">
                 {/* Service Information */}
@@ -39,6 +40,9 @@ const McpVolunteerPage = () => {
 
                 {/* Query Form */}
                 <QueryVolunteers onSubmitHttpRequest={setHttpRequest} />
+
+                {/* Bulk Create Form */}
+                <BulkCreate onSubmitHttpRequest={setHttpRequest} />
 
                 {/* Quick Actions */}
                 <QuickActions onSubmitHttpRequest={setHttpRequest} />

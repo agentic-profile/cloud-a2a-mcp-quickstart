@@ -8,7 +8,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Keywords',
         payload: {
-            keywords: 'london'
+            keywords: 'phil welfare'
         }
     },
     {
@@ -63,7 +63,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Presence',
         payload: {
-            presence: 'remote'
+            presence: ['remote']
         }
     },
     {
@@ -110,7 +110,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
             endDate: '2024-06-30',
             causes: ['Community', 'Health and social care', 'Young People & Children'],
             skills: ['Medical Doctor', 'CPR/First Aid', 'Support, Training & Advocacy'],
-            presence: 'both',
+            presence: ['in-person', 'remote'],
             languages: ['en', 'fr'],
             minAge: 25,
             maxAge: 55,

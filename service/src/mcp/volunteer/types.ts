@@ -22,10 +22,10 @@ export interface Preferences {
     dates?: DateRange[];
     maxDistanceKm?: number;
     causes?: Cause[];
-    presence: Presence;
+    presence?: Presence[];
 }
 
-export type Presence = 'in-person' | 'remote' | 'both';
+export type Presence = 'in-person' | 'remote';
 
 export type Cause = "Animal welfare"
     | "Community"
@@ -61,11 +61,11 @@ export type Skill = "Business, Strategy & Legal"
 export interface TimePreferences {
     hours?: HourPreference[];
     days?: DayPreference[];
-    durationHours?: number;
+    maxDurationHours?: number;
     commitment?: TimeCommitment;
 }
 
-export type TimeCommitment = 'One Time' | 'Weekly' | 'Monthly' | 'Flexible';
+export type TimeCommitment = 'one time' | 'weekly' | 'monthly' | 'flexible';
 export type HourPreference = 'morning' | 'afternoon' | 'evening';
 export type DayPreference = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 
@@ -85,7 +85,7 @@ export interface QueryVolunteers {
     endDate?: string;
     causes?: Cause[];
     skills?: Skill[];
-    presence?: Presence;
+    presence?: Presence[];
     languages?: ISO639Language[];
     minAge?: number;
     maxAge?: number;

@@ -75,9 +75,14 @@ const VolunteerSchema = {
                             },
                             description: 'Preferred days of week'
                         },
-                        durationHours: {
+                        maxDurationHours: {
                             type: 'number',
-                            description: 'Preferred duration in hours'
+                            description: 'Maximum preferred duration in hours'
+                        },
+                        commitment: {
+                            type: 'string',
+                            enum: ['one time', 'weekly', 'monthly', 'flexible'],
+                            description: 'Time commitment preference'
                         }
                     }
                 },
@@ -123,6 +128,14 @@ const VolunteerSchema = {
                         ]
                     },
                     description: 'Causes the volunteer is interested in'
+                },
+                presence: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        enum: ['in-person', 'remote']
+                    },
+                    description: 'Preferred presence types'
                 }
             }
         },
@@ -154,6 +167,140 @@ const VolunteerSchema = {
     },
     required: ['did', 'createdAt', 'updatedAt', 'name']
 };
+
+const QueryVolunteersSchema = {
+    type: 'object',
+    properties: {
+        keywords: {
+            type: 'string',
+            description: 'Keywords to search for in volunteer profiles'
+        },
+        postcode: {
+            type: 'string',
+            description: 'The postal code to search for volunteers in'
+        },
+        maxDistanceKm: {
+            type: 'number',
+            description: 'Maximum distance in kilometers to search for volunteers within'
+        },
+        hourPreferences: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: ['morning', 'afternoon', 'evening']
+            },
+            description: 'Preferred times of day'
+        },
+        dayPreferences: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            },
+            description: 'Preferred days of week'
+        },
+        minDurationHours: {
+            type: 'number',
+            description: 'Minimum duration in hours'
+        },
+        startDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Start date for availability'
+        },
+        endDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'End date for availability'
+        },
+        causes: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: [
+                    'Animal welfare',
+                    'Community',
+                    'Crisis and Welfare',
+                    'Emergency Response',
+                    'Health and social care',
+                    'Older people',
+                    'Sports',
+                    'Sports, art and culture',
+                    'Sustainability, heritage and environment',
+                    'Young People & Children'
+                ]
+            },
+            description: 'Causes to filter by'
+        },
+        skills: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: [
+                    'Business, Strategy & Legal',
+                    'Communications, Marketing & Events',
+                    'CPR/First Aid',
+                    'Creative Services',
+                    'Digital, Data & IT',
+                    'Finance & Fundraising',
+                    'Heavy Equipment Operator',
+                    'Leadership & Management',
+                    'Mechanic',
+                    'Medical Doctor',
+                    'Medical Nurse',
+                    'Medical Paramedic',
+                    'Organisational Policy & Governance',
+                    'Property & Infrastructure',
+                    'Radio Operator',
+                    'Research, Service Design & User Insight',
+                    'Search and Rescue',
+                    'Support, Training & Advocacy',
+                    'Sustainability & Energy'
+                ]
+            },
+            description: 'Skills to filter by'
+        },
+        presence: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: ['in-person', 'remote']
+            },
+            description: 'Presence types to filter by'
+        },
+        languages: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: ['en', 'fr', 'de', 'it', 'es', 'ru', 'zh', 'ja', 'ko', 'jp']
+            },
+            description: 'Languages to filter by (ISO 639 codes)'
+        },
+        minAge: {
+            type: 'number',
+            description: 'Minimum age to filter by'
+        },
+        maxAge: {
+            type: 'number',
+            description: 'Maximum age to filter by'
+        },
+        minor: {
+            type: 'boolean',
+            description: 'Filter by whether volunteer is a minor'
+        },
+        gender: {
+            type: 'string',
+            enum: ['male', 'female'],
+            description: 'Gender to filter by'
+        },
+        timeCommitment: {
+            type: 'string',
+            enum: ['one time', 'weekly', 'monthly', 'flexible'],
+            description: 'Time commitment to filter by'
+        }
+    },
+    required: []
+}
 
 const UpdateVolunteerSchema = {
     ...VolunteerSchema,
@@ -198,35 +345,7 @@ export const MCP_TOOLS = [
     {
         name: 'query',
         description: 'Search for volunteers that match a specific query',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                postcode: {
-                    type: 'string',
-                    description: 'The postal code to search for volunteers in'
-                },
-                distance: {
-                    type: 'number',
-                    description: 'Distance in kilometers to search for volunteers within (requires geolocation)'
-                },
-                geolocation: {
-                    type: 'object',
-                    description: 'Geographic coordinates to search around',
-                    properties: {
-                        latitude: {
-                            type: 'number',
-                            description: 'Latitude coordinate'
-                        },
-                        longitude: {
-                            type: 'number',
-                            description: 'Longitude coordinate'
-                        }
-                    },
-                    required: ['latitude', 'longitude']
-                }
-            },
-            required: []
-        },
+        inputSchema: QueryVolunteersSchema,
         outputSchema: {
             type: 'object',
             properties: {
@@ -267,6 +386,60 @@ export const MCP_TOOLS = [
                 }
             },
             required: ['volunteers']
+        }
+    },
+    {
+        name: 'bulk-create',
+        description: 'Bulk create random volunteers (admin only)',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                limit: {
+                    type: 'number',
+                    description: 'Maximum number of volunteers to create (default 100)'
+                },
+                fieldOptionality: {
+                    type: 'number',
+                    minimum: 0,
+                    maximum: 1,
+                    description: 'Probability that fields will be excluded in generated volunteers (0.0 = never, 1.0 = always, default 0.5)'
+                }
+            },
+            required: []
+        },
+        outputSchema: {
+            type: 'object',
+            properties: {
+                count: {
+                    type: 'number',
+                    description: 'Number of volunteers created'
+                }
+            },
+            required: ['count']
+        }
+    },
+    {
+        name: 'bulk-delete',
+        description: 'Bulk delete volunteers (admin only)',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                limit: {
+                    type: 'number',
+                    description: 'Maximum number of volunteers to delete (default 20)'
+                }
+            },
+            required: []
+        },
+        outputSchema: {
+            type: 'object',
+            properties: {
+                success: {
+                    type: 'boolean',
+                    description: 'Whether the bulk delete operation succeeded'
+                }
+            },
+            required: ['success']
         }
     }
 ];
