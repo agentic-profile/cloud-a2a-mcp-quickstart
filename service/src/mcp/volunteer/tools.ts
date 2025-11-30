@@ -163,6 +163,28 @@ const VolunteerSchema = {
                 enum: ['en', 'fr', 'de', 'it', 'es', 'ru', 'zh', 'ja', 'ko', 'jp']
             },
             description: 'Languages spoken by the volunteer (ISO 639 codes)'
+        },
+        history: {
+            type: 'object',
+            description: 'Volunteering history of the volunteer',
+            properties: {
+                since: {
+                    type: 'string',
+                    format: 'date-time',
+                    description: 'ISO 8601 timestamp when the volunteer started volunteering'
+                },
+                activities: {
+                    type: 'number',
+                    description: 'Number of activities the volunteer has participated in'
+                },
+                organizations: {
+                    type: 'array',
+                    items: {
+                        type: 'string'
+                    },
+                    description: 'List of organizations that hosted the activities'
+                }
+            }
         }
     },
     required: ['did', 'createdAt', 'updatedAt', 'name']

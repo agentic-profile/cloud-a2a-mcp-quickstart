@@ -1,4 +1,4 @@
-import { Volunteer, Skill, Preferences, TimePreferences, DateRange, Cause, ISO639Language, Presence, DayPreference, HourPreference, TimeCommitment } from "./types.js";
+import { Volunteer, Skill, Preferences, TimePreferences, DateRange, Cause, ISO639Language, Presence, DayPreference, HourPreference, TimeCommitment, VolunteeringHistory } from "./types.js";
 
 export function createRandomVolunteer( fieldOptionality: number = 0.0 ): Volunteer {
     const name = randomName();
@@ -14,6 +14,7 @@ export function createRandomVolunteer( fieldOptionality: number = 0.0 ): Volunte
         minor: randomMinor(age, fieldOptionality),
         gender: randomGender(fieldOptionality),
         languages: randomLanguages(fieldOptionality),
+        history: randomHistory(fieldOptionality),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
@@ -258,23 +259,48 @@ function randomDescription(fieldOptionality: number): string | undefined {
      if( Math.random() < fieldOptionality )
         return undefined; // half the time, no description
 
-    const template = DESCRIPTION_TEMPLATES[Math.floor(Math.random() * DESCRIPTION_TEMPLATES.length)];
-    
-    // Get unique random qualities to fill slots
-    const quality1 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
-    let quality2 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
-    // Ensure quality2 is different from quality1
-    while (quality2 === quality1) {
-        quality2 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+    // Randomly select 0-4 templates from the available templates
+    const numTemplates = Math.floor(Math.random() * 5); // 0-4 templates
+    const selectedTemplates: string[] = [];
+    const availableTemplates = [...DESCRIPTION_TEMPLATES];
+    for (let i = 0; i < numTemplates && availableTemplates.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * availableTemplates.length);
+        selectedTemplates.push(availableTemplates.splice(randomIndex, 1)[0]);
     }
-    
-    // Get a random passion
-    const passion = PASSIONS[Math.floor(Math.random() * PASSIONS.length)];
-    
-    return template
-        .replace(/{quality1}/g, quality1)
-        .replace(/{quality2}/g, quality2)
-        .replace(/{passion}/g, passion);
+
+    if (selectedTemplates.length === 0) {
+        return undefined; // decided not to return anything
+    }
+
+    // choose a different passion for each template
+    const selectedPassions: string[] = [];
+    const availablePassions = [...PASSIONS];
+    for (let i = 0; i < numTemplates && availablePassions.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * availablePassions.length);
+        selectedPassions.push(availablePassions.splice(randomIndex, 1)[0]);
+    }
+        
+    const description = selectedTemplates.map((template, index) => {
+        // Get unique random qualities to fill slots
+        const quality1 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+        let quality2 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+        // Ensure quality2 is different from quality1
+        while (quality2 === quality1) {
+            quality2 = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+        }
+        
+        // Pick one passion from the selected subset
+        const passion = selectedPassions[index];
+        
+        return template
+            .replace(/{quality1}/g, quality1)
+            .replace(/{quality2}/g, quality2)
+            .replace(/{passion}/g, passion);
+    }).join(' ');
+
+    console.log('🔍 Created description:', description);
+
+    return description;
 }
 
 const ALL_SKILLS: Skill[] = [
@@ -349,7 +375,7 @@ function randomTimePreferences(fieldOptionality: number): TimePreferences | unde
     const preferences: TimePreferences = {};
     
     // Random hours (1-3)
-    if (Math.random() < 0.7) {
+    if (Math.random() > fieldOptionality) {
         const numHours = Math.floor(Math.random() * 3) + 1;
         const hours: HourPreference[] = [];
         const availableHours = [...TIME_HOURS];
@@ -361,7 +387,7 @@ function randomTimePreferences(fieldOptionality: number): TimePreferences | unde
     }
     
     // Random days (1-7)
-    if (Math.random() < 0.7) {
+    if (Math.random() > fieldOptionality) {
         const numDays = Math.floor(Math.random() * 5) + 1; // 1-5 days
         const days: DayPreference[] = [];
         const availableDays = [...TIME_DAYS];
@@ -373,7 +399,7 @@ function randomTimePreferences(fieldOptionality: number): TimePreferences | unde
     }
     
     // Random duration (1-8 hours)
-    if (Math.random() < 0.6) {
+    if (Math.random() > fieldOptionality) {
         preferences.maxDurationHours = Math.floor(Math.random() * 8) + 1;
     }
     
@@ -427,12 +453,12 @@ function randomPreferences(fieldOptionality: number): Preferences | undefined {
     }
     
     // Random max distance (5-50 km)
-    if (Math.random() < 0.6) {
+    if (Math.random() > fieldOptionality) {
         preferences.maxDistanceKm = Math.floor(Math.random() * 46) + 5;
     }
     
     // Random causes (1-3)
-    if (Math.random() < 0.7) {
+    if (Math.random() > fieldOptionality) {
         const numCauses = Math.floor(Math.random() * 3) + 1;
         const causes: Cause[] = [];
         const availableCauses = [...ALL_CAUSES];
@@ -494,4 +520,74 @@ function randomLanguages(fieldOptionality: number): ISO639Language[] | undefined
     }
     
     return languages.length > 0 ? languages : undefined;
+}
+
+const ORGANIZATION_NAMES = [
+    "Red Cross",
+    "Salvation Army",
+    "Habitat for Humanity",
+    "United Way",
+    "Food Bank Network",
+    "Animal Rescue League",
+    "Community Health Center",
+    "Senior Citizens Center",
+    "Youth Development Program",
+    "Environmental Conservation Society",
+    "Homeless Shelter Network",
+    "Literacy Volunteers",
+    "Meals on Wheels",
+    "Big Brothers Big Sisters",
+    "Habitat for Humanity",
+    "American Red Cross",
+    "Local Food Pantry",
+    "Community Garden Project",
+    "Disaster Relief Organization",
+    "Children's Hospital Volunteers",
+    "Elder Care Services",
+    "Wildlife Protection Society",
+    "Community Center",
+    "Soup Kitchen",
+    "Refugee Support Network",
+    "Mental Health Support Group",
+    "Education Foundation",
+    "Sports and Recreation Club",
+    "Arts and Culture Center",
+    "Heritage Preservation Society"
+];
+
+function randomHistory(fieldOptionality: number): VolunteeringHistory | undefined {
+    if (Math.random() < fieldOptionality) {
+        return undefined; // Chance of no history based on fieldOptionality
+    }
+    
+    const history: VolunteeringHistory = {};
+    
+    // Generate "since" date - between 6 months and 10 years ago
+    if (Math.random() > fieldOptionality) {
+        const monthsAgo = Math.floor(Math.random() * 114) + 6; // 6-120 months
+        const sinceDate = new Date();
+        sinceDate.setMonth(sinceDate.getMonth() - monthsAgo);
+        history.since = sinceDate.toISOString();
+    }
+    
+    // Generate number of activities - between 1 and 50
+    if (Math.random() > fieldOptionality) {
+        history.activities = Math.floor(Math.random() * 50) + 1;
+    }
+    
+    // Generate organizations - 1 to 5 organizations
+    if (Math.random() > fieldOptionality) {
+        const numOrgs = Math.floor(Math.random() * 5) + 1; // 1-3 organizations
+        const organizations: string[] = [];
+        const availableOrgs = [...ORGANIZATION_NAMES];
+        
+        for (let i = 0; i < numOrgs && availableOrgs.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * availableOrgs.length);
+            organizations.push(availableOrgs.splice(randomIndex, 1)[0]);
+        }
+        history.organizations = organizations;
+    }
+    
+    // Return history only if at least one field is set
+    return Object.keys(history).length > 0 ? history : undefined;
 }

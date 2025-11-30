@@ -11,7 +11,14 @@ export interface Volunteer {
     age?: number;
     minor?: boolean;
     gender?: Gender;
-    languages?: ISO639Language[]; 
+    languages?: ISO639Language[];
+    history?: VolunteeringHistory;
+}
+
+export interface VolunteeringHistory {
+    since?: string; // ISO 8601 timestamp
+    activities?: number; // number of activities the volunteer has participated in
+    organizations?: string[]; // list of organizations that hosted the activities
 }
 
 export type Gender = 'male' | 'female';
@@ -92,4 +99,7 @@ export interface QueryVolunteers {
     minor?: boolean;
     gender?: Gender;
     timeCommitment?: TimeCommitment;
+    historySince?: string;
+    historyActivities?: number;
+    historyOrganizations?: string[];
 }

@@ -1,47 +1,58 @@
 export const VOLUNTEER_EXAMPLE = {
-    "name": "Brittany Duncan",
-    "description": "Skilled volunteer who is adaptable and positive, making a positive impact wherever they go. Has a passion for healthcare support.",
-    "skills": [
-      "Support, Training & Advocacy"
+  "name": "Rachel Block",
+  "createdAt": "2025-11-30T21:53:36.276Z",
+  "updatedAt": "2025-11-30T21:53:36.276Z",
+  "description": "Motivated volunteer with a supportive spirit and detail-oriented dedication to community welfare, especially passionate about mental health awareness. Dedicated volunteer with a professional personality and empathetic work ethic, motivated by a love for community events. Dedicated individual with a active approach and supportive attitude towards community service, with a special interest in food security.",
+  "postcode": "WC1N 1RT",
+  "skills": [
+    "Search and Rescue",
+    "CPR/First Aid"
+  ],
+  "preferences": {
+    "maxDistanceKm": 36,
+    "causes": [
+      "Community",
+      "Animal welfare"
     ],
-    "preferences": {
-      "presence": [
-        "in-person"
+    "presence": [
+      "in-person"
+    ],
+    "times": {
+      "hours": [
+        "morning",
+        "evening",
+        "afternoon"
       ],
-      "times": {
-        "hours": [
-          "afternoon",
-          "morning",
-          "evening"
-        ],
-        "days": [
-          "sunday",
-          "wednesday",
-          "friday"
-        ],
-        "commitment": "weekly"
-      },
-      "dates": [
-        {
-          "startDate": "2025-12-01",
-          "endDate": "2026-06-04"
-        }
+      "days": [
+        "friday",
+        "thursday",
+        "sunday",
+        "saturday"
       ],
-      "maxDistanceKm": 8,
-      "causes": [
-        "Crisis and Welfare",
-        "Sustainability, heritage and environment",
-        "Sports, art and culture"
-      ]
+      "maxDurationHours": 5,
+      "commitment": "weekly"
     },
-    "postcode": "WC1A 1RT",
-    "age": 16,
-    "minor": true,
-    "gender": "female",
-    "languages": [
-      "de"
-    ],
-    "createdAt": "2025-11-30T19:40:11.123Z",
-    "updatedAt": "2025-11-30T19:40:11.123Z"
-};
-  
+    "dates": [
+      {
+        "startDate": "2025-12-07",
+        "endDate": "2026-02-03"
+      }
+    ]
+  },
+  "age": 58,
+  "minor": false,
+  "gender": "female",
+  "languages": [
+    "en"
+  ],
+  "history": {
+    "since": "2017-01-30T21:53:36.276Z",
+    "activities": 13,
+    "organizations": [
+      "Salvation Army",
+      "Habitat for Humanity",
+      "Heritage Preservation Society",
+      "Environmental Conservation Society"
+    ]
+  }
+};  

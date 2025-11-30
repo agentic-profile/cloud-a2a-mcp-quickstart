@@ -8,19 +8,19 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Keywords',
         payload: {
-            keywords: 'phil welfare'
+            keywords: 'Rachel'
         }
     },
     {
         name: 'Postcode',
         payload: {
-            postcode: 'DT1 2NH'
+            postcode: 'WC1N 1RT'
         }
     },
     {
         name: 'Max Distance',
         payload: {
-            maxDistanceKm: 10
+            maxDistanceKm: 5
         }
     },
     {
@@ -32,7 +32,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Day Preference',
         payload: {
-            dayPreferences: ['saturday']
+            dayPreferences: ['sunday']
         }
     },
     {
@@ -51,7 +51,7 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Causes',
         payload: {
-            causes: ['Community', 'Health and social care']
+            causes: ['Community', 'Animal welfare']
         }
     },
     {
@@ -63,13 +63,13 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Presence',
         payload: {
-            presence: ['remote']
+            presence: ['in-person']
         }
     },
     {
         name: 'Languages',
         payload: {
-            languages: ['en', 'fr', 'es']
+            languages: ['en']
         }
     },
     {
@@ -94,29 +94,50 @@ const EXAMPLE_QUERIES: JsonExample[] = [
     {
         name: 'Time Commitment',
         payload: {
-            timeCommitment: 'Weekly'
+            timeCommitment: 'weekly'
+        }
+    },
+    {
+        name: 'History Since',
+        payload: {
+            historySince: '2020-01-01T00:00:00.000Z'
+        }
+    },
+    {
+        name: 'History Activities',
+        payload: {
+            historyActivities: 10
+        }
+    },
+    {
+        name: 'History Organizations',
+        payload: {
+            historyOrganizations: ['Habitat for Humanity', 'Salvation Army']
         }
     },
     {
         name: 'All Fields',
         payload: {
-            keywords: 'london',
-            postcode: 'E1 3DG',
-            maxDistanceKm: 10,
-            hourPreferences: ['afternoon'],
-            dayPreferences: ['saturday'],
+            keywords: 'Rachel',
+            postcode: 'WC1N 1RT',
+            maxDistanceKm: 5,
+            hourPreferences: ['morning'],
+            dayPreferences: ['sunday'],
             minDurationHours: 4,
             startDate: '2024-06-01',
-            endDate: '2024-06-30',
-            causes: ['Community', 'Health and social care', 'Young People & Children'],
-            skills: ['Medical Doctor', 'CPR/First Aid', 'Support, Training & Advocacy'],
-            presence: ['in-person', 'remote'],
-            languages: ['en', 'fr'],
-            minAge: 25,
-            maxAge: 55,
+            endDate: '2026-06-30',
+            causes: ['Community', 'Animal welfare'],
+            skills: ['Medical Doctor', 'CPR/First Aid'],
+            presence: ['in-person'],
+            languages: ['en'],
+            minAge: 18,
+            maxAge: 65,
             minor: false,
             gender: 'female',
-            timeCommitment: 'Weekly'
+            timeCommitment: 'weekly',
+            historySince: '2020-01-01T00:00:00.000Z',
+            historyActivities: 10,
+            historyOrganizations: ['Habitat for Humanity', 'Salvation Army']
         }
     }
 ];

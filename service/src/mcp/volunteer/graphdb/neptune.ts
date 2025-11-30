@@ -1,5 +1,5 @@
 import { NeptunedataClient, ExecuteGremlinQueryCommand } from '@aws-sdk/client-neptunedata';
-import { Volunteer, Preferences } from '../types.js';
+import { Volunteer, Preferences, VolunteeringHistory } from '../types.js';
 
 // Neptune configuration from environment variables (provided by agentic-service.yaml)
 // These are set in the Lambda function environment from CloudFormation template
@@ -182,6 +182,28 @@ function flattenPreferences(preferences: Preferences): Record<string, any> {
 }
 
 /**
+ * Flatten history object into individual properties for graph storage
+ * Returns an object with property names and values to be set on the vertex
+ */
+function flattenHistory(history: VolunteeringHistory): Record<string, any> {
+    const props: Record<string, any> = {};
+    
+    if (history.since !== undefined) {
+        props['history.since'] = history.since;
+    }
+    
+    if (history.activities !== undefined) {
+        props['history.activities'] = history.activities;
+    }
+    
+    if (history.organizations && history.organizations.length > 0) {
+        props['history.organizations'] = history.organizations;
+    }
+    
+    return props;
+}
+
+/**
  * Reconstruct preferences object from flattened graph properties
  */
 function reconstructPreferences(props: Record<string, any>): Preferences | undefined {
@@ -246,6 +268,33 @@ function reconstructPreferences(props: Record<string, any>): Preferences | undef
 }
 
 /**
+ * Reconstruct history object from flattened graph properties
+ */
+function reconstructHistory(props: Record<string, any>): VolunteeringHistory | undefined {
+    const history: VolunteeringHistory = {};
+    let hasHistory = false;
+    
+    if (props['history.since'] !== undefined) {
+        history.since = props['history.since'];
+        hasHistory = true;
+    }
+    
+    if (props['history.activities'] !== undefined) {
+        history.activities = typeof props['history.activities'] === 'string' 
+            ? parseInt(props['history.activities'], 10) 
+            : props['history.activities'];
+        hasHistory = true;
+    }
+    
+    if (props['history.organizations']) {
+        history.organizations = props['history.organizations'];
+        hasHistory = true;
+    }
+    
+    return hasHistory ? history : undefined;
+}
+
+/**
  * Update or insert a Volunteer into the Neptune database
  * @param volunteer - The volunteer object to insert or update
  * @returns Promise that resolves when the operation completes
@@ -288,6 +337,13 @@ export async function updateVolunteer(volunteer: Volunteer): Promise<void> {
         if (volunteer.languages && volunteer.languages.length > 0) {
             query = addProperty(query, 'languages', volunteer.languages);
         }
+        // Flatten history into individual properties
+        if (volunteer.history) {
+            const historyProps = flattenHistory(volunteer.history);
+            for (const [key, value] of Object.entries(historyProps)) {
+                query = addProperty(query, key, value);
+            }
+        }
         
         // If not found, create new vertex
         query += `, addV('Volunteer')`;
@@ -323,6 +379,13 @@ export async function updateVolunteer(volunteer: Volunteer): Promise<void> {
         }
         if (volunteer.languages && volunteer.languages.length > 0) {
             query = addProperty(query, 'languages', volunteer.languages);
+        }
+        // Flatten history into individual properties
+        if (volunteer.history) {
+            const historyProps = flattenHistory(volunteer.history);
+            for (const [key, value] of Object.entries(historyProps)) {
+                query = addProperty(query, key, value);
+            }
         }
         
         query += `)`;
@@ -400,7 +463,8 @@ function parseGremlinVertex(vertex: any): Record<string, any> {
                     'preferences.times.hours',
                     'preferences.times.days',
                     'preferences.dates.startDates',
-                    'preferences.dates.endDates'
+                    'preferences.dates.endDates',
+                    'history.organizations'
                 ];
                 if (arrayProperties.includes(key) && listValues.length > 0) {
                     // Extract all values from the list for array properties
@@ -497,6 +561,12 @@ function propsToVolunteer(props: Record<string, any>): Volunteer | null {
     }
     if (props.languages) {
         volunteer.languages = props.languages;
+    }
+    
+    // Reconstruct history from flattened graph properties
+    const history = reconstructHistory(props);
+    if (history) {
+        volunteer.history = history;
     }
     
     return volunteer as Volunteer;

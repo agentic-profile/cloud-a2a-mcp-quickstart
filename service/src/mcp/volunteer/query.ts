@@ -123,6 +123,25 @@ function buildQuery(query: QueryVolunteers): string {
         queryString += `.has("preferences.dates.startDates")`;
     }
 
+    // History - since date (ISO 8601 string, can be compared lexicographically)
+    if (query.historySince) {
+        // Filter for volunteers who started volunteering on or before the query date
+        // Since ISO dates sort lexicographically, we can use string comparison
+        queryString += `.has("history.since", P.lte("${escapeGremlinString(query.historySince)}"))`;
+    }
+
+    // History - activities count (minimum)
+    if (query.historyActivities !== undefined) {
+        queryString += `.has("history.activities", P.gte(${query.historyActivities}))`;
+    }
+
+    // History - organizations (multi-valued property, check all values match)
+    if (query.historyOrganizations && query.historyOrganizations.length > 0) {
+        for (const org of query.historyOrganizations) {
+            queryString += `.has("history.organizations", "${escapeGremlinString(org)}")`;
+        }
+    }
+
     // Add valueMap at the end to get all properties
     queryString += '.valueMap(true)';
 
