@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { ArrowUpIcon } from '@heroicons/react/24/outline';
 import { JsonEditor, McpToolCallCard } from '@/components';
 import type { JsonExample } from '@/components/JsonEditor';
-import { ACTIVITY_EXAMPLE } from './examples';
+import { VOLUNTEER_EXAMPLE } from './examples';
 
 const EXAMPLE_VOLUNTEERS: JsonExample[] = [
     {
         name: "Volunteer",
-        payload: ACTIVITY_EXAMPLE
+        payload: VOLUNTEER_EXAMPLE
     }
 ];
 

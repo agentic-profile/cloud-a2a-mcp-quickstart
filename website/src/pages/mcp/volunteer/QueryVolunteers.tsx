@@ -6,59 +6,126 @@ import type { JsonExample } from '@/components/JsonEditor';
 
 const EXAMPLE_QUERIES: JsonExample[] = [
     {
+        name: 'Keywords',
+        payload: {
+            keywords: 'london'
+        }
+    },
+    {
         name: 'Postcode',
         payload: {
             postcode: 'DT1 2NH'
         }
     },
     {
-        name: 'Text Search',
+        name: 'Max Distance',
         payload: {
-            keywords: 'london'
+            maxDistanceKm: 10
         }
     },
     {
-        name: 'Distance',
+        name: 'Hour Preference',
         payload: {
-            geolocation: {
-                latitude: 51.5074,
-                longitude: -0.1278
-            },
-            distance: 10
+            hourPreferences: ['morning']
         }
     },
     {
-        name: 'Remote or In Person',
+        name: 'Day Preference',
         payload: {
-            attendanceType: 'Home' // 'Local'
+            dayPreferences: ['saturday']
         }
-    }, /*
+    },
     {
-        name: 'Time commitment',
+        name: 'Min Duration',
         payload: {
-            timeCommitment: 'any', // one-time, weekly, monthly, flexible 
+            minDurationHours: 4
         }
-    }*/
+    },
     {
-        name: 'All',
+        name: 'Date Range',
         payload: {
-            "keywords": "london",
-            "postcode": "E1 3DG",
-            "geolocation": {
-              "latitude": 51.5171364,
-              "longitude": -0.0428627
-            },
-            "distance": 10,
-            "attendanceType": "Local"
-          }
+            startDate: '2024-06-01',
+            endDate: '2026-06-30'
+        }
+    },
+    {
+        name: 'Causes',
+        payload: {
+            causes: ['Community', 'Health and social care']
+        }
+    },
+    {
+        name: 'Skills',
+        payload: {
+            skills: ['Medical Doctor', 'CPR/First Aid']
+        }
+    },
+    {
+        name: 'Presence',
+        payload: {
+            presence: 'remote'
+        }
+    },
+    {
+        name: 'Languages',
+        payload: {
+            languages: ['en', 'fr', 'es']
+        }
+    },
+    {
+        name: 'Age Range',
+        payload: {
+            minAge: 18,
+            maxAge: 65
+        }
+    },
+    {
+        name: 'Minor',
+        payload: {
+            minor: false
+        }
+    },
+    {
+        name: 'Gender',
+        payload: {
+            gender: 'female'
+        }
+    },
+    {
+        name: 'Time Commitment',
+        payload: {
+            timeCommitment: 'Weekly'
+        }
+    },
+    {
+        name: 'All Fields',
+        payload: {
+            keywords: 'london',
+            postcode: 'E1 3DG',
+            maxDistanceKm: 10,
+            hourPreferences: ['afternoon'],
+            dayPreferences: ['saturday'],
+            minDurationHours: 4,
+            startDate: '2024-06-01',
+            endDate: '2024-06-30',
+            causes: ['Community', 'Health and social care', 'Young People & Children'],
+            skills: ['Medical Doctor', 'CPR/First Aid', 'Support, Training & Advocacy'],
+            presence: 'both',
+            languages: ['en', 'fr'],
+            minAge: 25,
+            maxAge: 55,
+            minor: false,
+            gender: 'female',
+            timeCommitment: 'Weekly'
+        }
     }
 ];
 
-interface QueryActivitiesProps {
+interface QueryVolunteersProps {
     onSubmitHttpRequest: (request: any) => void;
 }
 
-const QueryActivities = ({ onSubmitHttpRequest }: QueryActivitiesProps) => {
+const QueryVolunteers = ({ onSubmitHttpRequest }: QueryVolunteersProps) => {
     const [ queryJson, setQueryJson ] = useState<string>('');
     
     const createMcpRequest = () => {
@@ -77,10 +144,10 @@ const QueryActivities = ({ onSubmitHttpRequest }: QueryActivitiesProps) => {
 
     return (
         <McpToolCallCard
-            title="Query Activities"
+            title="Query Volunteers"
             icon={<MagnifyingGlassIcon className="w-5 h-5 text-white" />}
-            description="Click the button below to query the current activities."
-            buttonText="Query Activities"
+            description="Click the button below to query the current volunteers."
+            buttonText="Query Volunteers"
             createMcpRequest={createMcpRequest}
             onSubmitHttpRequest={onSubmitHttpRequest}
         >
@@ -95,7 +162,7 @@ const QueryActivities = ({ onSubmitHttpRequest }: QueryActivitiesProps) => {
     );
 };
 
-export default QueryActivities;
+export default QueryVolunteers;
 
 function jsonToObject(json: string): any | undefined {
     try {

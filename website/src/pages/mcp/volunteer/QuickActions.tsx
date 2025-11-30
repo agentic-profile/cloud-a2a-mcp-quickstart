@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { mcpToolsCallRequestInit2, mcpMethodRequestInit } from '../util/misc';
 import { type HttpProgress } from '@/components/JsonRpcDebug';
+import { PlusIcon } from '@heroicons/react/24/solid';
 
 interface QuickActionsProps {
     onSubmitHttpRequest: (request: any) => void;
@@ -57,6 +58,18 @@ const QuickActions = ({ onSubmitHttpRequest }: QuickActionsProps) => {
             label: 'List Tools',
             icon: <ListBulletIcon className="w-5 h-5" />,
             createRequest: () => mcpMethodRequestInit("tools/list"),
+        },
+        {
+            id: 'bulk-delete',
+            label: 'Bulk Delete Volunteers',
+            icon: <TrashIcon className="w-5 h-5" />,
+            createRequest: () => mcpToolsCallRequestInit2("bulk-delete", {limit: 100}),
+        },
+        {
+            id: 'bulk-create',
+            label: 'Bulk Create Volunteers',
+            icon: <PlusIcon className="w-5 h-5" />,
+            createRequest: () => mcpToolsCallRequestInit2("bulk-create", {limit: 100}),
         }
     ];
 

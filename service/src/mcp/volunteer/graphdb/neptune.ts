@@ -334,3 +334,13 @@ export async function deleteVolunteer(did: string): Promise<void> {
         throw error;
     }
 }
+
+export async function bulkDeleteVolunteers(limit: number): Promise<void> {
+    try {
+        const query = `g.V().hasLabel("Volunteer").limit(${limit}).drop()`;
+        await executeGremlinQuery(query);
+    } catch (error) {
+        console.error('Error bulk deleting volunteers in Neptune:', error);
+        throw error;
+    }
+}

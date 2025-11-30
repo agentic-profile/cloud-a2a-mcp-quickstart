@@ -27,7 +27,27 @@ const VolunteerSchema = {
             type: 'array',
             items: {
                 type: 'string',
-                enum: ['gardening', 'animal_care', 'event_organisation', 'marketing', 'fundraising', 'administration']
+                enum: [
+                    'Business, Strategy & Legal',
+                    'Communications, Marketing & Events',
+                    'CPR/First Aid',
+                    'Creative Services',
+                    'Digital, Data & IT',
+                    'Finance & Fundraising',
+                    'Heavy Equipment Operator',
+                    'Leadership & Management',
+                    'Mechanic',
+                    'Medical Doctor',
+                    'Medical Nurse',
+                    'Medical Paramedic',
+                    'Organisational Policy & Governance',
+                    'Property & Infrastructure',
+                    'Radio Operator',
+                    'Research, Service Design & User Insight',
+                    'Search and Rescue',
+                    'Support, Training & Advocacy',
+                    'Sustainability & Energy'
+                ]
             },
             description: 'List of skills the volunteer has'
         },
@@ -84,12 +104,52 @@ const VolunteerSchema = {
                 maxDistanceKm: {
                     type: 'number',
                     description: 'Maximum distance in kilometers the volunteer is willing to travel'
+                },
+                causes: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        enum: [
+                            'Animal welfare',
+                            'Community',
+                            'Crisis and Welfare',
+                            'Emergency Response',
+                            'Health and social care',
+                            'Older people',
+                            'Sports',
+                            'Sports, art and culture',
+                            'Sustainability, heritage and environment',
+                            'Young People & Children'
+                        ]
+                    },
+                    description: 'Causes the volunteer is interested in'
                 }
             }
         },
         postcode: {
             type: 'string',
             description: 'Postal code of the volunteer'
+        },
+        age: {
+            type: 'number',
+            description: 'Age of the volunteer'
+        },
+        minor: {
+            type: 'boolean',
+            description: 'Whether the volunteer is a minor'
+        },
+        gender: {
+            type: 'string',
+            enum: ['male', 'female'],
+            description: 'Gender of the volunteer'
+        },
+        languages: {
+            type: 'array',
+            items: {
+                type: 'string',
+                enum: ['en', 'fr', 'de', 'it', 'es', 'ru', 'zh', 'ja', 'ko', 'jp']
+            },
+            description: 'Languages spoken by the volunteer (ISO 639 codes)'
         }
     },
     required: ['did', 'createdAt', 'updatedAt', 'name']
@@ -109,7 +169,7 @@ export const MCP_TOOLS = [
             properties: {
                 did: {
                     type: 'string',
-                    description: 'The id of the volunteer to read'
+                    description: 'The DID of the volunteer to read'
                 }
             },
             required: ['did']

@@ -1,6 +1,4 @@
-
-export const ACTIVITY_EXAMPLE = {
-    "did": "did:web:example.com:mike",
+export const VOLUNTEER_EXAMPLE = {
     "createdAt": "2024-01-10T08:30:00.000Z",
     "updatedAt": "2024-01-10T08:30:00.000Z",
     "name": "Mike",

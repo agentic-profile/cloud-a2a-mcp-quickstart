@@ -4,7 +4,11 @@ import { mcpResultResponse } from '../misc.js';
 import { handleQuery } from './query.js';
 import { ClientAgentSession } from '@agentic-profile/auth';
 import { Volunteer } from './types.js';
-import { deleteVolunteer, listVolunteers, readVolunteer, updateVolunteer } from './graphdb/neptune.js';
+import { bulkDeleteVolunteers, deleteVolunteer, listVolunteers, readVolunteer, updateVolunteer } from './graphdb/neptune.js';
+import { parseDid } from '../../utils/did.js';
+import { createRandomVolunteer } from './synthesize.js';
+
+const ADMIN_DID = process.env.ADMIN_DID || 'did:web:iamagentic.ai:1';
 
 export async function handleToolsCall(request: JSONRPCRequest, session: ClientAgentSession | null ): Promise<JSONRPCResponse | JSONRPCError> {
     const { name } = request.params || {};
@@ -22,6 +26,11 @@ export async function handleToolsCall(request: JSONRPCRequest, session: ClientAg
             return await handleRecentUpdates(request);
         case 'delete':
             return await handleDelete(request,session);
+        case 'bulk-delete':
+            return await handleBulkDelete(request,session);
+        case 'bulk-create':
+            return await handleBulkCreate(request,session);
+
         default:
             return jrpcError(request.id!, -32601, `Tool ${name} not found`);
     }
@@ -45,6 +54,8 @@ async function handleDelete(request: JSONRPCRequest, session: ClientAgentSession
         return jrpcErrorAuthRequired( request.id! );
     
     const { did } = request.params?.arguments as { did: string } || {};
+    if( parseDid(session.agentDid).did !== did )
+        return jrpcError(request.id!, -32603, `You are not authorized to delete this volunteer`);
 
     try {
         await deleteVolunteer(did);
@@ -59,6 +70,8 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
         return jrpcErrorAuthRequired( request.id! );
 
     let { volunteer } = request.params?.arguments as { volunteer: Volunteer } || {};
+    volunteer.did = parseDid(session.agentDid).did;
+    volunteer.updatedAt = new Date().toISOString();
 
     try {
         await updateVolunteer(volunteer);
@@ -68,7 +81,40 @@ async function handleUpdate(request: JSONRPCRequest, session: ClientAgentSession
     }
 }
 
-//let sortedByUpdatedAt: any[] | null = null;
+async function handleBulkCreate(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
+    if( !session )
+        return jrpcErrorAuthRequired( request.id! );
+    if( parseDid(session.agentDid).did !== ADMIN_DID )
+        return jrpcError(request.id!, -32603, `You are not authorized to bulk delete volunteers`);
+
+    let { limit } = request.params?.arguments as { limit: number } || {};
+    const deadline = Date.now() + 10000;
+
+    try {
+        let count = 0;
+        while( count++ < limit && Date.now() < deadline )
+            await updateVolunteer( createRandomVolunteer() );
+        return mcpResultResponse(request.id!, { count });
+    } catch (error) {
+        return jrpcError(request.id!, -32603, `Failed to update volunteer: ${error}`);
+    }
+}
+
+async function handleBulkDelete(request: JSONRPCRequest, session: ClientAgentSession | null): Promise<JSONRPCResponse | JSONRPCError> {
+    if( !session )
+        return jrpcErrorAuthRequired( request.id! );
+    if( parseDid(session.agentDid).did !== ADMIN_DID )
+        return jrpcError(request.id!, -32603, `You are not authorized to bulk delete volunteers`);
+
+    let { limit = 20 } = request.params?.arguments as { limit: number } || {};
+
+    try {
+        await bulkDeleteVolunteers(limit);
+        return mcpResultResponse(request.id!, { success: true });
+    } catch (error) {
+        return jrpcError(request.id!, -32603, `Failed to bulk delete volunteers: ${error}`);
+    }
+}
 
 async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResponse | JSONRPCError> {
     //const { since, limit = 10 } = request.params?.arguments as { since: string, limit: number } || {};
@@ -82,8 +128,3 @@ async function handleRecentUpdates(request: JSONRPCRequest): Promise<JSONRPCResp
         return jrpcError(request.id!, -32603, `Failed to list volunteers: ${error}`);
     }
 }
-
-/*
-function asMillis(date: string): number {
-    return new Date(date).getTime();
-}*/
