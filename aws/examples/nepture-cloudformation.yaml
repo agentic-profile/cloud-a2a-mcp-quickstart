@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Complete Amazon Neptune Database Cluster with VPC, Security Groups, and Monitoring'
+
+Parameters:
+  VpcCIDR:
+    Description: CIDR block for the VPC
+    Type: String
+    Default: 10.0.0.0/16
+    
+  PrivateSubnet1CIDR:
+    Description: CIDR block for the first private subnet
+    Type: String
+    Default: 10.0.1.0/24
+    
+  PrivateSubnet2CIDR:
+    Description: CIDR block for the second private subnet
+    Type: String
+    Default: 10.0.2.0/24
+    
+  DBInstanceClass:
+    Description: Neptune DB instance type
+    Type: String
+    Default: db.r5.large
+    AllowedValues:
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r6g.large
+      - db.r6g.xlarge
+      
+  DBClusterIdentifier:
+    Description: Neptune DB cluster identifier
+    Type: String
+    Default: neptune-cluster
+    
+  EngineVersion:
+    Description: Neptune engine version
+    Type: String
+    Default: 1.3.2.1
+
+Resources:
+  # VPC Configuration
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: Neptune-VPC
+
+  # Private Subnets
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      Tags:
+        - Key: Name
+          Value: Neptune Private Subnet 1
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      Tags:
+        - Key: Name
+          Value: Neptune Private Subnet 2
+
+  # Security Group for Neptune
+  NeptuneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Neptune database
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8182
+          ToPort: 8182
+          SourceSecurityGroupId: !Ref ApplicationSecurityGroup
+          Description: Neptune Gremlin port
+      Tags:
+        - Key: Name
+          Value: Neptune-SecurityGroup
+
+  # Security Group for Applications
+  ApplicationSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for applications accessing Neptune
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Neptune-Application-SecurityGroup
+
+  # Neptune DB Subnet Group
+  NeptuneDBSubnetGroup:
+    Type: AWS::Neptune::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Neptune database
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      Tags:
+        - Key: Name
+          Value: Neptune-SubnetGroup
+
+  # Neptune DB Cluster Parameter Group
+  NeptuneDBClusterParameterGroup:
+    Type: AWS::Neptune::DBClusterParameterGroup
+    Properties:
+      Description: Neptune DB cluster parameter group
+      Family: neptune1.3
+      Parameters:
+        neptune_enable_audit_log: 1
+        neptune_query_timeout: 120000
+      Tags:
+        - Key: Name
+          Value: Neptune-ClusterParameterGroup
+
+  # Neptune DB Parameter Group
+  NeptuneDBParameterGroup:
+    Type: AWS::Neptune::DBParameterGroup
+    Properties:
+      Description: Neptune DB parameter group
+      Family: neptune1.3
+      Parameters:
+        neptune_query_timeout: 120000
+      Tags:
+        - Key: Name
+          Value: Neptune-ParameterGroup
+
+  # Neptune DB Cluster
+  NeptuneDBCluster:
+    Type: AWS::Neptune::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref DBClusterIdentifier
+      EngineVersion: !Ref EngineVersion
+      DBSubnetGroupName: !Ref NeptuneDBSubnetGroup
+      VpcSecurityGroupIds:
+       
