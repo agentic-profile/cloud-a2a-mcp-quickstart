@@ -7,33 +7,49 @@ const NEPTUNE_CLUSTER_ENDPOINT = process.env.NEPTUNE_CLUSTER_ENDPOINT || '';
 const NEPTUNE_CLUSTER_PORT = parseInt(process.env.NEPTUNE_CLUSTER_PORT || '8182', 10);
 const AWS_REGION = process.env.AWS_REGION || 'us-west-2';
 
-// Validate that endpoint is provided
-if (!NEPTUNE_CLUSTER_ENDPOINT) {
-    throw new Error('NEPTUNE_CLUSTER_ENDPOINT environment variable is not set');
+// Lazy-initialized Neptune client to avoid blocking Lambda cold starts
+let neptuneClient: NeptunedataClient | null = null;
+
+/**
+ * Get or create the Neptune client (lazy initialization)
+ * This prevents network timeouts during Lambda cold start
+ */
+function getNeptuneClient(): NeptunedataClient {
+    if (neptuneClient) {
+        return neptuneClient;
+    }
+
+    // Validate that endpoint is provided
+    if (!NEPTUNE_CLUSTER_ENDPOINT) {
+        throw new Error('NEPTUNE_CLUSTER_ENDPOINT environment variable is not set');
+    }
+
+    // Log the endpoint for debugging
+    console.log(`🔍 Neptune Cluster Endpoint: ${NEPTUNE_CLUSTER_ENDPOINT}:${NEPTUNE_CLUSTER_PORT}`);
+
+    // Initialize Neptune Data client with endpoint from environment variable
+    // Construct the full HTTPS endpoint URL from the cluster endpoint
+    const neptuneEndpoint = `https://${NEPTUNE_CLUSTER_ENDPOINT}:${NEPTUNE_CLUSTER_PORT}`;
+
+    neptuneClient = new NeptunedataClient({
+        endpoint: neptuneEndpoint,
+        region: AWS_REGION,
+    });
+
+    return neptuneClient;
 }
-
-// Log the endpoint for debugging
-console.log(`🔍 Neptune Cluster Endpoint: ${NEPTUNE_CLUSTER_ENDPOINT}:${NEPTUNE_CLUSTER_PORT}`);
-
-// Initialize Neptune Data client with endpoint from environment variable
-// Construct the full HTTPS endpoint URL from the cluster endpoint
-const neptuneEndpoint = `https://${NEPTUNE_CLUSTER_ENDPOINT}:${NEPTUNE_CLUSTER_PORT}`;
-
-const neptuneClient = new NeptunedataClient({
-    endpoint: neptuneEndpoint,
-    region: AWS_REGION,
-});
 
 /**
  * Execute a Gremlin query against Neptune using AWS SDK
  */
 async function executeGremlinQuery(query: string): Promise<any> {
     try {
+        const client = getNeptuneClient();
         const command = new ExecuteGremlinQueryCommand({
             gremlinQuery: query,
         });
 
-        const response = await neptuneClient.send(command);
+        const response = await client.send(command);
         
         // Log response structure for debugging
         //console.log('🔍 Neptune response structure:', JSON.stringify(response, null, 2));

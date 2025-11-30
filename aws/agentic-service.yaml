@@ -216,8 +216,8 @@ Resources:
             - HasCustomDomain
             - !Sub 'https://${DomainName}'
             - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
-      Timeout: 30
-      MemorySize: 256
+      Timeout: 90
+      MemorySize: 512
       VpcConfig:
         SubnetIds:
           - !ImportValue 
@@ -350,6 +350,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - neptune-db:connect
+                  - neptune-db:ReadDataViaQuery
+                  - neptune-db:WriteDataViaQuery
+                  - neptune-db:DeleteDataViaQuery
                 Resource: !Sub 'arn:aws:neptune-db:${AWS::Region}:${AWS::AccountId}:${NeptuneCluster.ClusterResourceId}/*'
 
   # HTTP API Gateway
