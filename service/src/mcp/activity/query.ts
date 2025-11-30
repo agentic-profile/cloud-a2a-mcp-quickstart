@@ -5,7 +5,7 @@ import { Geolocation } from './types.js';
 
 
 
-interface ActivityQuery {
+export interface ActivityQuery {
     keywords?: string;
     postcode?: string;
     distance?: number;

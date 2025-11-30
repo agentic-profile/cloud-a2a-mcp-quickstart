@@ -1,3 +1,42 @@
+const QuerySchema = {
+    type: 'object',
+    properties: {
+        keywords: {
+            type: 'string',
+            description: 'Keywords to search for in activity titles and descriptions'
+        },
+        postcode: {
+            type: 'string',
+            description: 'The postal code to search for activities in'
+        },
+        distance: {
+            type: 'number',
+            description: 'Distance in kilometers to search for activities within (requires geolocation)'
+        },
+        geolocation: {
+            type: 'object',
+            description: 'Geographic coordinates to search around',
+            properties: {
+                latitude: {
+                    type: 'number',
+                    description: 'Latitude coordinate'
+                },
+                longitude: {
+                    type: 'number',
+                    description: 'Longitude coordinate'
+                }
+            },
+            required: ['latitude', 'longitude']
+        },
+        attendanceType: {
+            type: 'string',
+            enum: ['Home', 'Local'],
+            description: 'Filter activities by attendance type (Home for remote, Local for in-person)'
+        }
+    },
+    required: []
+};
+
 const CoreActivitySchema = {
     type: 'object',
     properties: {
@@ -147,40 +186,7 @@ export const MCP_TOOLS = [
     {
         name: 'query',
         description: 'Search for activities that match a specific query',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                postcode: {
-                    type: 'string',
-                    description: 'The postal code to search for activities in'
-                },
-                distance: {
-                    type: 'number',
-                    description: 'Distance in kilometers to search for activities within (requires geolocation)'
-                },
-                geolocation: {
-                    type: 'object',
-                    description: 'Geographic coordinates to search around',
-                    properties: {
-                        latitude: {
-                            type: 'number',
-                            description: 'Latitude coordinate'
-                        },
-                        longitude: {
-                            type: 'number',
-                            description: 'Longitude coordinate'
-                        }
-                    },
-                    required: ['latitude', 'longitude']
-                },
-                attendanceType: {
-                    type: 'string',
-                    enum: ['Home', 'Local'],
-                    description: 'Filter activities by attendance type (Home for remote, Local for in-person)'
-                }
-            },
-            required: []
-        },
+        inputSchema: QuerySchema,
         outputSchema: {
             type: 'object',
             properties: {

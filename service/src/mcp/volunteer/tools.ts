@@ -319,6 +319,22 @@ const QueryVolunteersSchema = {
             type: 'string',
             enum: ['one time', 'weekly', 'monthly', 'flexible'],
             description: 'Time commitment to filter by'
+        },
+        historySince: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Filter by volunteers who started volunteering before this date'
+        },
+        historyActivities: {
+            type: 'number',
+            description: 'Filter by minimum number of activities the volunteer has participated in'
+        },
+        historyOrganizations: {
+            type: 'array',
+            items: {
+                type: 'string'
+            },
+            description: 'Filter by organizations that hosted the activities'
         }
     },
     required: []
