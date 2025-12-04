@@ -18,6 +18,10 @@ async function handleMcpRequest(req: Request, res: Response) {
                 return jrpcResult(requestId, {} );
             case 'logging/setLevel':
                 return jrpcResult(requestId, {} );
+            case 'prompts/list':
+                return jrpcResult(requestId, { prompts: [] } );
+            case 'resources/list':
+                return jrpcResult(requestId, { resources: [] } );
             case 'tools/list':
                 return jrpcResult(requestId, { tools: MCP_TOOLS } );
             case 'tools/call':

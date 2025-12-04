@@ -3,6 +3,9 @@ import { mcpResultResponse } from "../misc.js";
 import { jrpcError } from "../../json-rpc/index.js";
 import { chatCompletion } from '../../inference/claude-bedrock.js';
 import { extractJson } from '../../utils/json.js';
+import { readFileSync } from 'fs';
+
+const SYSTEM_PROMPT = readFileSync(new URL('prompt.txt', import.meta.url), 'utf-8');
 
 interface Message {
     role: 'user' | 'assistant';
@@ -45,6 +48,7 @@ export async function handleChat(request: JSONRPCRequest): Promise<JSONRPCRespon
     });
 }
 
+/*
 const SYSTEM_PROMPT = `You are a helpful assistant talking with a user who wants to volunteer
 for community activities in the UK.
 
@@ -88,3 +92,4 @@ The JSON filter must be provided in the following format, which must wrap the st
 It is very important to only ask questions that help build the filter.
 
 `;
+*/
