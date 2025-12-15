@@ -44,6 +44,7 @@ export async function handleQuery(request: JSONRPCRequest, activities:any[]): Pr
     }
 
     results = pruneActivities(results);
+    results = results.slice(0, 1000);
 
     return mcpResultResponse(request.id!, {
         kind: 'activity-list',
