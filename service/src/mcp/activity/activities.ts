@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 export const activities = (() => {
     console.time("Import activities");
     // Read JSON file directly so it can be garbage collected after processing
-    const activityDataPath = join(__dirname, 'data', 'activities.json');
+    const activityDataPath = join(__dirname, 'data', 'activities-100.json');
     const activityData: any[] = JSON.parse(readFileSync(activityDataPath, 'utf-8'));
     const processed = simplifyDoitActivities(activityData);
     console.timeEnd("Import activities");

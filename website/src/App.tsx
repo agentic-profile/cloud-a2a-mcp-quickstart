@@ -23,7 +23,7 @@ import McpWalletPage from './pages/mcp/wallet/McpWalletPage';
 import McpActivityPage from './pages/mcp/activity/McpActivityPage';
 import SettingsPage from './pages/SettingsPage';
 import IdentityPage from './pages/identity/IdentityPage';
-import McpVolunteerPage from './pages/mcp/volunteer/McpVolunteerPage';
+//import McpVolunteerPage from './pages/mcp/volunteer/McpVolunteerPage';
 import { useSettingsStore } from './stores/settingsStore';
 
 function App() {
@@ -67,7 +67,7 @@ function App() {
                         <Route path="/mcp/activity" element={<McpActivityPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/identity" element={<IdentityPage />} />
-                        <Route path="/mcp/volunteer" element={<McpVolunteerPage />} />
+                        {/*<Route path="/mcp/volunteer" element={<McpVolunteerPage />} />*/}
                     </Routes>
                 </Layout>
             </HeroUIProvider>

@@ -6,7 +6,7 @@ import wellKnownDidDocument from './well-known-did-document.json' with { type: '
 // A2A handlers and helpers
 import { VentureExecutor, agentCard as ventureCard } from './a2a/venture/index.js';
 import { CapitalExecutor, agentCard as capitalCard } from './a2a/capital/index.js';
-import { VolunteerExecutor, agentCard as volunteerCard } from './a2a/volunteer/index.js';
+//import { VolunteerExecutor, agentCard as volunteerCard } from './a2a/volunteer/index.js';
 import { CharityExecutor, agentCard as charityCard } from './a2a/charity/index.js';
 
 // MCP handlers
@@ -18,7 +18,7 @@ import ventureRouter from "./mcp/venture/router.js";
 import walletRouter from "./mcp/wallet/router.js";
 import activityRouter from "./mcp/activity/router.js";
 import { A2AServiceRouter } from './a2a/router.js';
-import volunteerRouter from "./mcp/volunteer/router.js";
+//import volunteerRouter from "./mcp/volunteer/router.js";
 
 // Create Express app
 const app: Application = express();
@@ -79,7 +79,7 @@ app.get('/.well-known/did.json', (req: Request, res: Response) => {
 // A2A handlers
 app.use('/a2a/venture', A2AServiceRouter( new VentureExecutor(), ventureCard ));
 app.use('/a2a/capital', A2AServiceRouter( new CapitalExecutor(), capitalCard ));
-app.use('/a2a/volunteer', A2AServiceRouter( new VolunteerExecutor(), volunteerCard ));
+//app.use('/a2a/volunteer', A2AServiceRouter( new VolunteerExecutor(), volunteerCard ));
 app.use('/a2a/charity', A2AServiceRouter( new CharityExecutor(), charityCard ));
 
 // MCP handlers
@@ -90,7 +90,7 @@ app.use('/mcp/reputation', reputationRouter);
 app.use('/mcp/venture', ventureRouter);
 app.use('/mcp/wallet', walletRouter);
 app.use('/mcp/activity', activityRouter);
-app.use('/mcp/volunteer', volunteerRouter);
+//app.use('/mcp/volunteer', volunteerRouter);
 
 // Serve the web interface for non-API routes
 app.get('/', (_req: Request, res: Response) => {

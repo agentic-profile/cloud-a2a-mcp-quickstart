@@ -44,11 +44,11 @@ export const mcpServices: MCPService[] = [
         icon: UserGroupIcon,
         route: '/mcp/community'
     },
-    {
+    /*{
         id: '7',
         name: 'Volunteers',
         description: 'Find volunteers for your activities',
         icon: UserGroupIcon,
         route: '/mcp/volunteer'
-    }
+    }*/
 ];
