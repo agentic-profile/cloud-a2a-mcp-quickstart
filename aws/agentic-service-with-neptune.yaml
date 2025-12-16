@@ -209,6 +209,9 @@ Resources:
           DYNAMODB_WALLETS_TABLE_NAME: !Ref WalletsTable
           DYNAMODB_REPUTATIONS_TABLE_NAME: !Ref ReputationsTable
           DYNAMODB_COMMUNITY_PROFILES_TABLE_NAME: !Ref CommunityTable
+          NEPTUNE_CLUSTER_ENDPOINT: !GetAtt NeptuneCluster.Endpoint
+          NEPTUNE_CLUSTER_READ_ENDPOINT: !GetAtt NeptuneCluster.ReadEndpoint
+          NEPTUNE_CLUSTER_PORT: '8182'
           SERVICE_URL: !If 
             - HasCustomDomain
             - !Sub 'https://${DomainName}'
@@ -340,6 +343,17 @@ Resources:
                   - !Sub '${ReputationsTable.Arn}/index/*'
                   - !GetAtt CommunityTable.Arn
                   - !Sub '${CommunityTable.Arn}/index/*'
+        - PolicyName: NeptuneAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - neptune-db:connect
+                  - neptune-db:ReadDataViaQuery
+                  - neptune-db:WriteDataViaQuery
+                  - neptune-db:DeleteDataViaQuery
+                Resource: !Sub 'arn:aws:neptune-db:${AWS::Region}:${AWS::AccountId}:${NeptuneCluster.ClusterResourceId}/*'
 
   # HTTP API Gateway
   HttpApi:
@@ -384,6 +398,78 @@ Resources:
       StageName: !Ref Environment
       AutoDeploy: true
 
+  # Neptune DB Subnet Group (Public Subnets)
+  NeptuneSubnetGroup:
+    Type: AWS::Neptune::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub 'agentic-service-neptune-public-subnet-group-${Project}-${Environment}'
+      DBSubnetGroupDescription: Subnet group for Neptune Serverless cluster (public subnets for public access)
+      SubnetIds:
+        - !ImportValue 
+          Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet1'
+        - !ImportValue 
+          Fn::Sub: 'agentic-foundation-${Environment}-DefaultSubnet2'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
+  # Neptune Security Group
+  NeptuneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Neptune Serverless cluster
+      VpcId: !ImportValue 
+        Fn::Sub: 'agentic-foundation-${Environment}-DefaultVpc'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8182
+          ToPort: 8182
+          CidrIp: 0.0.0.0/0
+          Description: 'Allow public access to Neptune (Gremlin/SPARQL) - WARNING: Consider restricting to specific IPs'
+      Tags:
+        - Key: Name
+          Value: !Sub 'agentic-service-neptune-sg-${Project}-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
+  # Neptune DB Cluster (Serverless)
+  NeptuneCluster:
+    Type: AWS::Neptune::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub 'agentic-service-neptune-cluster-${Project}-${Environment}'
+      EngineVersion: 1.4.6.0
+      ServerlessScalingConfiguration:
+        MinCapacity: 1.0
+        MaxCapacity: 2.5
+      DBSubnetGroupName: !Ref NeptuneSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref NeptuneSecurityGroup
+      IamAuthEnabled: true
+      StorageEncrypted: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
+  # Neptune DB Instance (Serverless requires at least one instance)
+  NeptuneInstance:
+    Type: AWS::Neptune::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub 'agentic-service-neptune-db-${Project}-${Environment}'
+      DBClusterIdentifier: !Ref NeptuneCluster
+      DBInstanceClass: db.serverless
+      PubliclyAccessible: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: agentic-service-a2a-mcp
+
   # Lambda Security Group
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -398,6 +484,11 @@ Resources:
           DestinationSecurityGroupId: !ImportValue 
             Fn::Sub: 'agentic-foundation-${Environment}-ValkeySecurityGroupId'
           Description: Allow Lambda to access Valkey cache
+        - IpProtocol: tcp
+          FromPort: 8182
+          ToPort: 8182
+          DestinationSecurityGroupId: !Ref NeptuneSecurityGroup
+          Description: Allow Lambda to access Neptune
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
@@ -418,6 +509,17 @@ Resources:
           Value: !Sub 'agentic-service-a2a-mcp-lambda-sg-${Project}-${Environment}'
         - Key: Environment
           Value: !Ref Environment
+
+  # Neptune Security Group Ingress Rule (separate resource to avoid circular dependency)
+  NeptuneSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref NeptuneSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8182
+      ToPort: 8182
+      SourceSecurityGroupId: !Ref LambdaSecurityGroup
+      Description: Allow Lambda to access Neptune (Gremlin/SPARQL)
 
   # Lambda Permission for HTTP API Gateway
   LambdaPermission:
@@ -536,6 +638,30 @@ Outputs:
       - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
     Export:
       Name: !Sub '${AWS::StackName}-ServiceUrl'
+
+  NeptuneClusterEndpoint:
+    Description: 'Neptune Cluster Endpoint'
+    Value: !GetAtt NeptuneCluster.Endpoint
+    Export:
+      Name: !Sub '${AWS::StackName}-NeptuneClusterEndpoint'
+
+  NeptuneClusterReadEndpoint:
+    Description: 'Neptune Cluster Read Endpoint'
+    Value: !GetAtt NeptuneCluster.ReadEndpoint
+    Export:
+      Name: !Sub '${AWS::StackName}-NeptuneClusterReadEndpoint'
+
+  NeptuneClusterPort:
+    Description: 'Neptune Cluster Port'
+    Value: '8182'
+    Export:
+      Name: !Sub '${AWS::StackName}-NeptuneClusterPort'
+
+  NeptuneClusterArn:
+    Description: 'Neptune Cluster ARN'
+    Value: !Sub 'arn:aws:neptune-db:${AWS::Region}:${AWS::AccountId}:${NeptuneCluster.ClusterResourceId}'
+    Export:
+      Name: !Sub '${AWS::StackName}-NeptuneClusterArn'
 
 
 
