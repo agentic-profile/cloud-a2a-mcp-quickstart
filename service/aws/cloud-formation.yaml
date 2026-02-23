@@ -111,6 +111,80 @@ Parameters:
 
 Resources:
 
+  # DynamoDB Table for Venture profiles
+  VenturesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${StackName}-${Stage}-ventures'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: kind
+          AttributeType: S
+        - AttributeName: updated
+          AttributeType: S
+        - AttributeName: subjectDid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: KindIndex
+          KeySchema:
+            - AttributeName: kind
+              KeyType: HASH
+            - AttributeName: updated
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: SubjectIndex
+          KeySchema:
+            - AttributeName: subjectDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${StackName}-${Stage}-ventures'
+
+  # DynamoDB Table for Reputations
+  ReputationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${StackName}-${Stage}-reputations'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: reporterDid
+          AttributeType: S
+        - AttributeName: subjectDid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: ReporterIndex
+          KeySchema:
+            - AttributeName: reporterDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: SubjectIndex
+          KeySchema:
+            - AttributeName: subjectDid
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${StackName}-${Stage}-reputations'
+
   # Lambda Function
   LambdaFunction:
     Type: AWS::Lambda::Function
@@ -132,6 +206,8 @@ Resources:
           VALKEY_CLIENT_USERNAME: !Ref ValkeyClientUserName
           VALKEY_CLIENT_PASSWORD_SECRET_ARN: !Ref ValkeyClientPasswordSecretArn
           VALKEY_TLS_ENABLED: "true"
+          DYNAMODB_VENTURE_PROFILES_TABLE_NAME: !Ref VenturesTable
+          DYNAMODB_REPUTATIONS_TABLE_NAME: !Ref ReputationsTable
           SERVICE_URL: !If 
             - UseCustomDomain
             - !If
@@ -227,6 +303,25 @@ Resources:
                 Resource: 
                   - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0'
                   - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-*'
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                Resource: 
+                  - !GetAtt VenturesTable.Arn
+                  - !Sub '${VenturesTable.Arn}/index/*'
+                  - !GetAtt ReputationsTable.Arn
+                  - !Sub '${ReputationsTable.Arn}/index/*'
 
   # HTTP API Gateway
   HttpApi:

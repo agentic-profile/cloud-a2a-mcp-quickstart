@@ -9,7 +9,18 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    
+    "cloud:up": "./aws/cloud-up.sh --stage=staging",
+    "cloud:up:prod": "./aws/cloud-up.sh --stage=prod",
+    "cloud:down": "set -a; . ./aws/cloud.env; set +a; : \"${StackName:?Set StackName in cloud.env}\"; aws cloudformation delete-stack --stack-name \"${StackName}-staging\"",
+    "cloud:down:prod": "set -a; . ./aws/cloud.env; set +a; : \"${StackName:?Set StackName in cloud.env}\"; aws cloudformation delete-stack --stack-name \"${StackName}-prod\"",
+  
+    "cloud:results": "node aws/write-formation-results.js --stage=staging",
+    "cloud:results:prod": "node aws/write-formation-results.js --stage=prod",
+  
+    "cloud:deploy": "STAGE=staging bash ./aws/deploy.sh",
+    "cloud:deploy:prod": "STAGE=prod bash ./aws/deploy.sh"
   },
   "dependencies": {
     "@agentic-profile/auth": "^0.6.2",

@@ -9,7 +9,11 @@ import { mcpCrud } from '../mcp-crud.js';
 import { handleAbout, handleRecentUpdates } from '../mcp-misc.js';
 import { Request } from 'express';
 
-const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
+let TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME;
+if (!TABLE_NAME) {
+    console.warn('Missing DYNAMODB_VENTURE_PROFILES_TABLE_NAME; using default')
+    TABLE_NAME = 'venture-profiles';
+}
 const store = itemStore<StoreItem>({'tableName': TABLE_NAME});
 
 const KINDS = [ 'venture' , 'capital', 'venture-strategy' ]; // TODO refine this

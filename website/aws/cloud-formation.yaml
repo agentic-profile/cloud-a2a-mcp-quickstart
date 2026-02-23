@@ -1,32 +1,52 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Website Infrastructure for Agentic - S3 and CloudFront Setup'
+Description: 'Agentic Profile Example Webapp CDN'
 
 Parameters:
-  Environment:
+  StackName:
     Type: String
-    Default: staging
-    Description: Environment name (staging, prod)
+    Description: Lowercase project identifier used in resource names and tags
+    AllowedPattern: '^[a-z0-9-]+$'
+    ConstraintDescription: StackName must be lowercase letters, numbers, and dashes only
+
+  Stage:
+    Type: String
+    Description: Deployment stage
     AllowedValues: [staging, prod]
-  Project:
-    Type: String
-    Default: example
-    Description: Project name (example, venture, volunteer)
-  DomainName:
+
+  ProdDomainName:
     Type: String
     Default: ''
-    Description: Custom domain name for the website (optional)
+    Description: Custom domain name for the website (prod)
+
+  NakedDomainName:
+    Type: String
+    Default: ''
+    Description: Optional naked domain name for the production website
+
+  StagingDomainName:
+    Type: String
+    Default: ''
+    Description: Custom domain name for the website (staging)
+
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 Hosted Zone ID for custom domain
+
   CertificateArn:
     Type: String
     Default: ''
-    Description: ACM certificate ARN for custom domain (required if DomainName is provided)
+    Description: ACM certificate ARN for custom domain
+
 
 Resources:
   # S3 Bucket for Website Content
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # BucketName: !Sub 'agentic-website-${Project}-${AWS::AccountId}-${Environment}-${AWS::StackId}'
-      # Let AWS generate a unique bucket name to avoid conflicts
+      BucketName: !Sub 
+        - '${StackName}-${Stage}-${StackIdSuffix}'
+        - StackIdSuffix: !Select [4, !Split ['-', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -44,10 +64,10 @@ Resources:
             AllowedOrigins: ['*']
             MaxAge: 3000
       Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Service
-          Value: agentic-website
+        - Key: StackName  
+          Value: !Ref StackName
+        - Key: Stage
+          Value: !Ref Stage
 
   # CloudFront Distribution
   CloudFrontDistribution:
@@ -58,7 +78,16 @@ Resources:
         DefaultRootObject: index.html
         Aliases: !If 
           - HasCustomDomain
-          - [!Ref DomainName]
+          - !If 
+            - UseProdAndNakedDomain
+            - [!Ref ProdDomainName, !Ref NakedDomainName]
+            - !If 
+              - UseProdDomain
+              - [!Ref ProdDomainName]
+              - !If
+                - UseNakedDomain
+                - [!Ref NakedDomainName]
+                - [!Ref StagingDomainName]
           - !Ref 'AWS::NoValue'
         ViewerCertificate: !If
           - HasCustomDomain
@@ -114,10 +143,10 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
       Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Service
-          Value: agentic-website
+        - Key: StackName
+          Value: !Ref StackName
+        - Key: Stage
+          Value: !Ref Stage
 
   # S3 Bucket Policy for Static Website Hosting
   WebsiteBucketPolicy:
@@ -138,16 +167,50 @@ Resources:
   CloudFrontLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/cloudfront/agentic-website-${Project}-${Environment}'
+      LogGroupName: !Sub '/aws/cloudfront/${StackName}-${Stage}'
       RetentionInDays: 30
       Tags:
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Service
-          Value: agentic-website
+        - Key: StackName
+          Value: !Ref StackName
+        - Key: Stage
+          Value: !Ref Stage
+
+  # Route 53 DNS Record
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: HasPrimaryDomain
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !If [UseProdDomain, !Ref ProdDomainName, !Ref StagingDomainName]
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront always uses this HostedZoneId
+        EvaluateTargetHealth: false
+
+  NakedDnsRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: UseNakedDomain
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref NakedDomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
 
 Conditions:
-  HasCustomDomain: !Not [!Equals [!Ref DomainName, '']]
+  IsProd: !Equals [!Ref Stage, 'prod']
+  HasProdDomain: !Not [ !Equals [ !Ref ProdDomainName, '' ] ]
+  HasStagingDomain: !Not [ !Equals [ !Ref StagingDomainName, '' ] ]
+  HasNakedDomain: !Not [ !Equals [ !Ref NakedDomainName, '' ] ]
+  UseProdDomain: !And [ !Condition IsProd, !Condition HasProdDomain ]
+  UseStagingDomain: !And [ !Not [!Condition IsProd], !Condition HasStagingDomain ]
+  UseNakedDomain: !And [ !Condition IsProd, !Condition HasNakedDomain ]
+  HasPrimaryDomain: !Or [ !Condition UseProdDomain, !Condition UseStagingDomain ]
+  UseProdAndNakedDomain: !And [ !Condition UseProdDomain, !Condition UseNakedDomain ]
+  HasCustomDomain: !Or [ !Condition HasPrimaryDomain, !Condition UseNakedDomain ]
 
 Outputs:
   WebsiteBucketName:
@@ -183,8 +246,14 @@ Outputs:
   WebsiteUrl:
     Description: 'Website URL'
     Value: !If
-      - HasCustomDomain
-      - !Sub 'https://${DomainName}'
-      - !Sub 'https://${CloudFrontDistribution.DomainName}'
+      - UseProdDomain
+      - !Sub 'https://${ProdDomainName}'
+      - !If
+        - UseStagingDomain
+        - !Sub 'https://${StagingDomainName}'
+        - !If
+          - UseNakedDomain
+          - !Sub 'https://${NakedDomainName}'
+          - !Sub 'https://${CloudFrontDistribution.DomainName}'
     Export:
       Name: !Sub '${AWS::StackName}-WebsiteUrl'

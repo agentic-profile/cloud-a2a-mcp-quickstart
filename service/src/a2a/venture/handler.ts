@@ -19,7 +19,11 @@ import { generateMarkdownSummary } from './from-website/markdown-generator.js';
 import { VentureSummary } from './from-website/venture-types.js';
 
 // For Venture profiles
-const TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME || 'venture-profiles';
+let TABLE_NAME = process.env.DYNAMODB_VENTURE_PROFILES_TABLE_NAME;
+if (!TABLE_NAME) {
+    console.warn('Missing DYNAMODB_VENTURE_PROFILES_TABLE_NAME; using default')
+    TABLE_NAME = 'venture-profiles';
+}
 const ventureProfileStore = itemStore<StoreItem>({tableName: TABLE_NAME});
 
 // For agent-to-agent context
