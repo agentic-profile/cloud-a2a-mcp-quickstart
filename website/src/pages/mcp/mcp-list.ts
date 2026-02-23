@@ -1,14 +1,21 @@
 import type { MCPService } from './types';
-import { MapPinIcon, GlobeAltIcon, WalletIcon, StarIcon, UserGroupIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { 
+    //MapPinIcon, 
+    GlobeAltIcon,
+    //WalletIcon, 
+    StarIcon, 
+    //UserGroupIcon,
+    //CalendarIcon
+} from '@heroicons/react/24/outline';
 
 export const mcpServices: MCPService[] = [
-    {
+    /*{
         id: '1',
         name: 'Location',
         description: 'Find other people or businesses near you',
         icon: MapPinIcon,
         route: '/mcp/location'
-    },
+    },*/
     {
         id: '2',
         name: 'Venture',
@@ -16,13 +23,13 @@ export const mcpServices: MCPService[] = [
         icon:GlobeAltIcon,
         route: '/mcp/venture'
     },
-    {
+    /*{
         id: '3',
         name: 'Wallet',
         description: 'Manage verifiable credentials and digital wallet items',
         icon: WalletIcon,
         route: '/mcp/wallet'
-    },
+    },*/
     {
         id: '4',
         name: 'Reputation',
@@ -30,7 +37,7 @@ export const mcpServices: MCPService[] = [
         icon: StarIcon,
         route: '/mcp/reputation'
     },
-    {
+    /*{
         id: '5',
         name: 'Activity',
         description: 'Find activities that people can do',
