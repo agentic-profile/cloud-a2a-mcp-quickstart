@@ -1,0 +1,389 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Agentic Profile Examples API service'
+
+Conditions:
+  IsProd: !Equals [!Ref Stage, "prod"]
+  UseCustomDomain: !Not [!Equals [!Ref CustomDomainMode, "none"]]
+  CreateCustomDomain: !Equals [!Ref CustomDomainMode, "create"]
+  ExistingCustomDomain: !Equals [!Ref CustomDomainMode, "existing"]
+  CreateRoute53Record: !And
+    - !Equals [!Ref CustomDomainMode, "create"]
+    - !Not [!Equals [!Ref Route53HostedZoneId, ""]]
+
+Rules:
+  CustomDomainInputs:
+    Assertions:
+      - Assert: !Or
+          - !Equals [!Ref CustomDomainMode, "none"]
+          - !Not [!Equals [!Ref ProdDomainName, ""]]
+          - !Not [!Equals [!Ref StagingDomainName, ""]]
+        AssertDescription: ProdDomainName or StagingDomainName must be set when CustomDomainMode is "create" or "existing".
+      - Assert: !Or
+          - !Not [!Equals [!Ref CustomDomainMode, "create"]]
+          - !Not [!Equals [!Ref CertificateArn, ""]]
+        AssertDescription: CertificateArn must be set when CustomDomainMode is "create".
+
+Parameters:
+  StackName:
+    Type: String
+    Description: Lowercase project identifier used in resource names and tags
+    AllowedPattern: '^[a-z0-9-]+$'
+    ConstraintDescription: StackName must be lowercase letters, numbers, and dashes only
+
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g. staging, prod) for tagging and environment identification
+    AllowedValues: [staging, prod]
+
+  DeploymentBucketName:
+    Type: String
+    Description: S3 bucket name that stores deployment artifacts (e.g., function.zip)
+
+  NodeEnv:
+    Type: String
+    Default: production
+    Description: Node environment
+    AllowedValues: [development, production]
+
+  LogLevel:
+    Type: String
+    Default: info
+    Description: Log level
+    AllowedValues: [debug, info, warn, error, trace]
+
+  CustomDomainMode:
+    Type: String
+    Default: none
+    Description: How to configure the API custom domain (none | create | existing)
+    AllowedValues: [none, create, existing]
+
+  ProdDomainName:
+    Type: String
+    Default: ''
+    Description: Custom domain name for the prod stage HTTP service (optional)
+
+  StagingDomainName:
+    Type: String
+    Default: ''
+    Description: Custom domain name for the staging stage HTTP service (optional)
+
+  CertificateArn:
+    Type: String
+    Default: ''
+    Description: ACM certificate ARN for custom domain (required if ProdDomainName or StagingDomainName is provided). Must be in the SAME region as this stack.
+
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: '(Optional) Route53 hosted zone ID for the domain (e.g. Z123...). When set with CustomDomainMode=create, creates an A record pointing the custom domain to API Gateway.'
+
+  FoundationVpcId:
+    Type: String
+    Description: Foundation VPC ID
+
+  PrivateSubnet1Id:
+    Type: String
+    Description: Private subnet 1 ID
+
+  PrivateSubnet2Id:
+    Type: String
+    Description: Private subnet 2 ID
+
+  ValkeyClientUserName:
+    Type: String
+    Description: Valkey client username
+
+  ValkeyClientPasswordSecretArn:
+    Type: String
+    Description: Valkey password secret ARN
+
+  ValkeyEndpoint:
+    Type: String
+    Description: Valkey endpoint
+
+  ValkeyPort:
+    Type: String
+    Description: Valkey port
+
+  ValkeyClientSecurityGroupId:
+    Type: String
+    Description: Valkey security group ID
+
+Resources:
+
+  # Lambda Function
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${StackName}-${Stage}'
+      Runtime: nodejs22.x
+      Handler: dist/index.handler
+      Code:
+        S3Bucket: !Ref DeploymentBucketName
+        S3Key: !Sub '${StackName}-${Stage}/function.zip'
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          NODE_ENV: !Ref NodeEnv
+          LOG_LEVEL: !Ref LogLevel
+          NODE_OPTIONS: "--enable-source-maps"
+          VALKEY_ENDPOINT: !Ref ValkeyEndpoint
+          VALKEY_PORT: !Ref ValkeyPort
+          VALKEY_CLIENT_USERNAME: !Ref ValkeyClientUserName
+          VALKEY_CLIENT_PASSWORD_SECRET_ARN: !Ref ValkeyClientPasswordSecretArn
+          VALKEY_TLS_ENABLED: "true"
+          SERVICE_URL: !If 
+            - UseCustomDomain
+            - !If
+              - IsProd
+              - !Sub 'https://${ProdDomainName}'
+              - !Sub 'https://${StagingDomainName}'
+            - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+      Timeout: 90
+      MemorySize: 128
+      VpcConfig:
+        SubnetIds:
+          - !Ref PrivateSubnet1Id
+          - !Ref PrivateSubnet2Id
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+          - !Ref ValkeyClientSecurityGroupId
+      Tags:
+        - Key: Name  
+          Value: !Sub '${StackName}-${Stage}'
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${StackName}-${Stage}-lambda-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: OutboundHttpAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: ElastiCacheAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticache:DescribeCacheClusters
+                  - elasticache:DescribeCacheSubnetGroups
+                Resource: '*'
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref ValkeyClientPasswordSecretArn
+        - PolicyName: VPCAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:UnassignPrivateIpAddresses
+                Resource: '*'
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: 
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0'
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-*'
+
+  # HTTP API Gateway
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub '${StackName}-${Stage}-api-gateway'
+      Description: 'HTTP API Gateway for Lambda Function'
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowHeaders:
+          - '*'
+        AllowMethods:
+          - '*'
+        AllowOrigins:
+          - '*'
+        ExposeHeaders:
+          - 'www-authenticate'
+        MaxAge: 86400
+
+  # HTTP API Integration
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations'
+      PayloadFormatVersion: '1.0'
+
+  # HTTP API Route for all paths
+  HttpApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'ANY /{proxy+}'
+      Target: !Sub 'integrations/${HttpApiIntegration}'
+
+  # HTTP API Stage
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: '$default'
+      AutoDeploy: true
+
+  # Lambda Security Group
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Lambda function to access Valkey cache and VPC endpoints
+      VpcId: !Ref FoundationVpcId
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          DestinationSecurityGroupId: !Ref ValkeyClientSecurityGroupId
+          Description: Allow Lambda to access Valkey cache
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+          Description: Allow Lambda to access VPC endpoints
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Allow Lambda to access AWS services (HTTPS)
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Allow Lambda to access AWS services (HTTP)
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.0.0/16
+          Description: Allow Lambda to access MySQL in this VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${StackName}-${Stage}-lambda-security-group'
+        - Key: StackName
+          Value: !Ref StackName
+
+  # Lambda Permission for HTTP API Gateway
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
+
+  # API Gateway Domain Mapping (conditional)
+  ApiDomainMapping:
+    Type: AWS::ApiGatewayV2::DomainName
+    Condition: CreateCustomDomain
+    Properties:
+      DomainName: !If [IsProd, !Ref ProdDomainName, !Ref StagingDomainName]
+      DomainNameConfigurations:
+        - CertificateArn: !Ref CertificateArn
+          EndpointType: REGIONAL
+
+  # API Gateway API Mapping (conditional)
+  ApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Condition: UseCustomDomain
+    Properties:
+      ApiId: !Ref HttpApi
+      DomainName: !If
+        - CreateCustomDomain
+        - !Ref ApiDomainMapping
+        - !If [IsProd, !Ref ProdDomainName, !Ref StagingDomainName]
+      Stage: !Ref HttpApiStage
+
+  # Route53 A record (alias) pointing custom domain to API Gateway (optional)
+  ApiCustomDomainRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateRoute53Record
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !If [IsProd, !Sub '${ProdDomainName}.', !Sub '${StagingDomainName}.']
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt ApiDomainMapping.RegionalDomainName
+        HostedZoneId: !GetAtt ApiDomainMapping.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+
+  # CloudWatch Log Group
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${StackName}-${Stage}-lambda-log'
+      RetentionInDays: 14
+
+Outputs:
+  HttpApiUrl:
+    Description: 'HTTP API Gateway URL'
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/'
+    Export:
+      Name: !Sub '${AWS::StackName}-HttpApiUrl'
+
+  LambdaFunctionArn:
+    Description: 'Lambda Function ARN'
+    Value: !GetAtt LambdaFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaFunctionArn'
+
+  LambdaFunctionName:
+    Description: 'Lambda Function Name'
+    Value: !Ref LambdaFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaFunctionName'
+
+  ServiceUrl:
+    Description: 'Service URL (API Gateway or Custom Domain)'
+    Value: !If 
+      - UseCustomDomain
+      - !If [IsProd, !Sub 'https://${ProdDomainName}', !Sub 'https://${StagingDomainName}']
+      - !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/'
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceUrl'

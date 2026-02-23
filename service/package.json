@@ -14,7 +14,16 @@
     "test:local-redis": "npm run build && node scripts/test-local-redis.js",
     "test:local-dynamodb": "npm run build && node scripts/test-local-dynamodb.js",
     "dev": "tsx --inspect src/index.local.ts",
-    "setup-well-known-agent": "tsx scripts/setup-well-known-agent.js"
+    "setup-well-known-agent": "tsx scripts/setup-well-known-agent.js",
+    
+    "cloud:up": "./aws/cloud-up.sh --stage=staging",
+    "cloud:up:prod": "./aws/cloud-up.sh --stage=prod",
+    "cloud:update": "./aws/cloud-update.sh --stage=staging",
+    "cloud:update:prod": "./aws/cloud-update.sh --stage=prod",
+    "cloud:down": "./aws/cloud-down.sh --stage=staging",
+    "cloud:down:prod": "./aws/cloud-down.sh --stage=prod",
+    "cloud:results": "node aws/write-formation-results.js --stage=staging",
+    "cloud:results:prod": "node aws/write-formation-results.js --stage=prod"
   },
   "keywords": [
     "lambda",

@@ -1,11 +1,28 @@
 import { Redis, RedisOptions } from "ioredis";
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
+const {
+    VALKEY_ENDPOINT,
+    VALKEY_PORT,
+    VALKEY_CLIENT_USERNAME,
+    VALKEY_CLIENT_PASSWORD_SECRET_ARN,
+    VALKEY_DB,
+    VALKEY_TLS_ENABLED,
+    VALKEY_PASSWORD,
+    AWS_REGION
+} = process.env;
+
+console.log( 'env', process.env );
+
 // Redis client configuration
-const REDIS_ENDPOINT = process.env.VALKEY_ENDPOINT || 'localhost';
-const REDIS_PORT = parseInt(process.env.VALKEY_PORT || '6379');
-const REDIS_PASSWORD_SECRET_ARN = process.env.VALKEY_PASSWORD_SECRET_ARN;
-const REDIS_DB = parseInt(process.env.VALKEY_DB || '0');
+const REDIS_PORT = parseInt(VALKEY_PORT || '6379');
+if (!VALKEY_CLIENT_USERNAME) {
+    console.log('⚠️ No Redis username provided');
+} else {
+    console.log(`🔍 Redis username: ${VALKEY_CLIENT_USERNAME}`);
+}
+const REDIS_DB = parseInt(VALKEY_DB || '0');
+const REDIS_TLS_ENABLED = VALKEY_TLS_ENABLED !== 'false';
 
 // Create Redis client
 let redis: Redis;
@@ -17,13 +34,13 @@ let cachedPassword: string | undefined = undefined;
 async function getRedisPassword(): Promise<string | undefined> {
 
     // allow password to be set in environment variable
-    if( process.env.VALKEY_PASSWORD )
-        return process.env.VALKEY_PASSWORD;
+    if (VALKEY_PASSWORD)
+        return VALKEY_PASSWORD;
 
     console.log('🔍 getRedisPassword called');
-    console.log(`🔍 Secret ARN: ${REDIS_PASSWORD_SECRET_ARN}`);
+    console.log(`🔍 Secret ARN: ${VALKEY_CLIENT_PASSWORD_SECRET_ARN}`);
     
-    if (!REDIS_PASSWORD_SECRET_ARN) {
+    if (!VALKEY_CLIENT_PASSWORD_SECRET_ARN) {
         console.log('⚠️ No Redis password secret ARN provided, using no password');
         return undefined;
     }
@@ -35,12 +52,12 @@ async function getRedisPassword(): Promise<string | undefined> {
 
     try {
         console.log('🔍 Creating Secrets Manager client...');
-        const secretsClient = new SecretsManagerClient({ region: process.env.AWS_REGION || 'us-east-1' });
-        console.log(`🔍 AWS Region: ${process.env.AWS_REGION || 'us-east-1'}`);
+        const secretsClient = new SecretsManagerClient({ region: AWS_REGION || 'us-east-1' });
+        console.log(`🔍 AWS Region: ${AWS_REGION || 'us-east-1'}`);
         
         console.log('🔍 Creating GetSecretValue command...');
         const command = new GetSecretValueCommand({
-            SecretId: REDIS_PASSWORD_SECRET_ARN,
+            SecretId: VALKEY_CLIENT_PASSWORD_SECRET_ARN,
         });
         
         console.log('🔍 Sending command to Secrets Manager...');
@@ -48,10 +65,17 @@ async function getRedisPassword(): Promise<string | undefined> {
         console.log('✅ Secrets Manager response received');
         
         if (response.SecretString) {
-            console.log('🔍 Parsing secret data...');
-            const secretData = JSON.parse(response.SecretString);
-            cachedPassword = secretData.password;
-            console.log('✅ Successfully retrieved Redis password from Secrets Manager');
+            console.log('🔍 Processing secret string...');
+            try {
+                // Try to parse as JSON first (common for Secrets Manager)
+                const secretData = JSON.parse(response.SecretString);
+                cachedPassword = secretData.password || response.SecretString;
+                console.log('✅ Successfully retrieved Redis password (parsed as JSON or using raw string)');
+            } catch (e) {
+                // If not JSON, use the raw secret string
+                cachedPassword = response.SecretString;
+                console.log('✅ Successfully retrieved Redis password (raw string)');
+            }
             return cachedPassword;
         }
         
@@ -66,27 +90,27 @@ async function getRedis() {
     if( redis )
         return redis;
 
-    const username = 'default';
     const password = await getRedisPassword();
 
-    console.log(`🔍 Redis endpoint: ${REDIS_ENDPOINT}`);
+    const endpoint = VALKEY_ENDPOINT || 'localhost';
+    console.log(`🔍 Redis endpoint: ${endpoint}`);
     console.log(`🔍 Redis port: ${REDIS_PORT}`);
     console.log(`🔍 Redis database: ${REDIS_DB}`);
-    console.log(`🔍 Redis username: ${username}`);
+    console.log(`🔍 Redis username: ${VALKEY_CLIENT_USERNAME}`);
     console.log(`🔍 Redis password: ${password?.substring(0, 4)}...`);
 
     const options: RedisOptions = {
-        host: REDIS_ENDPOINT,
+        host: endpoint,
         port: REDIS_PORT,
-        username,
+        username: VALKEY_CLIENT_USERNAME,
         password,
         db: REDIS_DB,
         connectTimeout: 10000,
         maxRetriesPerRequest: 3
     };
 
-    // Only use TLS for cloud Redis (not localhost)
-    if (REDIS_ENDPOINT !== 'localhost' && REDIS_ENDPOINT !== '127.0.0.1') {
+    // Only use TLS for cloud Redis (not localhost) if enabled
+    if (REDIS_TLS_ENABLED && endpoint !== 'localhost' && endpoint !== '127.0.0.1') {
         options.tls = {};   // assume TLS for cloud Redis
     }
 
